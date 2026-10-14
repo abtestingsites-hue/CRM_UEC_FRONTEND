@@ -1,0 +1,17 @@
+﻿Γû╢ Integration Testing: API Contracts & Service Interoperability
+  Γ£ö INT-01: Root endpoint responds with 200 and text/html payload (41.8343ms)
+  Γ£ö INT-02: Telephony health endpoint returns operational provider status (3.4551ms)
+  Γ£ö INT-03: Agents endpoint returns JSON object containing agents list (2262.8981ms)
+  Γ£ö INT-04: Canonical leads endpoint (/api/v1/leads) returns 200 and leads collection (881.5618ms)
+  Γ£ö INT-05: Route mismatch detection - Frontend route /leads returns 404 while backend is /api/v1/leads (469.5655ms)
+  Γ£ö INT-06: Vobiz inbound webhook endpoint (/vobiz/incoming) contract and XML content-type check (76.362ms)
+  Γ£ö INT-07: Recording route authorization check - Unauthenticated recording retrieval (274.4671ms)
+Γ£ö Integration Testing: API Contracts & Service Interoperability (4012.5697ms)
+Γä╣ tests 7
+Γä╣ suites 1
+Γä╣ pass 7
+Γä╣ fail 0
+Γä╣ cancelled 0
+Γä╣ skipped 0
+Γä╣ todo 0
+Γä╣ duration_ms 4087.652

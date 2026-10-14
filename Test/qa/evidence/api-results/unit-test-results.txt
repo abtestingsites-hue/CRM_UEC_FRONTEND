@@ -1,0 +1,22 @@
+﻿Γû╢ Unit Testing: Authentication & Security Logic
+  Γ£ö UNIT-AUTH-01: Password verification must use secure cryptographic hash comparison, not plaintext inequality (2.0656ms)
+  Γ£ö UNIT-AUTH-02: JWT token must have valid RFC 7519 3-part structure, exp claim, and signature (0.1819ms)
+  Γ£ö UNIT-AUTH-03: RBAC AuthGuard must strictly enforce role access and reject empty or unauthenticated contexts (0.1203ms)
+Γ£ö Unit Testing: Authentication & Security Logic (3.7059ms)
+Γû╢ Unit Testing: Lead Management Business Logic
+  Γ£ö UNIT-LEAD-01: State transitions must enforce valid CRM lifecycle ordering (0.1446ms)
+  Γ£ö UNIT-LEAD-02: Phone number validation must enforce E.164 international format (0.1796ms)
+  Γ£ö UNIT-LEAD-03: Email validation must conform to standard RFC 5322 syntax (0.1525ms)
+Γ£ö Unit Testing: Lead Management Business Logic (0.6468ms)
+Γû╢ Unit Testing: Omnichannel & Telephony Domain Logic
+  Γ£ö UNIT-TEL-01: Call duration calculation must accurately compute seconds between answered and ended timestamps (0.1599ms)
+  Γ£ö UNIT-OMNI-01: Message deduplication logic must detect duplicate provider message IDs (0.1159ms)
+Γ£ö Unit Testing: Omnichannel & Telephony Domain Logic (0.4336ms)
+Γä╣ tests 8
+Γä╣ suites 3
+Γä╣ pass 8
+Γä╣ fail 0
+Γä╣ cancelled 0
+Γä╣ skipped 0
+Γä╣ todo 0
+Γä╣ duration_ms 88.1093

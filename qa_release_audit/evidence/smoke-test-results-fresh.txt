@@ -1,0 +1,19 @@
+﻿====================================================
+PARAMANTRA / ELDERCARE CRM - AUTOMATED SMOKE SUITE
+Target: http://localhost:4000
+Timestamp: 2026-10-13T14:27:40.087Z
+====================================================
+
+[PASS] SMK-01 - Root Health / Ping Check (Status: 200, Latency: 42ms)
+[PASS] SMK-02 - Telephony Service Health Check (Status: 200, Latency: 4ms)
+[FAIL] SMK-03 - API Gateway Health Check (/api/v1/health) (Expected: 200, Got: 404, Latency: 16ms)
+[FAIL] SMK-04 - Frontend Lead Route Compatibility (/leads) (Expected: 200, Got: 404, Latency: 16ms)
+[PASS] SMK-05 - Backend Canonical Lead Route (/api/v1/leads) (Status: 200, Latency: 942ms)
+[PASS] SMK-06 - Agents API Endpoint (/api/v1/agents) (Status: 200, Latency: 3156ms)
+[FAIL] SMK-07 - Dashboard Analytics Route (/dashboard/analytics) (Expected: 200, Got: 404, Latency: 3ms)
+[FAIL] SMK-08 - Appointments Calendar Route (/calendar) (Expected: 200, Got: 404, Latency: 13ms)
+
+====================================================
+SMOKE SUMMARY: Total: 8 | Passed: 4 | Failed: 4 | Pass Rate: 50%
+====================================================
+

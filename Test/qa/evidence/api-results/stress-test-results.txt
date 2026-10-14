@@ -1,0 +1,27 @@
+﻿====================================================
+PARAMANTRA / ELDERCARE CRM - CONTROLLED STRESS TEST
+Target: http://localhost:4000
+Timestamp: 2026-10-13T12:47:10.051Z
+====================================================
+
+>>> Firing Stress Burst with 20 simultaneous concurrent requests...
+Completed in 0.07s | Status Breakdown: {"200":20}
+Stress Latency: p95=22ms | p99=63ms
+
+>>> Firing Stress Burst with 35 simultaneous concurrent requests...
+Completed in 0.03s | Status Breakdown: {"200":35}
+Stress Latency: p95=21ms | p99=21ms
+
+>>> Firing Stress Burst with 50 simultaneous concurrent requests...
+Completed in 0.02s | Status Breakdown: {"200":50}
+Stress Latency: p95=18ms | p99=19ms
+
+--- Evaluating Post-Stress Server Recovery ---
+Post-Stress Recovery Ping: Status=200 | Latency=13ms
+
+====================================================
+STRESS AUDIT VERDICT:
+Max Concurrency Tested: 50 simultaneous requests
+Recovery Time: 13ms (Server self-healed, event loop unblocked)
+====================================================
+

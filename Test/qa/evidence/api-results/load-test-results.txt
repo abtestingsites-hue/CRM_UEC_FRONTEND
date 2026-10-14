@@ -1,0 +1,28 @@
+﻿====================================================
+PARAMANTRA / ELDERCARE CRM - AUTOMATED LOAD TEST
+Target: http://localhost:4000
+Timestamp: 2026-10-13T12:46:49.243Z
+====================================================
+
+--- Running Stage: Concurrency = 5 VUs | Target Requests = 50 ---
+Duration: 1.89s | Total Requests: 50 | Throughput: 26.49 req/sec
+HTTP Statuses: {"200":50} | Error Rate: 0.00%
+Latency (ms): p50=13ms | p90=428ms | p95=474ms | p99=560ms
+
+--- Running Stage: Concurrency = 10 VUs | Target Requests = 100 ---
+Duration: 1.52s | Total Requests: 100 | Throughput: 65.87 req/sec
+HTTP Statuses: {"200":100} | Error Rate: 0.00%
+Latency (ms): p50=11ms | p90=437ms | p95=499ms | p99=642ms
+
+--- Running Stage: Concurrency = 25 VUs | Target Requests = 150 ---
+Duration: 3.89s | Total Requests: 150 | Throughput: 38.58 req/sec
+HTTP Statuses: {"200":147,"500":3} | Error Rate: 2.00%
+Latency (ms): p50=11ms | p90=723ms | p95=761ms | p99=3363ms
+
+====================================================
+LOAD TEST SUMMARY MATRIX:
+Stage 1 (5 VUs):  RPS: 26.49 | p95: 474ms | Errors: 0.00%
+Stage 2 (10 VUs): RPS: 65.87 | p95: 499ms | Errors: 0.00%
+Stage 3 (25 VUs): RPS: 38.58 | p95: 761ms | Errors: 2.00%
+====================================================
+

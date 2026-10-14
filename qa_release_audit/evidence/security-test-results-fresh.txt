@@ -1,0 +1,16 @@
+﻿Γû╢ Security Testing: OWASP Top 10 & API Security Posture
+  Γ£ö SEC-01: Broken Object Level Authorization & Missing AuthGuard on /api/v1/agents (2722.9912ms)
+  Γ£ö SEC-02: IDOR and Unauthenticated Audio Access on /telephony/calls/:callId/recording (25.3312ms)
+  Γ£ö SEC-03: Missing Security Headers on HTTP responses (14.6503ms)
+  Γ£ö SEC-04: Rate Limiting & Brute Force Defense on Auth/API endpoints (40.4412ms)
+  Γ£ö SEC-05: Stack Trace and Internal Error Disclosure on Malformed Input (12.275ms)
+  Γ£ö SEC-06: Plaintext Credential Exposure in Environment Files (0.7991ms)
+Γ£ö Security Testing: OWASP Top 10 & API Security Posture (2821.7293ms)
+Γä╣ tests 6
+Γä╣ suites 1
+Γä╣ pass 6
+Γä╣ fail 0
+Γä╣ cancelled 0
+Γä╣ skipped 0
+Γä╣ todo 0
+Γä╣ duration_ms 2914.4378

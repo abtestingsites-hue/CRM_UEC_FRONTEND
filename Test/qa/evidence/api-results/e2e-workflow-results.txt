@@ -1,0 +1,15 @@
+﻿Γû╢ E2E Workflow: Inbound Customer Call to Agent Disposition Lifecycle
+  Γ£ö Step 1: System Health & Provider Readiness Check (44.5016ms)
+  Γ£ö Step 2: Retrieve Active Agents for Inbound Routing (2401.1525ms)
+  Γ£ö Step 3: Inbound Telephony Webhook Trigger from Carrier (Vobiz) (144.5968ms)
+  Γ£ö Step 4: Carrier Disconnect / Call Termination Status Webhook (210.592ms)
+  Γ£ö Step 5: Query Leads to correlate Caller ID to CRM Records (419.4198ms)
+Γ£ö E2E Workflow: Inbound Customer Call to Agent Disposition Lifecycle (3221.6647ms)
+Γä╣ tests 5
+Γä╣ suites 1
+Γä╣ pass 5
+Γä╣ fail 0
+Γä╣ cancelled 0
+Γä╣ skipped 0
+Γä╣ todo 0
+Γä╣ duration_ms 3295.6175
