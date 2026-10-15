@@ -64,6 +64,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
         reconnectionDelay: 1000,
         auth: {
           agentId: user.id,
+          token: typeof window !== 'undefined' ? (localStorage.getItem('paramantra_access_token') || localStorage.getItem('token') || '') : '',
         }
       });
     }
@@ -83,6 +84,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
           reconnectionDelay: 1000,
           auth: {
             agentId: user.id,
+            token: typeof window !== 'undefined' ? (localStorage.getItem('paramantra_access_token') || localStorage.getItem('token') || '') : '',
           }
         });
       }
@@ -99,6 +101,10 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
         globalMediaSocket = io(mediaSocketUrl, {
           transports: ['websocket'],
           reconnection: true,
+          auth: {
+            agentId: user.id,
+            token: typeof window !== 'undefined' ? (localStorage.getItem('paramantra_access_token') || localStorage.getItem('token') || '') : '',
+          }
         });
       }
     }
@@ -112,11 +118,13 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
       console.log('[AGENT-SOCKET]', 'connected globalSocket');
 
       const displayName = user.name || (user.email ? user.email.split('@')[0] : 'Agent');
+      const token = typeof window !== 'undefined' ? (localStorage.getItem('paramantra_access_token') || localStorage.getItem('token') || '') : '';
 
       socketInstance.emit('agent_login', {
         agentId: user.agentId || user.id,
         name: displayName.charAt(0).toUpperCase() + displayName.slice(1),
-        department: user.department || 'General'
+        department: user.department || 'General',
+        token,
       });
     };
 
@@ -126,10 +134,12 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
       
       if (telephonySocketInstance !== socketInstance) {
         console.log('[AGENT-SOCKET]', 'connected globalTelephonySocket');
+        const token = typeof window !== 'undefined' ? (localStorage.getItem('paramantra_access_token') || localStorage.getItem('token') || '') : '';
         telephonySocketInstance.emit('agent_login', {
           agentId: user.agentId || user.id,
           name: user.name || user.email,
-          department: user.department || 'General'
+          department: user.department || 'General',
+          token,
         });
       }
     };
@@ -137,10 +147,12 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     const handleMediaConnect = () => {
       if (mediaSocketInstance !== socketInstance) {
         console.log('[AGENT-SOCKET]', 'connected globalMediaSocket');
+        const token = typeof window !== 'undefined' ? (localStorage.getItem('paramantra_access_token') || localStorage.getItem('token') || '') : '';
         mediaSocketInstance.emit('agent_login', {
           agentId: user.agentId || user.id,
           name: user.name || user.email,
-          department: user.department || 'General'
+          department: user.department || 'General',
+          token,
         });
       }
     };
