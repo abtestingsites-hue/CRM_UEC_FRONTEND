@@ -742,7 +742,7 @@ app.get('/test-send', async (req, res) => {
 });
 
 // OUTGOING INSTAGRAM
-const IG_ACCESS_TOKEN = process.env.IG_ACCESS_TOKEN || 'IGAASXVchcdJdBZAGFnRU5iQzRRbGN2VWJUSmN1UHZANSk9CV1JSYklpQi1Va2NaME44T1JxU1FJVlBaNk1sWGpRZAjhJbWM0NHNfZAFpzUF9janYwVXdmcTg1UFhKWWszYllSakhIcW5VbGE4T1VYRkZAVcE83UjhPYkFqUTJzdFhrUQZDZD';
+const IG_ACCESS_TOKEN = process.env.IG_ACCESS_TOKEN || process.env.META_ACCESS_TOKEN || '';
 
 app.post('/api/messages/send-instagram', async (req, res) => {
   const { conversationId, message } = req.body;
