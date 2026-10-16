@@ -20,7 +20,7 @@ export default function AIRecordsPage() {
             role = user.role;
             agentId = user.agentId || user.id;
           }
-        } catch(e) {}
+        } catch (e) { console.warn('[UI Exception Swallowed Fixed]:', e); }
 
         const { apiFetch } = require('@/lib/api');
         const res = await apiFetch('/telephony/history');
@@ -101,7 +101,7 @@ export default function AIRecordsPage() {
         <div className="p-4 border-b border-[#222] flex items-center justify-between bg-[#0a0a0a]">
           <div className="relative group w-64">
             <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-primary transition-colors" />
-            <input aria-label="Input field" 
+            <input aria-label="Search call recordings" 
               type="text" 
               placeholder="Search recordings..." 
               className="w-full bg-[#111] border border-[#333] focus:border-primary rounded-lg pl-9 pr-3 py-2 text-sm outline-none transition-all text-white placeholder-slate-500"
@@ -116,15 +116,15 @@ export default function AIRecordsPage() {
 
         {/* Table */}
         <div className="flex-1 overflow-y-auto custom-scrollbar">
-          <table className="w-full text-left text-sm">
+          <table aria-label="Call recordings audit table" className="w-full text-left text-sm">
             <thead className="text-xs text-slate-500 bg-[#111] uppercase border-b border-[#222] sticky top-0">
               <tr>
-                <th className="px-6 py-4 font-semibold">Call ID / Type</th>
-                <th className="px-6 py-4 font-semibold">Customer</th>
-                <th className="px-6 py-4 font-semibold">Agent</th>
-                <th className="px-6 py-4 font-semibold">Duration</th>
-                <th className="px-6 py-4 font-semibold">Date & Time</th>
-                <th className="px-6 py-4 font-semibold text-right">Playback</th>
+                <th scope="col" className="px-6 py-4 font-semibold">Call ID / Type</th>
+                <th scope="col" className="px-6 py-4 font-semibold">Customer</th>
+                <th scope="col" className="px-6 py-4 font-semibold">Agent</th>
+                <th scope="col" className="px-6 py-4 font-semibold">Duration</th>
+                <th scope="col" className="px-6 py-4 font-semibold">Date & Time</th>
+                <th scope="col" className="px-6 py-4 font-semibold text-right">Playback</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#222]">

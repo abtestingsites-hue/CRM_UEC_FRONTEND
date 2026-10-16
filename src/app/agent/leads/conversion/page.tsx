@@ -77,7 +77,7 @@ export default function LeadConversionBoard() {
                         <h4 className="font-bold text-sm text-[#0F172A] md:text-white">{lead.customerName}</h4>
                         <p className="text-xs text-[#64748B] md:text-slate-400 mt-0.5">{lead.serviceInterest || 'General Inquiry'}</p>
                       </div>
-                      <button className="text-[#64748B] md:text-slate-500 hover:text-[#0F172A] md:hover:text-slate-300">
+                      <button aria-label="View lead conversion details" className="text-[#64748B] md:text-slate-500 hover:text-[#0F172A] md:hover:text-slate-300">
                         <MoreVertical className="w-4 h-4" />
                       </button>
                     </div>

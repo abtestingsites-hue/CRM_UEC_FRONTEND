@@ -43,7 +43,7 @@ export function BuilderPanel() {
         <form onSubmit={handleAddWidget} className="flex-1 flex flex-wrap items-end gap-4">
           <div className="flex flex-col">
             <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-1">Widget Title</span>
-            <input aria-label="Input field" 
+            <input aria-label="Widget Title" 
               type="text" 
               value={widgetTitle}
               onChange={(e) => setWidgetTitle(e.target.value)}
@@ -55,7 +55,7 @@ export function BuilderPanel() {
           <div className="flex flex-col">
             <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-1">Chart Type</span>
             <select 
-              value={widgetType}
+              aria-label="Widget Type" value={widgetType}
               onChange={(e) => setWidgetType(e.target.value as any)}
               className="bg-[#141414] border border-[#222] rounded-lg px-2.5 py-1.5 text-xs text-white outline-none focus:border-orange-500"
             >
@@ -69,7 +69,7 @@ export function BuilderPanel() {
           <div className="flex flex-col">
             <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-1">Grid Column Span</span>
             <select 
-              value={widgetWidth}
+              aria-label="Widget Width" value={widgetWidth}
               onChange={(e) => setWidgetWidth(Number(e.target.value) as any)}
               className="bg-[#141414] border border-[#222] rounded-lg px-2.5 py-1.5 text-xs text-white outline-none focus:border-orange-500"
             >

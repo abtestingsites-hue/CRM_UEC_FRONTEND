@@ -16,8 +16,10 @@ export const AgentWorkspace: React.FC = () => {
         <h2 className="text-xl font-bold mb-6">CRM Workspace</h2>
         
         <div className="mb-6">
-          <label className="text-sm text-gray-400 block mb-2">My Status</label>
+          <label htmlFor="agent-workspace-status" className="text-sm text-gray-400 block mb-2">My Status</label>
           <select 
+            id="agent-workspace-status"
+            aria-label="My Status"
             className="w-full bg-gray-800 p-2 rounded border border-gray-700"
             value={status}
             onChange={(e) => setStatus(e.target.value as any)}

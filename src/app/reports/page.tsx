@@ -404,7 +404,7 @@ export default function ReportsPage() {
             {/* Start Date */}
             <div className="flex flex-col">
               <span className="text-[9px] text-slate-500 font-bold uppercase tracking-wider mb-1">Start Date</span>
-              <input aria-label="Input field" 
+              <input aria-label="Report start date" 
                 type="date" 
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
@@ -414,7 +414,7 @@ export default function ReportsPage() {
             {/* End Date */}
             <div className="flex flex-col">
               <span className="text-[9px] text-slate-500 font-bold uppercase tracking-wider mb-1">End Date</span>
-              <input aria-label="Input field" 
+              <input aria-label="Report end date" 
                 type="date" 
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
@@ -425,7 +425,7 @@ export default function ReportsPage() {
             <div className="flex flex-col">
               <span className="text-[9px] text-slate-500 font-bold uppercase tracking-wider mb-1">Agent</span>
               <select 
-                value={agentFilter}
+                aria-label="Filter by agent" value={agentFilter}
                 onChange={(e) => setAgentFilter(e.target.value)}
                 className="bg-[#141414] border border-[#222] rounded-lg px-2.5 py-1 text-xs text-white outline-none focus:border-orange-500 w-32"
               >
@@ -438,7 +438,7 @@ export default function ReportsPage() {
             <div className="flex flex-col">
               <span className="text-[9px] text-slate-500 font-bold uppercase tracking-wider mb-1">Team</span>
               <select 
-                value={teamFilter}
+                aria-label="Filter by team" value={teamFilter}
                 onChange={(e) => setTeamFilter(e.target.value)}
                 className="bg-[#141414] border border-[#222] rounded-lg px-2.5 py-1 text-xs text-white outline-none focus:border-orange-500 w-32"
               >
@@ -451,7 +451,7 @@ export default function ReportsPage() {
             <div className="flex flex-col">
               <span className="text-[9px] text-slate-500 font-bold uppercase tracking-wider mb-1">Department</span>
               <select 
-                value={deptFilter}
+                aria-label="Filter by department" value={deptFilter}
                 onChange={(e) => setDeptFilter(e.target.value)}
                 className="bg-[#141414] border border-[#222] rounded-lg px-2.5 py-1 text-xs text-white outline-none focus:border-orange-500 w-36"
               >
@@ -615,7 +615,7 @@ export default function ReportsPage() {
               <div className="bg-[#0b0b0b] border border-[#1e1e1e] p-5 rounded-2xl">
                 <h3 className="text-xs font-bold text-slate-400 mb-4 uppercase tracking-wider">Detailed Data Grid</h3>
                 <div className="border border-[#1c1c1c] rounded-xl overflow-hidden">
-                  <table className="w-full text-left text-xs border-collapse">
+                  <table aria-label="Generated analytics report data table" className="w-full text-left text-xs border-collapse">
                     <thead>
                       <tr className="bg-[#121212] border-b border-[#1c1c1c] text-slate-400 font-bold uppercase tracking-wider">
                         {Object.keys(generatedData.tableData[0]).map(key => (
@@ -651,7 +651,7 @@ export default function ReportsPage() {
             <div className="p-6 space-y-4">
               <div className="space-y-1.5">
                 <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Cron Schedule Pattern</label>
-                <input aria-label="Input field" 
+                <input aria-label="Cron schedule expression" 
                   type="text" 
                   value={cronExpression} 
                   onChange={(e) => setCronExpression(e.target.value)}
@@ -691,7 +691,7 @@ export default function ReportsPage() {
             <div className="p-6 space-y-4">
               <div className="space-y-1.5">
                 <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Recipient Email Address</label>
-                <input aria-label="Input field" 
+                <input aria-label="Recipient email address" 
                   type="email" 
                   value={emailInput} 
                   onChange={(e) => setEmailInput(e.target.value)}

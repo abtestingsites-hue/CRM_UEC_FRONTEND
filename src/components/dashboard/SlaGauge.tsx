@@ -7,7 +7,7 @@ export function SlaGauge({ percentage = 94 }: { percentage?: number }) {
     <div className="bg-[#0a0a0a] border border-[#222] p-4 rounded-xl shadow-sm h-[220px] flex flex-col relative overflow-hidden">
       <div className="flex justify-between items-center mb-6">
         <h3 className="text-sm font-bold text-white">SLA Performance</h3>
-        <select className="bg-[#111] border border-[#333] text-xs text-slate-300 rounded-md px-2 py-1 outline-none">
+        <select aria-label="SLA gauge period" className="bg-[#111] border border-[#333] text-xs text-slate-300 rounded-md px-2 py-1 outline-none">
           <option>Today</option>
           <option>This Week</option>
         </select>

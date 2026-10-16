@@ -25,7 +25,7 @@ export default function AgentLeadsPage() {
       if (stored) {
         agentId = JSON.parse(stored).agentId;
       }
-    } catch (e) {}
+    } catch (e) { console.warn('[UI Exception Swallowed Fixed]:', e); }
 
     if (!agentId) {
       alert("Error: Agent profile not found. Please log out and log back in.");
@@ -78,7 +78,7 @@ export default function AgentLeadsPage() {
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 bg-[#111] border border-[#222] p-4 rounded-2xl shadow-sm md:shadow-none">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-            <input aria-label="Input field" 
+            <input aria-label="Search leads in pool" 
               type="text"
               placeholder="Search leads..."
               className="w-full bg-[#1a1a1a] border border-[#333] rounded-xl py-2.5 pl-10 pr-4 text-sm text-white focus:outline-none focus:border-primary transition-colors min-h-[44px] md:min-h-0"
@@ -94,13 +94,13 @@ export default function AgentLeadsPage() {
 
         {/* Desktop Table View */}
         <div className="hidden md:block bg-[#111] border border-[#222] rounded-xl overflow-hidden">
-          <table className="w-full text-left text-sm">
+          <table aria-label="Agent leads pool table" className="w-full text-left text-sm">
             <thead className="bg-[#1a1a1a] border-b border-[#222] text-slate-400">
               <tr>
-                <th className="px-6 py-4 font-medium">Customer</th>
-                <th className="px-6 py-4 font-medium">Contact</th>
-                <th className="px-6 py-4 font-medium">Service Interest</th>
-                <th className="px-6 py-4 font-medium text-right">Actions</th>
+                <th scope="col" className="px-6 py-4 font-medium">Customer</th>
+                <th scope="col" className="px-6 py-4 font-medium">Contact</th>
+                <th scope="col" className="px-6 py-4 font-medium">Service Interest</th>
+                <th scope="col" className="px-6 py-4 font-medium text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#222]">

@@ -25,7 +25,7 @@ export function Sidebar() {
       if (savedUser) {
         try {
           setUserRole(JSON.parse(savedUser).role);
-        } catch(e){}
+        } catch (e) { console.warn('[UI Exception Swallowed Fixed]:', e); }
       }
     }
   }, [user]);

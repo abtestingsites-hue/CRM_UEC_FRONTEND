@@ -43,7 +43,7 @@ const EnterpriseTableWorkspace = ({ columns, data, primaryAction, searchPlacehol
       <div className="flex justify-between items-center mb-4 bg-[#101010] p-4 border border-[#1e1e1e] rounded-xl shadow-lg">
         <div className="relative">
           <Search className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
-          <input aria-label="Input field" 
+          <input aria-label="Search marketing campaigns" 
             type="text" 
             placeholder={searchPlaceholder || "Search records..."}
             className="bg-[#141414] border border-[#222] rounded-lg pl-9 pr-4 py-2 text-xs text-white outline-none focus:border-rose-500 w-72 transition-colors"
@@ -65,7 +65,7 @@ const EnterpriseTableWorkspace = ({ columns, data, primaryAction, searchPlacehol
       </div>
 
       <div className="border border-[#1e1e1e] rounded-xl overflow-hidden bg-[#0c0c0c] shadow-2xl">
-        <table className="w-full text-left text-xs">
+        <table aria-label="Marketing campaigns table" className="w-full text-left text-xs">
           <thead className="bg-[#121212] border-b border-[#1e1e1e]">
             <tr>
               {columns.map((col: string, idx: number) => (
@@ -301,7 +301,7 @@ export default function MarketingHubPage() {
             </h1>
             <div className="relative mt-4">
               <Search className="w-3.5 h-3.5 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
-              <input aria-label="Input field" 
+              <input aria-label="Search marketing features" 
                 type="text" 
                 placeholder="Search marketing features..." 
                 value={searchQuery}

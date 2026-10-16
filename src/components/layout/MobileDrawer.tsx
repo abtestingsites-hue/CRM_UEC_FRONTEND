@@ -148,7 +148,7 @@ export function MobileDrawer({ isOpen, onClose, shouldShowAgentShell }: MobileDr
                   </div>
                 </div>
                 <select
-                  value={status || "AVAILABLE"}
+                  aria-label="Agent status" value={status || "AVAILABLE"}
                   onChange={(e) => setStatus(e.target.value as any)}
                   className="w-full bg-[#1a1a1a] border border-[#333] rounded-xl px-2.5 py-2 text-xs text-white font-medium outline-none focus:border-primary shadow-sm cursor-pointer"
                 >

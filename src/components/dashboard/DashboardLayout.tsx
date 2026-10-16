@@ -124,7 +124,7 @@ export function DashboardLayout() {
     <div className="flex-1 flex flex-col md:flex-row overflow-hidden h-full bg-[#F8FAFC] text-[#0F172A] md:bg-[#050505] md:text-white">
       {/* 1. Left Selector Sidebar - Hidden on mobile */}
       <aside className="hidden md:flex w-64 border-r border-[#1e1e1e] bg-[#090909] flex-col p-4 shrink-0">
-        <input aria-label="Input field" 
+        <input aria-label="Search Presets" 
           type="text" 
           placeholder="Search Presets..." 
           value={localSearch}
@@ -155,7 +155,7 @@ export function DashboardLayout() {
         <div className="block md:hidden p-4 pb-2 border-b border-[#1e1e1e] bg-[#0b0b0b] shrink-0">
           <label className="text-[10px] text-[#64748B] font-bold uppercase tracking-wider block mb-1">Select Preset Dashboard</label>
           <select 
-            value={activeType} 
+            aria-label="Dashboard Type" value={activeType} 
             onChange={(e) => setActiveType(e.target.value)}
             className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl px-3 py-2.5 text-sm font-semibold text-[#0F172A] outline-none shadow-sm cursor-pointer"
           >
@@ -171,7 +171,7 @@ export function DashboardLayout() {
             {/* Start Date */}
             <div className="flex flex-col">
               <span className="text-[9px] text-slate-500 font-bold uppercase tracking-wider mb-1">Start Date</span>
-              <input aria-label="Input field" 
+              <input aria-label="Filter Start Date" 
                 type="date" 
                 value={startDate}
                 onChange={(e) => setFilters({ startDate: e.target.value })}
@@ -181,7 +181,7 @@ export function DashboardLayout() {
             {/* End Date */}
             <div className="flex flex-col">
               <span className="text-[9px] text-slate-500 font-bold uppercase tracking-wider mb-1">End Date</span>
-              <input aria-label="Input field" 
+              <input aria-label="Filter End Date" 
                 type="date" 
                 value={endDate}
                 onChange={(e) => setFilters({ endDate: e.target.value })}
@@ -192,7 +192,7 @@ export function DashboardLayout() {
             <div className="flex flex-col">
               <span className="text-[9px] text-slate-500 font-bold uppercase tracking-wider mb-1">Department</span>
               <select 
-                value={department}
+                aria-label="Filter Department" value={department}
                 onChange={(e) => setFilters({ department: e.target.value })}
                 className="bg-[#141414] border border-[#222] rounded-lg px-2.5 py-1.5 text-xs text-white outline-none focus:border-orange-500 shadow-none min-h-[40px] md:min-h-0"
               >
@@ -315,12 +315,12 @@ export function DashboardLayout() {
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div className="bg-white border border-[#E2E8F0] md:bg-[#0b0b0b] md:border-[#1e1e1e] p-5 rounded-2xl text-[#0F172A] md:text-white shadow-sm md:shadow-none">
                   <h3 className="text-sm font-bold text-[#64748B] md:text-slate-400 mb-4 uppercase tracking-wider">Agent Performance Scorecard</h3>
-                  <table className="w-full text-left text-xs border-collapse">
+                  <table aria-label="Dashboard metrics breakdown table 1" className="w-full text-left text-xs border-collapse">
                     <thead>
                       <tr className="border-b border-[#E2E8F0] md:border-b-[#1c1c1c] text-[#64748B] md:text-slate-500">
-                        <th className="pb-2">Agent Name</th>
-                        <th className="pb-2 text-right">Talk Time</th>
-                        <th className="pb-2 text-right">SLA</th>
+                        <th scope="col" className="pb-2">Agent Name</th>
+                        <th scope="col" className="pb-2 text-right">Talk Time</th>
+                        <th scope="col" className="pb-2 text-right">SLA</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-[#E2E8F0] md:divide-[#1c1c1c]/40">
@@ -501,7 +501,7 @@ export function DashboardLayout() {
                 <div className="flex flex-col">
                   <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-1.5">Select Report Type</span>
                   <select 
-                    value={selectedReportType} 
+                    aria-label="Report Type" value={selectedReportType} 
                     onChange={(e) => {
                       setSelectedReportType(e.target.value);
                       setGeneratedReportData([]);
@@ -526,7 +526,7 @@ export function DashboardLayout() {
                 <div className="flex flex-col">
                   <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-1.5">Chart Type Preview</span>
                   <select 
-                    value={reportChartType} 
+                    aria-label="Report Chart Type" value={reportChartType} 
                     onChange={(e) => setReportChartType(e.target.value as any)}
                     className="bg-[#141414] border border-[#222] rounded-lg px-3 py-1.5 text-xs text-white outline-none focus:border-orange-500 w-full"
                   >
@@ -573,7 +573,7 @@ export function DashboardLayout() {
                       </button>
                     </div>
                     <div className="border border-[#1e1e1e] rounded-xl overflow-hidden">
-                      <table className="w-full text-left text-xs border-collapse">
+                      <table aria-label="Dashboard metrics breakdown table 2" className="w-full text-left text-xs border-collapse">
                         <thead>
                           <tr className="bg-[#121212] border-b border-[#1c1c1c] text-slate-400 font-bold uppercase tracking-wider">
                             {Object.keys(generatedReportData[0]).map(key => (
@@ -615,7 +615,7 @@ export function DashboardLayout() {
             <div className="p-6 space-y-4">
               <div className="space-y-1.5">
                 <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Cron Schedule Pattern</label>
-                <input aria-label="Input field" 
+                <input aria-label="Cron Schedule Pattern" 
                   type="text" 
                   value={scheduleCron} 
                   onChange={(e) => setScheduleCron(e.target.value)}

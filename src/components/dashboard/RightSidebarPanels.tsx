@@ -83,7 +83,7 @@ export function RightSidebarPanels() {
       <div>
         <div className="flex justify-between items-center mb-2">
           <h3 className="text-sm font-bold text-white">Top Performing Agents</h3>
-          <select className="bg-[#111] border border-[#333] text-[9px] text-slate-400 rounded-md px-1 py-0.5 outline-none">
+          <select aria-label="Sidebar metrics timeframe" className="bg-[#111] border border-[#333] text-[9px] text-slate-400 rounded-md px-1 py-0.5 outline-none">
             <option>This Month</option>
           </select>
         </div>

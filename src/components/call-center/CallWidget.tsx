@@ -279,6 +279,7 @@ function CallControlsInner({
       <div className="flex justify-center gap-4 mt-6">
         <button 
           onClick={toggleMute}
+          aria-label={isMuted ? 'Unmute microphone' : 'Mute microphone'}
           disabled={connectionState !== 'CONNECTED'}
           className={`w-12 h-12 rounded-full flex items-center justify-center transition-all ${
             connectionState !== 'CONNECTED' ? 'bg-[#111] text-slate-600 cursor-not-allowed opacity-50' :
@@ -291,6 +292,7 @@ function CallControlsInner({
         
         <button 
           onClick={toggleSpeaker}
+          aria-label={isSpeaker ? 'Disable speaker' : 'Enable speaker'}
           disabled={connectionState !== 'CONNECTED'}
           className={`w-12 h-12 rounded-full flex items-center justify-center transition-all ${
             connectionState !== 'CONNECTED' ? 'bg-[#111] text-slate-600 cursor-not-allowed opacity-50' :
@@ -303,6 +305,7 @@ function CallControlsInner({
 
         <button 
           onClick={endCall}
+          aria-label="End call"
           className="w-16 h-16 rounded-full bg-rose-500 hover:bg-rose-600 text-white flex items-center justify-center shadow-lg shadow-rose-500/20 transition-transform active:scale-95 border-2 border-rose-400"
           title="End Call"
         >
@@ -465,7 +468,7 @@ export function CallWidget() {
       try {
         const stored = localStorage.getItem('crm_user');
         if (stored) agentId = JSON.parse(stored).agentId;
-      } catch(e) {}
+      } catch (e) { console.warn('[UI Exception Swallowed Fixed]:', e); }
 
       if ((activeCall.phone === 'Internal' || activeCall.phone === 'Internal Directory Call') && mediaSocket) {
         mediaSocket.emit('endCall', {

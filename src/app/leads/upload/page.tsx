@@ -32,7 +32,7 @@ export default function LeadUploadPage() {
         const user = JSON.parse(userStr);
         userId = user.id;
       }
-    } catch (err) { }
+    } catch (err) { console.warn('[UI Exception Swallowed Fixed]:', err); }
 
     formData.append('uploadedById', userId);
 

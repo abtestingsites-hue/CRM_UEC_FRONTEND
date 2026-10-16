@@ -22,6 +22,7 @@ export const CallControls: React.FC = () => {
       <div className="flex gap-4">
         <button 
           onClick={toggleMute}
+          aria-label={isMuted ? 'Unmute microphone' : 'Mute microphone'}
           className={`p-4 rounded-2xl flex items-center justify-center transition-all ${isMuted ? 'bg-amber-500/10 text-amber-500 border border-amber-500/20' : 'bg-[#111] text-slate-400 hover:text-white hover:bg-[#222] border border-[#333]'}`}
           title={isMuted ? 'Unmute' : 'Mute'}
         >
@@ -30,6 +31,7 @@ export const CallControls: React.FC = () => {
         
         <button 
           onClick={toggleHold}
+          aria-label={isHold ? 'Resume call' : 'Hold call'}
           className={`p-4 rounded-2xl flex items-center justify-center transition-all ${isHold ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20' : 'bg-[#111] text-slate-400 hover:text-white hover:bg-[#222] border border-[#333]'}`}
           title={isHold ? 'Resume' : 'Hold'}
         >
@@ -37,6 +39,7 @@ export const CallControls: React.FC = () => {
         </button>
 
         <button 
+          aria-label="Transfer call"
           className="p-4 bg-[#111] border border-[#333] text-slate-400 hover:text-white hover:bg-[#222] rounded-2xl transition-all"
           title="Transfer"
         >
@@ -44,6 +47,7 @@ export const CallControls: React.FC = () => {
         </button>
         
         <button 
+          aria-label="Call notes"
           className="p-4 bg-[#111] border border-[#333] text-slate-400 hover:text-white hover:bg-[#222] rounded-2xl transition-all"
           title="Notes"
         >

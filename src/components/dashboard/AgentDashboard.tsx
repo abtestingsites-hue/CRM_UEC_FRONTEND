@@ -112,7 +112,7 @@ export function AgentDashboard({ metrics }: AgentDashboardProps) {
               <h2 className="text-lg font-bold text-white mb-1">Customer Sentiment Analytics</h2>
               <p className="text-sm text-slate-500">AI analysis of customer satisfaction from recent connected calls.</p>
             </div>
-            <select className="w-full sm:w-auto bg-[#141414] text-white border border-[#222] text-xs px-3 py-2 sm:py-1.5 rounded-xl outline-none focus:border-[#444] min-h-[40px] sm:min-h-0 shadow-none cursor-pointer">
+            <select aria-label="Agent dashboard timeframe" className="w-full sm:w-auto bg-[#141414] text-white border border-[#222] text-xs px-3 py-2 sm:py-1.5 rounded-xl outline-none focus:border-[#444] min-h-[40px] sm:min-h-0 shadow-none cursor-pointer">
               <option>This Week</option>
               <option>This Month</option>
             </select>

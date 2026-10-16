@@ -218,8 +218,8 @@ export function OmnichannelApp() {
               {/* Composer */}
               <div className="p-4 bg-[#080808] border-t border-[#1c1c1c] shrink-0">
                 <div className="flex items-end gap-2 bg-[#141414] border border-[#262626] rounded-xl p-2 focus-within:border-slate-500 transition-colors">
-                  <button className="p-2 text-slate-400 hover:text-white"><Paperclip className="w-4 h-4" /></button>
-                  <textarea
+                  <button aria-label="Attach file" className="p-2 text-slate-400 hover:text-white"><Paperclip className="w-4 h-4" /></button>
+                  <textarea aria-label="Message input"
                     value={inputText}
                     onChange={(e) => setInputText(e.target.value)}
                     onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
@@ -227,8 +227,8 @@ export function OmnichannelApp() {
                     className="flex-1 max-h-32 min-h-[36px] bg-transparent resize-none outline-none text-sm text-white py-2 px-1 placeholder-slate-500"
                     rows={1}
                   />
-                  <button className="p-2 text-slate-400 hover:text-white"><ImageIcon className="w-4 h-4" /></button>
-                  <button onClick={handleSend} disabled={!inputText.trim()} className={`p-2 rounded-lg text-white disabled:opacity-50 transition-colors ${colors.primary}`}>
+                  <button aria-label="Attach image" className="p-2 text-slate-400 hover:text-white"><ImageIcon className="w-4 h-4" /></button>
+                  <button aria-label="Send message" onClick={handleSend} disabled={!inputText.trim()} className={`p-2 rounded-lg text-white disabled:opacity-50 transition-colors ${colors.primary}`}>
                     <Send className="w-4 h-4" />
                   </button>
                 </div>

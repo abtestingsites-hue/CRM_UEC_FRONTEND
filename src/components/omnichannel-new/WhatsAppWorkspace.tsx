@@ -105,7 +105,7 @@ export function WhatsAppWorkspace({ platformDef, colors, onBack }: any) {
         {/* HEADER */}
         <div className="h-16 flex items-center justify-between px-4 shrink-0 border-b border-[#222d34]" style={{ backgroundColor: waPanel }}>
           <div className="flex items-center gap-3 cursor-pointer">
-            <button onClick={onBack} className="md:hidden p-1 mr-1 text-[#8696a0] hover:text-[#d1d7db]">
+            <button aria-label="Back to conversations" onClick={onBack} className="md:hidden p-1 mr-1 text-[#8696a0] hover:text-[#d1d7db]">
               <ChevronLeft className="w-6 h-6" />
             </button>
             <div className="w-10 h-10 rounded-full bg-[#303f46] overflow-hidden flex items-center justify-center text-slate-300 font-bold">
@@ -197,7 +197,7 @@ export function WhatsAppWorkspace({ platformDef, colors, onBack }: any) {
                         </div>
 
                         {/* Hover Action Menu */}
-                        <button className="absolute top-1 right-1 p-0.5 rounded-full bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity text-white">
+                        <button aria-label="Message actions" className="absolute top-1 right-1 p-0.5 rounded-full bg-black/20 opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity text-white">
                           <MoreVertical className="w-4 h-4" />
                         </button>
                       </motion.div>
@@ -212,7 +212,7 @@ export function WhatsAppWorkspace({ platformDef, colors, onBack }: any) {
 
         {/* COMPOSER */}
         <div className="min-h-[62px] flex items-end px-4 py-3 gap-2" style={{ backgroundColor: waPanel }}>
-          <button className="p-2 text-[#8696a0] hover:text-[#d1d7db] shrink-0">
+          <button aria-label="Insert emoji" className="p-2 text-[#8696a0] hover:text-[#d1d7db] shrink-0">
             <Smile className="w-6 h-6" />
           </button>
           <div className="relative shrink-0">
@@ -238,7 +238,7 @@ export function WhatsAppWorkspace({ platformDef, colors, onBack }: any) {
           </div>
           
           <div className="flex-1 bg-[#2a3942] rounded-lg border-none min-h-[40px] flex items-center">
-            <textarea
+            <textarea aria-label="Type a WhatsApp message"
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
               onKeyDown={handleKeyDown}

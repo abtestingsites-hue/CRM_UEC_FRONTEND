@@ -80,7 +80,7 @@ export function ReportsAnalyticsDashboard() {
         <div className="flex flex-col">
           <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-1.5">Select Report Type</span>
           <select 
-            value={selectedReportType} 
+            aria-label="Report Type" value={selectedReportType} 
             onChange={(e) => {
               setSelectedReportType(e.target.value);
               setGeneratedReportData([]);
@@ -96,7 +96,7 @@ export function ReportsAnalyticsDashboard() {
         <div className="flex flex-col">
           <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-1.5">Chart Type Preview</span>
           <select 
-            value={reportChartType} 
+            aria-label="Report Chart Type" value={reportChartType} 
             onChange={(e) => setReportChartType(e.target.value as any)}
             className="bg-[#141414] border border-[#222] rounded-lg px-3 py-1.5 text-xs text-white outline-none focus:border-orange-500 w-full"
           >
@@ -141,7 +141,7 @@ export function ReportsAnalyticsDashboard() {
               </button>
             </div>
             <div className="border border-[#1e1e1e] rounded-xl overflow-hidden">
-              <table className="w-full text-left text-xs border-collapse">
+              <table aria-label="Reports analytics detailed data table" className="w-full text-left text-xs border-collapse">
                 <thead>
                   <tr className="bg-[#121212] border-b border-[#1c1c1c] text-slate-400 font-bold uppercase tracking-wider">
                     {Object.keys(generatedReportData[0]).map(key => (
@@ -176,7 +176,7 @@ export function ReportsAnalyticsDashboard() {
               <h2 className="text-md font-bold text-white">Schedule Report Dispatch</h2>
             </div>
             <div className="p-6 space-y-4">
-              <input aria-label="Input field" 
+              <input aria-label="Cron schedule expression" 
                 type="text" 
                 value={cronExpression} 
                 onChange={(e) => setCronExpression(e.target.value)}

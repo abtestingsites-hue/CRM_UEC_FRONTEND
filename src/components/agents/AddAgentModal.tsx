@@ -81,7 +81,7 @@ export function AddAgentModal({ onClose, onSuccess }: AddAgentModalProps) {
               <p className="text-xs text-slate-500">Create a profile and generate login credentials</p>
             </div>
           </div>
-          <button onClick={onClose} className="p-2 text-slate-400 hover:text-white hover:bg-[#222] rounded-lg transition-colors shrink-0">
+          <button aria-label="Close dialog" onClick={onClose} className="p-2 text-slate-400 hover:text-white hover:bg-[#222] rounded-lg transition-colors shrink-0">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -140,7 +140,7 @@ export function AddAgentModal({ onClose, onSuccess }: AddAgentModalProps) {
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-slate-400 uppercase mb-2">Gender</label>
-                  <select name="gender" value={formData.gender} onChange={handleChange} className="w-full bg-[#111] border border-[#333] focus:border-primary rounded-xl px-4 py-3 md:py-2 text-base md:text-sm outline-none text-white transition-colors min-h-[48px] md:min-h-0 cursor-pointer">
+                  <select aria-label="Agent Gender" name="gender" value={formData.gender} onChange={handleChange} className="w-full bg-[#111] border border-[#333] focus:border-primary rounded-xl px-4 py-3 md:py-2 text-base md:text-sm outline-none text-white transition-colors min-h-[48px] md:min-h-0 cursor-pointer">
                     <option value="">Select...</option>
                     <option value="Male">Male</option>
                     <option value="Female">Female</option>
@@ -166,7 +166,7 @@ export function AddAgentModal({ onClose, onSuccess }: AddAgentModalProps) {
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-slate-400 uppercase mb-2">Role</label>
-                  <select name="role" value={formData.role} onChange={handleChange} className="w-full bg-[#111] border border-[#333] focus:border-orange-500 rounded-xl px-4 py-3 md:py-2 text-base md:text-sm outline-none text-white transition-colors min-h-[48px] md:min-h-0 cursor-pointer">
+                  <select aria-label="Agent Role" name="role" value={formData.role} onChange={handleChange} className="w-full bg-[#111] border border-[#333] focus:border-orange-500 rounded-xl px-4 py-3 md:py-2 text-base md:text-sm outline-none text-white transition-colors min-h-[48px] md:min-h-0 cursor-pointer">
                     <option value="AGENT">Agent</option>
                     <option value="SUPERVISOR">Supervisor</option>
                     <option value="ADMIN">Admin</option>
@@ -175,7 +175,7 @@ export function AddAgentModal({ onClose, onSuccess }: AddAgentModalProps) {
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-slate-400 uppercase mb-2">Initial Status</label>
-                  <select name="status" value={formData.status} onChange={handleChange} className="w-full bg-[#111] border border-[#333] focus:border-primary rounded-xl px-4 py-3 md:py-2 text-base md:text-sm outline-none text-white transition-colors min-h-[48px] md:min-h-0 cursor-pointer">
+                  <select aria-label="Agent Status" name="status" value={formData.status} onChange={handleChange} className="w-full bg-[#111] border border-[#333] focus:border-primary rounded-xl px-4 py-3 md:py-2 text-base md:text-sm outline-none text-white transition-colors min-h-[48px] md:min-h-0 cursor-pointer">
                     <option value="AVAILABLE">Available (Online)</option>
                     <option value="OFFLINE">Offline</option>
                   </select>

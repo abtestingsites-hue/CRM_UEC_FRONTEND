@@ -149,7 +149,7 @@ export function DashboardSwitcher({
           {/* Start Date */}
           <div className="flex flex-col">
             <span className="text-[9px] text-slate-500 font-bold uppercase tracking-wider mb-1">Start Date</span>
-            <input aria-label="Input field" 
+            <input aria-label="Dashboard filter start date" 
               type="date" 
               value={startDate}
               onChange={(e) => setFilters({ startDate: e.target.value })}
@@ -159,7 +159,7 @@ export function DashboardSwitcher({
           {/* End Date */}
           <div className="flex flex-col">
             <span className="text-[9px] text-slate-500 font-bold uppercase tracking-wider mb-1">End Date</span>
-            <input aria-label="Input field" 
+            <input aria-label="Dashboard filter end date" 
               type="date" 
               value={endDate}
               onChange={(e) => setFilters({ endDate: e.target.value })}
@@ -170,7 +170,7 @@ export function DashboardSwitcher({
           <div className="flex flex-col">
             <span className="text-[9px] text-slate-500 font-bold uppercase tracking-wider mb-1">Department</span>
             <select 
-              value={department}
+              aria-label="Dashboard Department Filter" value={department}
               onChange={(e) => setFilters({ department: e.target.value })}
               className="bg-[#141414] border border-[#222] rounded-lg px-2 py-0.5 text-xs text-white outline-none focus:border-orange-500"
             >

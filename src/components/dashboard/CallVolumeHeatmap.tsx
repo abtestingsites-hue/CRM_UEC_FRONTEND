@@ -33,7 +33,7 @@ export function CallVolumeHeatmap() {
     <div className="bg-[#0a0a0a] border border-[#222] p-4 rounded-xl shadow-sm h-[220px] flex flex-col">
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-sm font-bold text-white">Call Volume Heatmap</h3>
-        <select className="bg-[#111] border border-[#333] text-xs text-slate-300 rounded-md px-2 py-1 outline-none">
+        <select aria-label="Call volume period filter" className="bg-[#111] border border-[#333] text-xs text-slate-300 rounded-md px-2 py-1 outline-none">
           <option>This Week</option>
           <option>Last Week</option>
         </select>

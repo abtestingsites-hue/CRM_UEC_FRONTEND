@@ -502,15 +502,15 @@ export default function TargetManagementPage() {
             <div className="bg-[#0b0b0b] border border-[#1e1e1e] p-5 rounded-2xl">
               <h3 className="text-xs font-bold text-slate-400 mb-4 uppercase tracking-wider">Detailed Agent Comparison Grid</h3>
               <div className="border border-[#1c1c1c] rounded-xl overflow-hidden">
-                <table className="w-full text-left text-xs border-collapse">
+                <table aria-label="Team performance targets table" className="w-full text-left text-xs border-collapse">
                   <thead>
                     <tr className="bg-[#121212] border-b border-[#1c1c1c] text-slate-400 font-bold uppercase tracking-wider">
-                      <th className="p-3 font-semibold">Agent Name</th>
-                      <th className="p-3 font-semibold text-right">Target Assigned</th>
-                      <th className="p-3 font-semibold text-right">Conversions Completed</th>
-                      <th className="p-3 font-semibold text-right">Attainment Rate %</th>
-                      <th className="p-3 font-semibold text-right">SLA SLA Compliance</th>
-                      <th className="p-3 font-semibold text-right">Status</th>
+                      <th scope="col" className="p-3 font-semibold">Agent Name</th>
+                      <th scope="col" className="p-3 font-semibold text-right">Target Assigned</th>
+                      <th scope="col" className="p-3 font-semibold text-right">Conversions Completed</th>
+                      <th scope="col" className="p-3 font-semibold text-right">Attainment Rate %</th>
+                      <th scope="col" className="p-3 font-semibold text-right">SLA SLA Compliance</th>
+                      <th scope="col" className="p-3 font-semibold text-right">Status</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[#1c1c1c]/50 text-slate-300">
@@ -566,7 +566,7 @@ export default function TargetManagementPage() {
               <div className="flex flex-col">
                 <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1.5">Target Scope</span>
                 <select 
-                  value={newScope} 
+                  aria-label="Target Scope" value={newScope} 
                   onChange={(e: any) => setNewScope(e.target.value)}
                   className="bg-[#141414] border border-[#222] rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-orange-500"
                 >
@@ -580,7 +580,7 @@ export default function TargetManagementPage() {
               <div className="flex flex-col">
                 <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1.5">Goal Level Period</span>
                 <select 
-                  value={newPeriod} 
+                  aria-label="Target Period" value={newPeriod} 
                   onChange={(e: any) => setNewPeriod(e.target.value)}
                   className="bg-[#141414] border border-[#222] rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-orange-500"
                 >
@@ -595,7 +595,7 @@ export default function TargetManagementPage() {
               <div className="flex flex-col">
                 <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1.5">Assignee / Target Name</span>
                 <select
-                  value={newAssignee}
+                  aria-label="Target Assignee" value={newAssignee}
                   onChange={(e) => setNewAssignee(e.target.value)}
                   className="bg-[#141414] border border-[#222] focus:border-orange-500 rounded-lg px-3 py-2 text-xs text-white outline-none"
                 >
@@ -611,7 +611,7 @@ export default function TargetManagementPage() {
 
               <div className="flex flex-col">
                 <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1.5">Conversion Count Target</span>
-                <input aria-label="Input field" 
+                <input aria-label="Conversion count target" 
                   type="number" 
                   value={newTargetVal} 
                   onChange={(e) => setNewTargetVal(Number(e.target.value))}

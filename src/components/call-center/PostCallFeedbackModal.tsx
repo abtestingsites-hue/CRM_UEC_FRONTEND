@@ -113,7 +113,7 @@ export function PostCallFeedbackModal({ callSid, onClose, onSubmit }: PostCallFe
           {/* Notes */}
           <div>
             <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-3">Wrap-up Notes</label>
-            <textarea
+            <textarea aria-label="Call summary feedback"
               rows={3}
               className="w-full bg-[#111] border border-[#333] focus:border-primary rounded-xl px-4 py-3 text-sm text-white outline-none resize-none"
               value={notes}

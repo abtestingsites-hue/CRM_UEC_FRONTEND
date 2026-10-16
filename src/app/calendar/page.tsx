@@ -233,13 +233,13 @@ export default function CalendarPage() {
           {view === 'timeline' && `Operational Activity Flow: ${currentDate.toLocaleDateString()}`}
         </h2>
         <div className="flex items-center gap-2">
-          <button onClick={handlePrevDate} className="p-1.5 bg-[#141414] hover:bg-[#202020] border border-[#262626] rounded-lg text-slate-400 hover:text-white transition-colors">
+          <button aria-label="Previous date" onClick={handlePrevDate} className="p-1.5 bg-[#141414] hover:bg-[#202020] border border-[#262626] rounded-lg text-slate-400 hover:text-white transition-colors">
             <ChevronLeft className="w-4.5 h-4.5" />
           </button>
           <button onClick={() => setCurrentDate(new Date())} className="px-3 py-1 bg-[#141414] hover:bg-[#202020] border border-[#262626] rounded-lg text-xs text-slate-400 hover:text-white transition-colors">
             Today
           </button>
-          <button onClick={handleNextDate} className="p-1.5 bg-[#141414] hover:bg-[#202020] border border-[#262626] rounded-lg text-slate-400 hover:text-white transition-colors">
+          <button aria-label="Next date" onClick={handleNextDate} className="p-1.5 bg-[#141414] hover:bg-[#202020] border border-[#262626] rounded-lg text-slate-400 hover:text-white transition-colors">
             <ChevronRight className="w-4.5 h-4.5" />
           </button>
         </div>
@@ -453,7 +453,7 @@ export default function CalendarPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Appointment Type</label>
-                  <select {...register('type')} required className="w-full bg-[#141414] border border-[#262626] focus:border-orange-500 rounded-lg px-2.5 py-2 text-sm text-white outline-none">
+                  <select aria-label="Appointment Type" {...register('type')} required className="w-full bg-[#141414] border border-[#262626] focus:border-orange-500 rounded-lg px-2.5 py-2 text-sm text-white outline-none">
                     <option value="MEETING">Meeting</option>
                     <option value="CALL">Call</option>
                     <option value="FOLLOW_UP">Follow-up</option>
@@ -468,7 +468,7 @@ export default function CalendarPage() {
 
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Link Customer</label>
-                  <select {...register('customerId')} required className="w-full bg-[#141414] border border-[#262626] focus:border-orange-500 rounded-lg px-2.5 py-2 text-sm text-white outline-none">
+                  <select aria-label="Select Patient or Customer" {...register('customerId')} required className="w-full bg-[#141414] border border-[#262626] focus:border-orange-500 rounded-lg px-2.5 py-2 text-sm text-white outline-none">
                     {customers.map((c) => (
                       <option key={c.id} value={c.id}>{c.name}</option>
                     ))}
