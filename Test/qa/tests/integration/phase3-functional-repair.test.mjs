@@ -393,11 +393,11 @@ describe('Phase 3: CRM Functional Repair, Integration, Performance & Reliability
   // DEF-15: AI POST-CALL MODEL CONFIGURATION
   // ==========================================
   describe('DEF-15: AI Post-Call Processing Configuration', () => {
-    it('P3-DEF15-01: Configured AI model is supported gemini-2.5-flash', async () => {
+    it('P3-DEF15-01: Configured AI model is supported active catalog model gemini-3.5-flash', async () => {
       const fs = await import('node:fs');
       const serviceFile = fs.readFileSync('CRM/Backend/src/analytics/analytics.service.ts', 'utf8');
       assert.ok(!serviceFile.includes('gemini-3.8-flash'), 'Obsolete gemini-3.8-flash must be removed');
-      assert.ok(serviceFile.includes('gemini-2.5-flash'), 'Must configure supported gemini-2.5-flash');
+      assert.ok(serviceFile.includes('gemini-3.5-flash'), 'Must configure supported active model gemini-3.5-flash');
     });
   });
 });

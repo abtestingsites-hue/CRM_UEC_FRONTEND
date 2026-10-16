@@ -54,10 +54,17 @@ describe('Regression Testing: Paramantra / ElderCare Core Baseline', () => {
   });
 
   it('REG-04: Inbound Webhook handler must acknowledge valid payloads', async () => {
+    const crypto = await import('node:crypto');
+    const secret = process.env.VOBIZ_WEBHOOK_SECRET || process.env.VOBIZ_AUTH_TOKEN || '';
+    const bodyStr = JSON.stringify({ Status: 'ringing', CallUUID: `reg_test_${Date.now()}` });
+    const headers = { 'Content-Type': 'application/json' };
+    if (secret) {
+      headers['x-vobiz-signature'] = 'sha256=' + crypto.createHmac('sha256', secret).update(bodyStr).digest('hex');
+    }
     const res = await fetch(`${BASE_URL}/vobiz/incoming`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ Status: 'ringing', CallUUID: `reg_test_${Date.now()}` })
+      headers,
+      body: bodyStr
     });
     assert.strictEqual(res.status, 201);
   });
