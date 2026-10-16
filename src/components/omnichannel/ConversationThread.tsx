@@ -2,12 +2,13 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useConversationStore } from '@/store/conversationStore';
-import { Send, PhoneCall, Check, CheckCheck, FileText, Sparkles, Mic, Paperclip, MoreVertical, Loader2, ChevronLeft } from 'lucide-react';
+import { Send, PhoneCall, Check, CheckCheck, FileText, Sparkles, Mic, Paperclip, MoreVertical, Loader2, ChevronLeft, AlertCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export function ConversationThread() {
   const { activeConversationId, conversations, messages, typingStatus, isMessagesLoading, addMessage, setActiveConversation } = useConversationStore();
   const [inputText, setInputText] = useState('');
+  const [sendError, setSendError] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const activeConv = conversations.find(c => c.id === activeConversationId);
@@ -38,11 +39,11 @@ export function ConversationThread() {
     setInputText('');
 
     try {
-      const hostname = typeof window !== 'undefined' ? window.location.hostname : 'localhost';
+      let res: Response;
 
       // If channel is Email, send an actual email
       if (activeConv.channel === 'email') {
-        await apiFetch(`/api/messages/send-email`, {
+        res = await apiFetch(`/api/messages/send-email`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -55,7 +56,7 @@ export function ConversationThread() {
         });
       } else if (activeConv.channel === 'whatsapp') {
         // Send actual WhatsApp via Twilio
-        await apiFetch(`/api/messages/send-whatsapp`, {
+        res = await apiFetch(`/api/messages/send-whatsapp`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -65,7 +66,7 @@ export function ConversationThread() {
         });
       } else if (activeConv.channel === 'chat' || activeConv.channel === 'instagram' || activeConv.channel === 'messenger') {
         // Send actual Instagram message via Meta Graph API
-        await apiFetch(`/api/messages/send-instagram`, {
+        res = await apiFetch(`/api/messages/send-instagram`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -75,7 +76,7 @@ export function ConversationThread() {
         });
       } else {
         // Standard WebRTC/Internal message
-        await apiFetch(`/api/v1/messages/send`, {
+        res = await apiFetch(`/api/v1/messages/send`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -85,8 +86,19 @@ export function ConversationThread() {
           })
         });
       }
-    } catch (err) {
+
+      if (!res.ok) {
+        const errJson = await res.json().catch(() => ({}));
+        const errMsg = errJson.error || errJson.message || `Provider failed with status ${res.status}`;
+        setSendError(errMsg);
+        addMessage(activeConv.id, { ...tempMsg, status: 'failed' as any });
+      } else {
+        setSendError(null);
+      }
+    } catch (err: any) {
       console.error('Failed to send message:', err);
+      setSendError(err.message || 'Network error sending message');
+      addMessage(activeConv.id, { ...tempMsg, status: 'failed' as any });
     }
   };
 
@@ -309,7 +321,18 @@ export function ConversationThread() {
                 <div className="flex items-center gap-1 mt-1 text-[10px] text-slate-500">
                   <span>{msg.timestamp}</span>
                   {msg.sender === 'agent' && !msg.isAiSuggested && (
-                    msg.status === 'read' ? <CheckCheck className="w-3 h-3 text-blue-500" /> : <Check className="w-3 h-3" />
+                    (msg.status as string) === 'failed' ? (
+                      <span className="flex items-center gap-0.5 text-rose-500 font-medium" title="Message delivery rejected by provider">
+                        <AlertCircle className="w-3 h-3" />
+                        <span>Failed</span>
+                      </span>
+                    ) : msg.status === 'read' ? (
+                      <CheckCheck className="w-3 h-3 text-blue-500" />
+                    ) : msg.status === 'delivered' ? (
+                      <CheckCheck className="w-3 h-3 text-slate-400" />
+                    ) : (
+                      <Check className="w-3 h-3" />
+                    )
                   )}
                 </div>
               </motion.div>
@@ -336,6 +359,15 @@ export function ConversationThread() {
 
       {/* Input Area */}
       <div className="p-4 bg-[#050505] border-t border-[#222] shrink-0">
+        {sendError && (
+          <div className="mb-2 p-2 bg-rose-950/40 border border-rose-800/60 rounded-xl text-rose-400 text-xs flex items-center justify-between">
+            <div className="flex items-center gap-1.5">
+              <AlertCircle className="w-4 h-4 shrink-0" />
+              <span>{sendError}</span>
+            </div>
+            <button onClick={() => setSendError(null)} className="text-slate-400 hover:text-white ml-2 text-xs">✕</button>
+          </div>
+        )}
         <div className="flex items-end gap-2 bg-[#111] border border-[#222] rounded-2xl p-2 focus-within:border-primary transition-all">
           <button className="p-2 text-slate-400 hover:text-white transition-colors"><Paperclip className="w-5 h-5" /></button>
           <textarea
