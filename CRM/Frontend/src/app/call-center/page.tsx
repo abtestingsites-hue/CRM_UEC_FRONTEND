@@ -332,7 +332,7 @@ export default function CallCenterPage() {
               <h2 className="text-xl font-bold text-white mb-2">Outbound Dialer</h2>
               <p className="text-sm text-slate-500 max-w-sm">Enter a customer phone number to initiate an outbound WebRTC SIP call.</p>
               <div className="mt-8 flex gap-2 w-full max-w-xs">
-                <input 
+                <input aria-label="Input field" 
                   type="text" 
                   placeholder="+91..." 
                   value={dialNumber}

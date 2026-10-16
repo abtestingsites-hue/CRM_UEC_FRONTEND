@@ -120,8 +120,8 @@ export function BookingModal({ isOpen, onClose, customerId: initialCustomerId, a
           {step === 1 && (
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Patient ID</label>
-                <input 
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Patient ID</label>
+                <input aria-label="Input field" 
                   type="text" 
                   value={customerId} 
                   onChange={(e) => setCustomerId(e.target.value)} 
@@ -131,8 +131,8 @@ export function BookingModal({ isOpen, onClose, customerId: initialCustomerId, a
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Doctor ID</label>
-                <input 
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Doctor ID</label>
+                <input aria-label="Input field" 
                   type="text" 
                   value={doctorId} 
                   onChange={(e) => setDoctorId(e.target.value)}
@@ -142,8 +142,8 @@ export function BookingModal({ isOpen, onClose, customerId: initialCustomerId, a
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Treatment / Reason</label>
-                <input 
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Treatment / Reason</label>
+                <input aria-label="Input field" 
                   type="text" 
                   value={treatment} 
                   onChange={(e) => setTreatment(e.target.value)}
@@ -152,8 +152,8 @@ export function BookingModal({ isOpen, onClose, customerId: initialCustomerId, a
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date</label>
-                <input 
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Date</label>
+                <input aria-label="Input field" 
                   type="date" 
                   value={date} 
                   onChange={(e) => setDate(e.target.value)}
@@ -218,7 +218,7 @@ export function BookingModal({ isOpen, onClose, customerId: initialCustomerId, a
           <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 flex justify-end space-x-3">
             <button 
               onClick={() => step === 2 ? setStep(1) : onClose()}
-              className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700 font-medium shadow-sm"
+              className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors dark:bg-gray-800 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-700 font-medium shadow-sm"
               disabled={loading}
             >
               {step === 2 ? 'Back' : 'Cancel'}

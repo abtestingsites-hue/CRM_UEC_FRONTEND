@@ -108,35 +108,35 @@ export function AddAgentModal({ onClose, onSuccess }: AddAgentModalProps) {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-in fade-in duration-300">
                 <div className="md:col-span-2">
                   <label className="block text-xs font-semibold text-slate-400 uppercase mb-2">Full Name *</label>
-                  <input required name="fullName" value={formData.fullName} onChange={handleChange} type="text" className="w-full bg-[#111] border border-[#333] focus:border-primary rounded-xl px-4 py-3 md:py-2 text-base md:text-sm outline-none text-white transition-colors min-h-[48px] md:min-h-0" />
+                  <input aria-label="Full Name" required name="fullName" value={formData.fullName} onChange={handleChange} type="text" className="w-full bg-[#111] border border-[#333] focus:border-primary rounded-xl px-4 py-3 md:py-2 text-base md:text-sm outline-none text-white transition-colors min-h-[48px] md:min-h-0" />
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-slate-400 uppercase mb-2">Email Address *</label>
-                  <input required name="email" value={formData.email} onChange={handleChange} type="email" className="w-full bg-[#111] border border-[#333] focus:border-primary rounded-xl px-4 py-3 md:py-2 text-base md:text-sm outline-none text-white transition-colors min-h-[48px] md:min-h-0" />
+                  <input aria-label="Email" required name="email" value={formData.email} onChange={handleChange} type="email" className="w-full bg-[#111] border border-[#333] focus:border-primary rounded-xl px-4 py-3 md:py-2 text-base md:text-sm outline-none text-white transition-colors min-h-[48px] md:min-h-0" />
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-slate-400 uppercase mb-2">Phone Number</label>
-                  <input name="phone" value={formData.phone} onChange={handleChange} type="text" className="w-full bg-[#111] border border-[#333] focus:border-primary rounded-xl px-4 py-3 md:py-2 text-base md:text-sm outline-none text-white transition-colors min-h-[48px] md:min-h-0" />
+                  <input aria-label="Phone" name="phone" value={formData.phone} onChange={handleChange} type="text" className="w-full bg-[#111] border border-[#333] focus:border-primary rounded-xl px-4 py-3 md:py-2 text-base md:text-sm outline-none text-white transition-colors min-h-[48px] md:min-h-0" />
                 </div>
                 <div className="md:col-span-2">
                   <label className="block text-xs font-semibold text-slate-400 uppercase mb-2">Address</label>
-                  <input name="address" value={formData.address} onChange={handleChange} type="text" className="w-full bg-[#111] border border-[#333] focus:border-primary rounded-xl px-4 py-3 md:py-2 text-base md:text-sm outline-none text-white transition-colors min-h-[48px] md:min-h-0" />
+                  <input aria-label="Address" name="address" value={formData.address} onChange={handleChange} type="text" className="w-full bg-[#111] border border-[#333] focus:border-primary rounded-xl px-4 py-3 md:py-2 text-base md:text-sm outline-none text-white transition-colors min-h-[48px] md:min-h-0" />
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-slate-400 uppercase mb-2">City</label>
-                  <input name="city" value={formData.city} onChange={handleChange} type="text" className="w-full bg-[#111] border border-[#333] focus:border-primary rounded-xl px-4 py-3 md:py-2 text-base md:text-sm outline-none text-white transition-colors min-h-[48px] md:min-h-0" />
+                  <input aria-label="City" name="city" value={formData.city} onChange={handleChange} type="text" className="w-full bg-[#111] border border-[#333] focus:border-primary rounded-xl px-4 py-3 md:py-2 text-base md:text-sm outline-none text-white transition-colors min-h-[48px] md:min-h-0" />
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-slate-400 uppercase mb-2">State / Province</label>
-                  <input name="state" value={formData.state} onChange={handleChange} type="text" className="w-full bg-[#111] border border-[#333] focus:border-primary rounded-xl px-4 py-3 md:py-2 text-base md:text-sm outline-none text-white transition-colors min-h-[48px] md:min-h-0" />
+                  <input aria-label="State" name="state" value={formData.state} onChange={handleChange} type="text" className="w-full bg-[#111] border border-[#333] focus:border-primary rounded-xl px-4 py-3 md:py-2 text-base md:text-sm outline-none text-white transition-colors min-h-[48px] md:min-h-0" />
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-slate-400 uppercase mb-2">Country</label>
-                  <input name="country" value={formData.country} onChange={handleChange} type="text" className="w-full bg-[#111] border border-[#333] focus:border-primary rounded-xl px-4 py-3 md:py-2 text-base md:text-sm outline-none text-white transition-colors min-h-[48px] md:min-h-0" />
+                  <input aria-label="Country" name="country" value={formData.country} onChange={handleChange} type="text" className="w-full bg-[#111] border border-[#333] focus:border-primary rounded-xl px-4 py-3 md:py-2 text-base md:text-sm outline-none text-white transition-colors min-h-[48px] md:min-h-0" />
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-slate-400 uppercase mb-2">ZIP Code</label>
-                  <input name="zipCode" value={formData.zipCode} onChange={handleChange} type="text" className="w-full bg-[#111] border border-[#333] focus:border-primary rounded-xl px-4 py-3 md:py-2 text-base md:text-sm outline-none text-white transition-colors min-h-[48px] md:min-h-0" />
+                  <input aria-label="Zip Code" name="zipCode" value={formData.zipCode} onChange={handleChange} type="text" className="w-full bg-[#111] border border-[#333] focus:border-primary rounded-xl px-4 py-3 md:py-2 text-base md:text-sm outline-none text-white transition-colors min-h-[48px] md:min-h-0" />
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-slate-400 uppercase mb-2">Gender</label>
@@ -149,7 +149,7 @@ export function AddAgentModal({ onClose, onSuccess }: AddAgentModalProps) {
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-slate-400 uppercase mb-2">Date of Birth</label>
-                  <input name="dob" value={formData.dob} onChange={handleChange} type="date" className="w-full bg-[#111] border border-[#333] focus:border-primary rounded-xl px-4 py-3 md:py-2 text-base md:text-sm outline-none text-white transition-colors min-h-[48px] md:min-h-0 [color-scheme:dark]" />
+                  <input aria-label="Dob" name="dob" value={formData.dob} onChange={handleChange} type="date" className="w-full bg-[#111] border border-[#333] focus:border-primary rounded-xl px-4 py-3 md:py-2 text-base md:text-sm outline-none text-white transition-colors min-h-[48px] md:min-h-0 [color-scheme:dark]" />
                 </div>
               </div>
             )}
@@ -158,11 +158,11 @@ export function AddAgentModal({ onClose, onSuccess }: AddAgentModalProps) {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-in fade-in duration-300">
                 <div>
                   <label className="block text-xs font-semibold text-slate-400 uppercase mb-2">Employee ID</label>
-                  <input name="employeeId" value={formData.employeeId} onChange={handleChange} type="text" className="w-full bg-[#111] border border-[#333] focus:border-primary rounded-xl px-4 py-3 md:py-2 text-base md:text-sm outline-none text-white transition-colors min-h-[48px] md:min-h-0" />
+                  <input aria-label="Employee Id" name="employeeId" value={formData.employeeId} onChange={handleChange} type="text" className="w-full bg-[#111] border border-[#333] focus:border-primary rounded-xl px-4 py-3 md:py-2 text-base md:text-sm outline-none text-white transition-colors min-h-[48px] md:min-h-0" />
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-slate-400 uppercase mb-2">Department</label>
-                  <input name="department" value={formData.department} onChange={handleChange} type="text" className="w-full bg-[#111] border border-[#333] focus:border-primary rounded-xl px-4 py-3 md:py-2 text-base md:text-sm outline-none text-white transition-colors min-h-[48px] md:min-h-0" />
+                  <input aria-label="Department" name="department" value={formData.department} onChange={handleChange} type="text" className="w-full bg-[#111] border border-[#333] focus:border-primary rounded-xl px-4 py-3 md:py-2 text-base md:text-sm outline-none text-white transition-colors min-h-[48px] md:min-h-0" />
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-slate-400 uppercase mb-2">Role</label>
@@ -182,7 +182,7 @@ export function AddAgentModal({ onClose, onSuccess }: AddAgentModalProps) {
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-slate-400 uppercase mb-2">Joining Date</label>
-                  <input name="joinedAt" value={formData.joinedAt} onChange={handleChange} type="date" className="w-full bg-[#111] border border-[#333] focus:border-primary rounded-xl px-4 py-3 md:py-2 text-base md:text-sm outline-none text-white transition-colors min-h-[48px] md:min-h-0 [color-scheme:dark]" />
+                  <input aria-label="Joined At" name="joinedAt" value={formData.joinedAt} onChange={handleChange} type="date" className="w-full bg-[#111] border border-[#333] focus:border-primary rounded-xl px-4 py-3 md:py-2 text-base md:text-sm outline-none text-white transition-colors min-h-[48px] md:min-h-0 [color-scheme:dark]" />
                 </div>
               </div>
             )}
@@ -196,11 +196,11 @@ export function AddAgentModal({ onClose, onSuccess }: AddAgentModalProps) {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-semibold text-slate-400 uppercase mb-2">Platform Login Email *</label>
-                    <input name="email" value={formData.email} onChange={handleChange} type="email" required className="w-full bg-[#111] border border-[#333] focus:border-primary rounded-xl px-4 py-3 md:py-2 text-base md:text-sm outline-none text-white transition-colors min-h-[48px] md:min-h-0" />
+                    <input aria-label="Email" name="email" value={formData.email} onChange={handleChange} type="email" required className="w-full bg-[#111] border border-[#333] focus:border-primary rounded-xl px-4 py-3 md:py-2 text-base md:text-sm outline-none text-white transition-colors min-h-[48px] md:min-h-0" />
                   </div>
                   <div>
                     <label className="block text-xs font-semibold text-slate-400 uppercase mb-2">Temporary Password *</label>
-                    <input name="password" value={formData.password} onChange={handleChange} type="password" required className="w-full bg-[#111] border border-[#333] focus:border-primary rounded-xl px-4 py-3 md:py-2 text-base md:text-sm outline-none text-white transition-colors min-h-[48px] md:min-h-0" />
+                    <input aria-label="Password" name="password" value={formData.password} onChange={handleChange} type="password" required className="w-full bg-[#111] border border-[#333] focus:border-primary rounded-xl px-4 py-3 md:py-2 text-base md:text-sm outline-none text-white transition-colors min-h-[48px] md:min-h-0" />
                   </div>
                 </div>
               </div>

@@ -59,8 +59,7 @@ export default function AgentsPage() {
         <div className="p-4 border-b border-[#222] flex items-center justify-between bg-[#0a0a0a]">
           <div className="relative group w-72">
             <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-primary transition-colors" />
-            <input
-              type="text"
+            <input aria-label="Search agents" type="text"
               placeholder="Search by name or email..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}

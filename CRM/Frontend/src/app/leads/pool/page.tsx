@@ -103,7 +103,7 @@ export default function LeadPoolPage() {
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 bg-[#111] border border-[#222] p-4 rounded-2xl shadow-sm md:shadow-none">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-            <input 
+            <input aria-label="Input field" 
               type="text"
               placeholder="Search leads..."
               className="w-full bg-[#1a1a1a] border border-[#333] rounded-xl py-2.5 pl-10 pr-4 text-sm text-white focus:outline-none focus:border-primary transition-colors min-h-[44px] md:min-h-0"

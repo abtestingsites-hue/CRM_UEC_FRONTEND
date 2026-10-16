@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect, useRef } from 'react';
 import { useConversationStore } from '@/store/conversationStore';
@@ -151,9 +151,7 @@ export function ConversationThread() {
           </button>
           <div className="relative shrink-0 w-8 h-8">
             {activeConv.customerAvatar ? (
-              <img
-                src={activeConv.customerAvatar}
-                alt={activeConv.customerName}
+              <img alt={activeConv.customerName || "Customer avatar"} src={activeConv.customerAvatar}
                 className="w-8 h-8 rounded-full object-cover border border-[#222]"
                 onError={(e) => {
                   (e.target as HTMLImageElement).style.display = 'none';

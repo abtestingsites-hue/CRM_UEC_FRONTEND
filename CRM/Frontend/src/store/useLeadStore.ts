@@ -1,4 +1,4 @@
-﻿import { create } from 'zustand';
+import { create } from 'zustand';
 import { apiFetch, API_BASE_URL } from '@/lib/api';
 
 interface Lead {
@@ -45,7 +45,7 @@ export const useLeadStore = create<LeadStore>((set, get) => ({
     set({ isLoading: true });
     try {
       const activeToken = token || (typeof localStorage !== 'undefined' ? localStorage.getItem('paramantra_access_token') : '') || '';
-      const res = await apiFetch(`${API_URL}/leads${query}`, {
+      const res = await apiFetch(`${API_URL}/api/v1/leads${query}`, {
         headers: {
           'Authorization': `Bearer ${activeToken}`
         }
@@ -69,7 +69,7 @@ export const useLeadStore = create<LeadStore>((set, get) => ({
   claimLead: async (leadId: string, agentId: string) => {
     try {
       const token = (typeof localStorage !== 'undefined' ? localStorage.getItem('paramantra_access_token') : '') || '';
-      const res = await apiFetch(`${API_URL}/leads/${leadId}/claim`, {
+      const res = await apiFetch(`${API_URL}/api/v1/leads/${leadId}/claim`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -102,7 +102,7 @@ export const useLeadStore = create<LeadStore>((set, get) => ({
   updateLeadStatus: async (leadId: string, status: string, notes: string, token?: string) => {
     try {
       const activeToken = token || (typeof localStorage !== 'undefined' ? localStorage.getItem('paramantra_access_token') : '') || '';
-      const res = await apiFetch(`${API_URL}/leads/${leadId}/status`, {
+      const res = await apiFetch(`${API_URL}/api/v1/leads/${leadId}/status`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -133,7 +133,7 @@ export const useLeadStore = create<LeadStore>((set, get) => ({
   addLead: async (leadData, token?: string) => {
     try {
       const activeToken = token || (typeof localStorage !== 'undefined' ? localStorage.getItem('paramantra_access_token') : '') || '';
-      const res = await apiFetch(`${API_URL}/leads`, {
+      const res = await apiFetch(`${API_URL}/api/v1/leads`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

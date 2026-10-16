@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useState } from 'react';
 import { CheckCircle, Loader2, Calendar } from 'lucide-react';
@@ -171,7 +171,7 @@ export function LeadConversionModal({ leadId, onClose, onSubmit }: LeadConversio
             <form onSubmit={handleScheduleFollowUp} className="p-6 space-y-6 overflow-y-auto custom-scrollbar flex-1">
               <div>
                 <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-3">Appointment Date & Time</label>
-                <input
+                <input id="appointment-datetime" aria-label="Appointment Date & Time"
                   type="datetime-local"
                   required
                   className="w-full bg-[#111] border border-[#333] focus:border-emerald-500 rounded-xl px-4 py-3 text-sm text-white outline-none"

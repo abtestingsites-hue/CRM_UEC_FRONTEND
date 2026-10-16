@@ -12,14 +12,24 @@ export default function TicketsPage() {
   const fetchTickets = async () => {
     setIsLoading(true);
     try {
-      // Mock tickets to prevent 404 API calls
-      const mockTickets = [
-        { id: 'TKT-001', customerName: 'Raghav', status: 'OPEN', priority: 'HIGH', title: 'Need support with login' },
-        { id: 'TKT-002', customerName: 'Mani', status: 'RESOLVED', priority: 'NORMAL', title: 'Billing issue' }
-      ];
-      setTickets(mockTickets);
+      const res = await apiFetch('/api/v1/tickets');
+      if (res.ok) {
+        const data = await res.json();
+        const normalized = (Array.isArray(data) ? data : []).map((t: any) => ({
+          id: t.id || `TKT-${Math.random().toString(36).substring(7).toUpperCase()}`,
+          customer: t.customer || t.customerName || 'Unknown Customer',
+          subject: t.subject || t.title || t.category || 'General Support',
+          status: t.status || 'OPEN',
+          priority: t.priority || 'NORMAL',
+          updated: t.updated || (t.updatedAt ? new Date(t.updatedAt).toLocaleDateString() : 'Today')
+        }));
+        setTickets(normalized);
+      } else {
+        setTickets([]);
+      }
     } catch (err) {
-      console.error(err);
+      console.error('Failed to fetch tickets:', err);
+      setTickets([]);
     } finally {
       setIsLoading(false);
     }
@@ -51,7 +61,7 @@ export default function TicketsPage() {
         <div className="p-4 border-b border-[#222] flex items-center justify-between bg-[#0a0a0a]">
           <div className="relative group w-64">
             <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-primary transition-colors" />
-            <input 
+            <input aria-label="Input field" 
               type="text" 
               placeholder="Search tickets..." 
               className="w-full bg-[#111] border border-[#333] focus:border-primary rounded-lg pl-9 pr-3 py-2 text-sm outline-none transition-all text-white placeholder-slate-500"
@@ -114,7 +124,7 @@ export default function TicketsPage() {
                     </td>
                     <td className="px-6 py-4 text-slate-500">{ticket.updated}</td>
                     <td className="px-6 py-4 text-right">
-                      <button className="text-slate-500 hover:text-white transition-colors opacity-0 group-hover:opacity-100">
+                      <button aria-label="Ticket actions" className="text-slate-500 hover:text-white transition-colors opacity-0 group-hover:opacity-100">
                         <MoreHorizontal className="w-5 h-5 ml-auto" />
                       </button>
                     </td>

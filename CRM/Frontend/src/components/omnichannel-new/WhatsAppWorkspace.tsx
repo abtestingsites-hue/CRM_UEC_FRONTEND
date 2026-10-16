@@ -117,9 +117,9 @@ export function WhatsAppWorkspace({ platformDef, colors, onBack }: any) {
             </div>
           </div>
           <div className="flex items-center gap-5 text-[#8696a0]">
-            <button className="hover:text-[#d1d7db]"><Video className="w-5 h-5" /></button>
-            <button className="hover:text-[#d1d7db]"><Search className="w-5 h-5" /></button>
-            <button className="hover:text-[#d1d7db]"><MoreVertical className="w-5 h-5" /></button>
+            <button aria-label="Start video call" className="hover:text-[#d1d7db]"><Video className="w-5 h-5" /></button>
+            <button aria-label="Search WhatsApp messages" className="hover:text-[#d1d7db]"><Search className="w-5 h-5" /></button>
+            <button aria-label="More options" className="hover:text-[#d1d7db]"><MoreVertical className="w-5 h-5" /></button>
           </div>
         </div>
 

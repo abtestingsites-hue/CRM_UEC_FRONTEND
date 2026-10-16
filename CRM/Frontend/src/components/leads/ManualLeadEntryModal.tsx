@@ -112,7 +112,7 @@ export function ManualLeadEntryModal({ isOpen, onClose }: ManualLeadEntryModalPr
                       <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <User className="w-4 h-4 text-slate-500" />
                       </div>
-                      <input 
+                      <input aria-label="Input field" 
                         type="text" 
                         value={formData.customerName}
                         onChange={(e) => setFormData({...formData, customerName: e.target.value})}
@@ -127,7 +127,7 @@ export function ManualLeadEntryModal({ isOpen, onClose }: ManualLeadEntryModalPr
                       <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <Phone className="w-4 h-4 text-slate-500" />
                       </div>
-                      <input 
+                      <input aria-label="Input field" 
                         type="tel" 
                         required
                         value={formData.phoneNumber}
@@ -144,7 +144,7 @@ export function ManualLeadEntryModal({ isOpen, onClose }: ManualLeadEntryModalPr
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                       <Mail className="w-4 h-4 text-slate-500" />
                     </div>
-                    <input 
+                    <input aria-label="Input field" 
                       type="email" 
                       value={formData.email}
                       onChange={(e) => setFormData({...formData, email: e.target.value})}
@@ -180,7 +180,7 @@ export function ManualLeadEntryModal({ isOpen, onClose }: ManualLeadEntryModalPr
                       <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <Tag className="w-4 h-4 text-slate-500" />
                       </div>
-                      <input 
+                      <input aria-label="Input field" 
                         type="text" 
                         value={formData.source}
                         onChange={(e) => setFormData({...formData, source: e.target.value})}

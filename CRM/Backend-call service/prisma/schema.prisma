@@ -81,16 +81,30 @@ enum MeetingType {
   DEMO_MEETING
 }
 
-enum AppointmentType {
-  MEETING
-  CALL
-  FOLLOW_UP
-  REMINDER
-  VISIT
-  DEMO
-  INTERVIEW
-  EVENT
-  HOLIDAY
+enum AppointmentStatus {
+  REQUESTED
+  PENDING_CONFIRMATION
+  CONFIRMED
+  CHECKED_IN
+  IN_CONSULTATION
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+  RESCHEDULED
+}
+
+enum BookingSource {
+  VOICE_AGENT
+  HUMAN_AGENT
+  AI_AGENT
+  WHATSAPP
+  INSTAGRAM
+  WEBSITE
+  WALK_IN
+  PHONE
+  REFERRAL
+  CRM
+  OTHER
 }
 
 model User {
@@ -108,11 +122,6 @@ model User {
   supervisorLogs SupervisorLog[]
   uploadedLeads Lead[] @relation("UploadedLeads")
   leadUploads   LeadUploadHistory[] @relation("LeadUploads")
-
-  organizationId String?   @db.Uuid
-  organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: SetNull)
-  userRoles     UserRoleAssignment[]
-  sessions      Session[]
 }
 
 model Agent {
@@ -152,6 +161,8 @@ model Agent {
   sessions        WebsocketSession[]
   calendar        Calendar?
   crmTasks        CrmTask[]
+  appointmentsAsDoctor Appointment[] @relation("DoctorAppointments")
+  appointmentsAsAgent  Appointment[] @relation("AgentAppointments")
 
   // CRM Expansion Relations
   departments     Department[]
@@ -164,7 +175,6 @@ model Agent {
   assignedLeads       Lead[] @relation("AssignedLeads")
   agentFollowups      LeadFollowup[] @relation("AgentFollowups")
   agentConversionLogs LeadConversionLog[] @relation("AgentConversionLogs")
-  activities          Activity[]
 }
 
 model Customer {
@@ -196,7 +206,6 @@ model Customer {
   appointments     Appointment[]
   crmTasks         CrmTask[]
   platformIdentities PlatformIdentity[]
-  activities       Activity[]
 
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
@@ -255,7 +264,7 @@ model CallLog {
   customer      Customer  @relation(fields: [customerId], references: [id])
   agentId       String?   @db.Uuid
   agent         Agent?    @relation(fields: [agentId], references: [id])
-  exotelCallSid String?
+  vobizCallSid  String?
   status        String
   duration      Int       @default(0)
   recordingUrl  String?
@@ -445,18 +454,54 @@ model Calendar {
 }
 
 model Appointment {
-  id          String   @id @default(uuid()) @db.Uuid
-  calendarId  String   @db.Uuid
-  calendar    Calendar @relation(fields: [calendarId], references: [id], onDelete: Cascade)
-  customerId  String   @db.Uuid
-  customer    Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
-  title       String
-  type        AppointmentType @default(MEETING)
-  startTime   DateTime
-  endTime     DateTime
-  status      String   // 'SCHEDULED', 'COMPLETED', 'CANCELLED'
+  id                 String             @id @default(uuid()) @db.Uuid
+  bookingId          String             @unique @default(uuid())
+  calendarId         String?            @db.Uuid
+  calendar           Calendar?          @relation(fields: [calendarId], references: [id], onDelete: Cascade)
   
-  createdAt   DateTime @default(now())
+  customerId         String?            @db.Uuid
+  customer           Customer?          @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  
+  leadId             String?            @db.Uuid
+  lead               Lead?              @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  
+  doctorId           String?            @db.Uuid
+  doctor             Agent?             @relation("DoctorAppointments", fields: [doctorId], references: [id])
+  
+  assignedAgentId    String?            @db.Uuid
+  assignedAgent      Agent?             @relation("AgentAppointments", fields: [assignedAgentId], references: [id])
+
+  title              String
+  treatment          String?
+  date               DateTime           @db.Date
+  startTime          DateTime
+  endTime            DateTime
+  duration           Int                @default(30) // in minutes
+  timezone           String             @default("UTC")
+  
+  status             AppointmentStatus  @default(REQUESTED)
+  bookingSource      BookingSource      @default(CRM)
+  appointmentType    String?
+  notes              String?
+  
+  cancellationReason String?
+  rescheduleReason   String?
+  confirmationStatus String?
+  reminderStatus     String?
+  
+  createdBy          String?            @db.Uuid
+  updatedBy          String?            @db.Uuid
+  
+  callSessionId      String?            @db.Uuid
+  callSession        CallSession?       @relation(fields: [callSessionId], references: [id])
+  
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+
+  @@index([doctorId, startTime])
+  @@index([customerId])
+  @@index([startTime])
+  @@index([status])
 }
 
 model CrmTask {
@@ -519,8 +564,18 @@ model CallSession {
   recordingUrl   String?
   reason         String?
   livekitRoom    String?
+  livekitSipParticipantIdentity String?
+  livekitEgressId String?
   transferHistory Json?
   holdDuration   Int?          @default(0)
+  aiProcessingStatus String    @default("PENDING") // PENDING, RECORDING_PENDING, TRANSCRIBING, ANALYZING, COMPLETED, FAILED
+  recordingStatus       String?  @default("NOT_AVAILABLE") // PENDING, RECORDING, PROCESSING, READY, FAILED, NOT_AVAILABLE
+  recordingStoragePath  String?
+  recordingMimeType     String?
+  recordingFileSize     Int?
+  recordingDuration     Int?
+  recordingStartedAt    DateTime?
+  recordingCompletedAt  DateTime?
   createdAt      DateTime      @default(now())
 
   caller         User?         @relation("CallsMade", fields: [callerUserId], references: [id])
@@ -532,6 +587,12 @@ model CallSession {
   participants   CallParticipant[]
   recordings     CallRecording[]
   analytics      CallAnalytics?
+  appointments   Appointment[]
+
+  @@index([status])
+  @@index([startedAt])
+  @@index([callerUserId])
+  @@index([customerId])
 }
 
 model CallParticipant {
@@ -674,8 +735,11 @@ model Lead {
   followups         LeadFollowup[]
   conversionLogs    LeadConversionLog[]
   notifications     LeadNotification[]
-  activities        Activity[]
-  attachments       Attachment[]
+  appointments      Appointment[]
+
+  @@index([status])
+  @@index([assignedAgentId])
+  @@index([createdAt])
 }
 
 model LeadFollowup {
@@ -741,126 +805,3 @@ model LeadNotification {
   createdAt   DateTime @default(now())
   sentAt      DateTime?
 }
-
-// ==========================================
-// PARAMANTRA CRM PHASE 1 ADDITIONS
-// ==========================================
-
-model Organization {
-  id             String    @id @default(uuid()) @db.Uuid
-  name           String
-  gstNumber      String?
-  address        String?
-  city           String?
-  country        String?
-  timezone       String    @default("UTC")
-  businessHours  Json?     // branch open/close settings
-  logoUrl        String?
-  branches       Branch[]
-  users          User[]
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
-}
-
-model Branch {
-  id             String       @id @default(uuid()) @db.Uuid
-  organizationId String       @db.Uuid
-  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  name           String
-  address        String?
-  createdAt      DateTime     @default(now())
-}
-
-model Role {
-  id              String                 @id @default(uuid()) @db.Uuid
-  name            String                 @unique
-  description     String?
-  permissions     RolePermission[]
-  userAssignments UserRoleAssignment[]
-  createdAt       DateTime               @default(now())
-  updatedAt       DateTime               @updatedAt
-}
-
-model Permission {
-  id             String           @id @default(uuid()) @db.Uuid
-  code           String           @unique // e.g. "Lead.Create", "Lead.Read"
-  category       String           // e.g. "Lead", "Customer"
-  roles          RolePermission[]
-}
-
-model RolePermission {
-  roleId         String     @db.Uuid
-  permissionId   String     @db.Uuid
-  role           Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
-  permission     Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
-
-  @@id([roleId, permissionId])
-}
-
-model UserRoleAssignment {
-  userId         String @db.Uuid
-  roleId         String @db.Uuid
-  user           User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  role           Role   @relation(fields: [roleId], references: [id], onDelete: Cascade)
-
-  @@id([userId, roleId])
-}
-
-model Session {
-  id           String   @id @default(uuid()) @db.Uuid
-  userId       String   @db.Uuid
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  tokenVersion Int      @default(0)
-  deviceInfo   String?
-  ipAddress    String?
-  expiresAt    DateTime
-  createdAt    DateTime @default(now())
-}
-
-model Activity {
-  id             String      @id @default(uuid()) @db.Uuid
-  type           String      // "CALL", "MEETING", "EMAIL", "TASK", "WHATSAPP", "SITE_VISIT"
-  subject        String
-  description    String?
-  status         String      // "PENDING", "COMPLETED", "CANCELLED"
-  dueDate        DateTime?
-  completedAt    DateTime?
-  
-  customerId     String?     @db.Uuid
-  customer       Customer?   @relation(fields: [customerId], references: [id], onDelete: SetNull)
-  leadId         String?     @db.Uuid
-  lead           Lead?       @relation(fields: [leadId], references: [id], onDelete: SetNull)
-  
-  agentId        String      @db.Uuid
-  agent          Agent       @relation(fields: [agentId], references: [id], onDelete: Cascade)
-  
-  comments       Comment[]
-  attachments    Attachment[]
-  createdAt      DateTime    @default(now())
-}
-
-model Comment {
-  id          String   @id @default(uuid()) @db.Uuid
-  activityId  String   @db.Uuid
-  activity    Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
-  content     String
-  authorId    String   @db.Uuid
-  createdAt   DateTime @default(now())
-}
-
-model Attachment {
-  id          String   @id @default(uuid()) @db.Uuid
-  filename    String
-  fileUrl     String
-  size        Int?
-  mimeType    String?
-  
-  activityId  String?  @db.Uuid
-  activity    Activity? @relation(fields: [activityId], references: [id], onDelete: Cascade)
-  
-  leadId      String?  @db.Uuid
-  lead        Lead?    @relation(fields: [leadId], references: [id], onDelete: Cascade)
-  
-  createdAt   DateTime @default(now())
-}
-

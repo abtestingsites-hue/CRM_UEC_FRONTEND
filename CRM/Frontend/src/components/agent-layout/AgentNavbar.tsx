@@ -55,8 +55,10 @@ export function AgentNavbar() {
       <div className="flex-1 max-w-xl">
         <div className="relative group">
           <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-primary transition-colors" />
-          <input 
+          <input aria-label="Input field" 
             type="text" 
+            id="agent-navbar-search"
+            aria-label="Search tasks, customers, or calls"
             placeholder="Search tasks, customers, or calls..." 
             className="w-full bg-[#111] border border-[#222] focus:border-primary/50 rounded-xl pl-10 pr-4 py-2 text-sm outline-none text-white transition-all placeholder-slate-500"
           />
@@ -87,6 +89,7 @@ export function AgentNavbar() {
         {/* Notification */}
         <div className="relative" ref={notificationsRef}>
           <button 
+            aria-label="Notifications"
             onClick={() => setShowNotifications(!showNotifications)}
             className="w-10 h-10 flex items-center justify-center rounded-xl bg-[#111] border border-[#222] hover:border-[#333] hover:bg-[#1a1a1a] text-slate-400 hover:text-white transition-all relative"
           >
@@ -134,10 +137,9 @@ export function AgentNavbar() {
             <p className="text-[10px] text-slate-500">{user?.email || 'agent@example.com'}</p>
           </div>
           <div className="relative cursor-pointer">
-            <img 
+            <img alt="Profile" 
               onClick={() => setShowProfileDropdown(!showProfileDropdown)}
               src={user?.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || 'Agent')}&background=ea580c&color=fff`} 
-              alt="Profile" 
               className="w-10 h-10 rounded-full border border-[#333] object-cover hover:border-primary transition-colors"
             />
             {showProfileDropdown && (

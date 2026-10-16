@@ -52,8 +52,10 @@ export function ConversationSidebar() {
         <h2 className="font-bold text-lg text-white">Unified Inbox</h2>
         <div className="relative group">
           <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-primary transition-colors" />
-          <input 
+          <input aria-label="Input field" 
             type="text" 
+            id="search-unified-inbox"
+            aria-label="Search messages"
             placeholder="Search messages..." 
             className="w-full bg-[#111] border border-[#222] focus:border-primary rounded-lg pl-9 pr-3 py-2 text-sm outline-none transition-all text-white placeholder-slate-500"
           />
@@ -89,7 +91,7 @@ export function ConversationSidebar() {
           >
             Messenger
           </button>
-          <button className="p-1 text-slate-500 hover:text-white ml-auto transition-colors"><Filter className="w-4 h-4" /></button>
+          <button aria-label="Filter conversations" className="p-1 text-slate-500 hover:text-white ml-auto transition-colors"><Filter className="w-4 h-4" /></button>
         </div>
       </div>
 
@@ -113,9 +115,8 @@ export function ConversationSidebar() {
               {/* Avatar Section */}
               <div className="relative shrink-0 w-10 h-10">
                 {conv.customerAvatar ? (
-                  <img
+                  <img alt={conv.customerName || "Customer avatar"}
                     src={conv.customerAvatar}
-                    alt={conv.customerName}
                     className="w-10 h-10 rounded-full object-cover border border-[#222]"
                     onError={(e) => {
                       (e.target as HTMLImageElement).style.display = 'none';

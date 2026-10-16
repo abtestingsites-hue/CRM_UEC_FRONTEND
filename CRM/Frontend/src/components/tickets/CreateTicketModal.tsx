@@ -54,17 +54,17 @@ export function CreateTicketModal({ onClose, onSuccess }: CreateTicketModalProps
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Customer Name</label>
-              <input required type="text" className="w-full bg-[#111] border border-[#333] focus:border-primary rounded-lg px-3 py-2 text-sm text-white outline-none" value={formData.customerName} onChange={e => setFormData({ ...formData, customerName: e.target.value })} placeholder="Enter the customer's name" />
+              <input aria-label="Enter the customer" required type="text" className="w-full bg-[#111] border border-[#333] focus:border-primary rounded-lg px-3 py-2 text-sm text-white outline-none" value={formData.customerName} onChange={e => setFormData({ ...formData, customerName: e.target.value })} placeholder="Enter the customer's name" />
             </div>
             <div className="space-y-1.5">
               <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Phone</label>
-              <input required type="text" className="w-full bg-[#111] border border-[#333] focus:border-primary rounded-lg px-3 py-2 text-sm text-white outline-none" value={formData.customerPhone} onChange={e => setFormData({ ...formData, customerPhone: e.target.value })} placeholder="Enter the customer's phone number" />
+              <input aria-label="Enter the customer" required type="text" className="w-full bg-[#111] border border-[#333] focus:border-primary rounded-lg px-3 py-2 text-sm text-white outline-none" value={formData.customerPhone} onChange={e => setFormData({ ...formData, customerPhone: e.target.value })} placeholder="Enter the customer's phone number" />
             </div>
           </div>
 
           <div className="space-y-1.5">
             <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Subject</label>
-            <input required type="text" className="w-full bg-[#111] border border-[#333] focus:border-primary rounded-lg px-3 py-2 text-sm text-white outline-none" value={formData.subject} onChange={e => setFormData({ ...formData, subject: e.target.value })} placeholder="Enter the ticket subject" />
+            <input aria-label="Enter the ticket subject" required type="text" className="w-full bg-[#111] border border-[#333] focus:border-primary rounded-lg px-3 py-2 text-sm text-white outline-none" value={formData.subject} onChange={e => setFormData({ ...formData, subject: e.target.value })} placeholder="Enter the ticket subject" />
           </div>
 
           <div className="grid grid-cols-2 gap-4">

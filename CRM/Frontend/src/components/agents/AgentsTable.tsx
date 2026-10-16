@@ -41,9 +41,8 @@ export function AgentsTable({ agents, onRefresh }: AgentsTableProps) {
               <tr key={agent.id} className="hover:bg-[#111] transition-colors group">
                 <td className="px-6 py-4">
                   <div className="flex items-center gap-3">
-                    <img 
+                    <img alt={agent.name || "Agent avatar"} 
                       src={agent.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(agent.name)}&background=0D8ABC&color=fff`} 
-                      alt={agent.name} 
                       className="w-10 h-10 rounded-full border border-[#333]" 
                     />
                     <div>
@@ -110,9 +109,8 @@ export function AgentsTable({ agents, onRefresh }: AgentsTableProps) {
           <div key={agent.id} className="bg-[#1a1a1a] border border-[#333] rounded-2xl p-4 space-y-3 shadow-sm text-white">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <img 
+                <img alt={agent.name || "Agent avatar"} 
                   src={agent.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(agent.name)}&background=0D8ABC&color=fff`} 
-                  alt={agent.name} 
                   className="w-10 h-10 rounded-full border border-[#333]" 
                 />
                 <div>

@@ -48,7 +48,7 @@ const EnterpriseTableWorkspace = ({ columns, data, primaryAction, searchPlacehol
       <div className="flex justify-between items-center mb-4 bg-[#101010] p-4 border border-[#1e1e1e] rounded-xl shadow-lg">
         <div className="relative">
           <Search className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
-          <input 
+          <input aria-label="Input field" 
             type="text" 
             placeholder={searchPlaceholder || "Search records..."}
             className="bg-[#141414] border border-[#222] rounded-lg pl-9 pr-4 py-2 text-xs text-white outline-none focus:border-orange-500 w-72 transition-colors"
@@ -178,7 +178,7 @@ export default function AutomationPage() {
             <div className="grid grid-cols-2 gap-5">
               <div className="space-y-1.5 col-span-2">
                 <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Rule Name</label>
-                <input type="text" defaultValue="Global Welcome Message" className="w-full bg-[#141414] border border-[#222] focus:border-orange-500 rounded-lg px-4 py-2 text-sm text-white outline-none" />
+                <input aria-label="W full bg 141414 border border 222 focusborder orange 500 rounded lg px 4 py 2 text sm text white outline none" type="text" defaultValue="Global Welcome Message" className="w-full bg-[#141414] border border-[#222] focus:border-orange-500 rounded-lg px-4 py-2 text-sm text-white outline-none" />
               </div>
               <div className="space-y-1.5">
                 <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Trigger Event</label>
@@ -258,7 +258,7 @@ export default function AutomationPage() {
         <div className="flex justify-between items-center mb-4 bg-[#101010] p-4 border border-[#1e1e1e] rounded-xl shadow-lg">
           <div className="relative">
             <Search className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
-            <input type="text" placeholder="Search auto-replies..." className="bg-[#141414] border border-[#222] rounded-lg pl-9 pr-4 py-2 text-xs text-white outline-none focus:border-orange-500 w-72 transition-colors"/>
+            <input aria-label="Search auto-replies" type="text" placeholder="Search auto-replies..." className="bg-[#141414] border border-[#222] rounded-lg pl-9 pr-4 py-2 text-xs text-white outline-none focus:border-orange-500 w-72 transition-colors"/>
           </div>
           <button onClick={() => setView('create')} className="flex items-center gap-1.5 px-4 py-2 bg-orange-600 hover:bg-orange-500 text-white rounded-lg text-xs font-bold transition-all shadow-[0_0_15px_rgba(234,88,12,0.15)]">
             <Plus className="w-3.5 h-3.5" /> Create Auto Reply
@@ -347,7 +347,7 @@ export default function AutomationPage() {
               <div className="space-y-1.5">
                 <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Human Handover Intent Confidence</label>
                 <div className="flex items-center gap-3">
-                  <input type="range" min="0" max="100" defaultValue="75" className="flex-1 accent-orange-500" />
+                  <input aria-label="Flex 1 accent orange 500" type="range" min="0" max="100" defaultValue="75" className="flex-1 accent-orange-500" />
                   <span className="text-sm font-bold text-orange-500 w-12">&lt; 75%</span>
                 </div>
                 <p className="text-[10px] text-slate-500">Route to human if NLP intent confidence is below threshold.</p>
@@ -399,9 +399,9 @@ export default function AutomationPage() {
           <EnterpriseTableWorkspace 
             columns={['Media Asset', 'Type', 'Size', 'Linked Templates', 'Last Updated', 'Actions']}
             data={[
-              [<div className="flex items-center gap-3"><div className="w-8 h-8 rounded-lg bg-[#222] border border-[#333] flex items-center justify-center"><Image className="w-4 h-4 text-emerald-500"/></div><span className="font-bold text-white">diwali_promo_header.png</span></div>, 'IMAGE', '1.2 MB', 'marketing_promo_v1', 'Oct 15, 2025', <div className="flex justify-end gap-2"><button className="p-1 hover:text-orange-500"><RefreshCw className="w-4 h-4"/></button><button className="p-1 hover:text-red-500"><Trash2 className="w-4 h-4"/></button></div>],
-              [<div className="flex items-center gap-3"><div className="w-8 h-8 rounded-lg bg-[#222] border border-[#333] flex items-center justify-center"><PlayCircle className="w-4 h-4 text-blue-500"/></div><span className="font-bold text-white">product_demo.mp4</span></div>, 'VIDEO', '14.5 MB', 'lead_welcome_video', 'Nov 02, 2025', <div className="flex justify-end gap-2"><button className="p-1 hover:text-orange-500"><RefreshCw className="w-4 h-4"/></button><button className="p-1 hover:text-red-500"><Trash2 className="w-4 h-4"/></button></div>],
-              [<div className="flex items-center gap-3"><div className="w-8 h-8 rounded-lg bg-[#222] border border-[#333] flex items-center justify-center"><FileText className="w-4 h-4 text-orange-500"/></div><span className="font-bold text-white">company_brochure.pdf</span></div>, 'DOCUMENT', '4.1 MB', 'brochure_outreach', 'Sep 10, 2025', <div className="flex justify-end gap-2"><button className="p-1 hover:text-orange-500"><RefreshCw className="w-4 h-4"/></button><button className="p-1 hover:text-red-500"><Trash2 className="w-4 h-4"/></button></div>],
+              [<div className="flex items-center gap-3"><div className="w-8 h-8 rounded-lg bg-[#222] border border-[#333] flex items-center justify-center"><Image className="w-4 h-4 text-emerald-500"/></div><span className="font-bold text-white">diwali_promo_header.png</span></div>, 'IMAGE', '1.2 MB', 'marketing_promo_v1', 'Oct 15, 2025', <div className="flex justify-end gap-2"><button aria-label="Refresh media asset" className="p-1 hover:text-orange-500"><RefreshCw className="w-4 h-4"/></button><button aria-label="Delete media asset" className="p-1 hover:text-red-500"><Trash2 className="w-4 h-4"/></button></div>],
+              [<div className="flex items-center gap-3"><div className="w-8 h-8 rounded-lg bg-[#222] border border-[#333] flex items-center justify-center"><PlayCircle className="w-4 h-4 text-blue-500"/></div><span className="font-bold text-white">product_demo.mp4</span></div>, 'VIDEO', '14.5 MB', 'lead_welcome_video', 'Nov 02, 2025', <div className="flex justify-end gap-2"><button aria-label="Refresh media asset" className="p-1 hover:text-orange-500"><RefreshCw className="w-4 h-4"/></button><button aria-label="Delete media asset" className="p-1 hover:text-red-500"><Trash2 className="w-4 h-4"/></button></div>],
+              [<div className="flex items-center gap-3"><div className="w-8 h-8 rounded-lg bg-[#222] border border-[#333] flex items-center justify-center"><FileText className="w-4 h-4 text-orange-500"/></div><span className="font-bold text-white">company_brochure.pdf</span></div>, 'DOCUMENT', '4.1 MB', 'brochure_outreach', 'Sep 10, 2025', <div className="flex justify-end gap-2"><button aria-label="Refresh media asset" className="p-1 hover:text-orange-500"><RefreshCw className="w-4 h-4"/></button><button aria-label="Delete media asset" className="p-1 hover:text-red-500"><Trash2 className="w-4 h-4"/></button></div>],
             ]}
             primaryAction="Upload Media"
             searchPlaceholder="Search media by filename or type..."
@@ -432,7 +432,7 @@ export default function AutomationPage() {
             </h1>
             <div className="relative mt-4">
               <Search className="w-3.5 h-3.5 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
-              <input 
+              <input aria-label="Input field" 
                 type="text" 
                 placeholder="Search settings..." 
                 value={searchQuery}

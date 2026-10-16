@@ -55,7 +55,7 @@ export function Navbar() {
       {/* Global Search */}
       <div className="max-w-md w-full relative group">
         <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-primary transition-colors" />
-        <input 
+        <input aria-label="Input field" 
           type="text" 
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}

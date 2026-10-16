@@ -76,21 +76,47 @@ export function OmnichannelApp() {
   const handleSend = async () => {
     if (!inputText.trim() || !activeConv) return;
     
+    const messageContent = inputText.trim();
+    setInputText('');
+
+    const tempId = `temp_${Date.now()}`;
     const tempMsg: any = {
-      id: Date.now().toString(),
+      id: tempId,
       sender: 'agent',
-      content: inputText,
+      content: messageContent,
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       status: 'sent'
     };
     addMessage(activeConv.id, tempMsg);
-    setInputText('');
     
-    // Simulate API call for sending
-    setTimeout(() => {
-      const sentMsg = { ...tempMsg, status: 'delivered' };
-      // In a real app we'd update this msg ID in store
-    }, 1000);
+    try {
+      const token = typeof localStorage !== 'undefined' ? localStorage.getItem('paramantra_access_token') : '';
+      const res = await apiFetch(`/api/v1/messages/send`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          conversationId: activeConv.id,
+          content: messageContent,
+          senderType: 'AGENT'
+        })
+      });
+
+      if (res.ok) {
+        const persisted = await res.json();
+        addMessage(activeConv.id, {
+          id: persisted.id,
+          sender: 'agent',
+          content: persisted.content || messageContent,
+          timestamp: new Date(persisted.createdAt || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          status: 'delivered'
+        });
+      }
+    } catch (err) {
+      console.error('Failed to dispatch omnichannel message:', err);
+    }
   };
 
   const getPlatformColors = (platform: string) => {
@@ -139,8 +165,8 @@ export function OmnichannelApp() {
             </div>
           </div>
           <div className="flex gap-2">
-            <button className="p-2 text-slate-400 hover:text-white rounded-md hover:bg-black/20 transition-colors"><Search className="w-4 h-4" /></button>
-            <button className="p-2 text-slate-400 hover:text-white rounded-md hover:bg-black/20 transition-colors"><MoreVertical className="w-4 h-4" /></button>
+            <button aria-label="Search conversations" className="p-2 text-slate-400 hover:text-white rounded-md hover:bg-black/20 transition-colors"><Search className="w-4 h-4" /></button>
+            <button aria-label="More options" className="p-2 text-slate-400 hover:text-white rounded-md hover:bg-black/20 transition-colors"><MoreVertical className="w-4 h-4" /></button>
           </div>
         </div>
 
@@ -279,8 +305,10 @@ export function OmnichannelApp() {
           </div>
           <div className="relative group">
             <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-white transition-colors" />
-            <input 
+            <input aria-label="Input field" 
               type="text" 
+              id="search-workspace-conversations"
+              aria-label="Search conversations"
               placeholder="Search conversations..." 
               className="w-full bg-[#111] border border-[#222] focus:border-slate-500 rounded-lg pl-9 pr-3 py-2 text-sm outline-none transition-all text-white placeholder-slate-500"
             />
