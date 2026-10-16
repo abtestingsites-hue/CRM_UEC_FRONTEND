@@ -1,4 +1,4 @@
-﻿import { create } from 'zustand';
+import { create } from 'zustand';
 import { apiFetch, API_BASE_URL } from '@/lib/api';
 
 export type ChannelType = 'whatsapp' | 'voice' | 'email' | 'sms' | 'chat' | 'instagram' | 'messenger';
@@ -103,32 +103,8 @@ export const useConversationStore = create<ConversationState>((set, get) => ({
       const data = await res.json();
       set({ conversations: data, isLoading: false });
     } catch (err: any) {
-      console.warn('Failed to fetch conversations from API, using mock data:', err);
-      const mockData: Conversation[] = [
-        {
-          id: 'conv_1',
-          customerId: 'cust_1',
-          customerName: 'Raghav',
-          lastMessage: 'I need help with my appointment.',
-          timestamp: new Date().toISOString(),
-          status: 'open',
-          channel: 'whatsapp',
-          unreadCount: 1,
-          priority: 'normal'
-        },
-        {
-          id: 'conv_2',
-          customerId: 'cust_2',
-          customerName: 'Mani',
-          lastMessage: 'Thanks for the quick response!',
-          timestamp: new Date().toISOString(),
-          status: 'resolved',
-          channel: 'whatsapp',
-          unreadCount: 0,
-          priority: 'normal'
-        }
-      ];
-      set({ conversations: mockData, isLoading: false });
+      console.error('Failed to fetch conversations from API:', err);
+      set({ error: err.message || 'Failed to fetch conversations', conversations: [], isLoading: false });
     }
   },
 
