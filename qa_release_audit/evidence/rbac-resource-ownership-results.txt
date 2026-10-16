@@ -1,0 +1,20 @@
+﻿Γû╢ Focused RBAC & Resource Ownership Authorization Suite
+  Γ£ö SEC-RBAC-01: Agent B querying Agent A lead via GET /api/v1/leads/:id receives masked phone number (1718.5586ms)
+  Γ£ö SEC-RBAC-02: Agent B attempting PUT /api/v1/leads/:id on Agent A lead is rejected with HTTP 403 (959.3023ms)
+  Γ£ö SEC-RBAC-03: Non-elevated agent attempting to reassign lead assignedAgentId is rejected with HTTP 403 (1033.643ms)
+  Γ£ö SEC-RBAC-04: Agent B attempting PUT /api/v1/leads/:id/status on Agent A lead is rejected with HTTP 403 (760.4787ms)
+  Γ£ö SEC-RBAC-05: Agent B attempting POST /api/v1/leads/:id/convert on Agent A lead is rejected with HTTP 403 (807.7151ms)
+  Γ£ö SEC-RBAC-06: Agent B attempting PUT /api/v1/tickets/:id/status on Agent A ticket is rejected with HTTP 403 (838.0246ms)
+  Γ£ö SEC-RBAC-07: Agent B attempting DELETE /calendar/:id on Agent A appointment is rejected with HTTP 403 (1049.317ms)
+  Γ£ö SEC-RBAC-08: Agent B attempting PUT /api/v1/followups/:id/status on Agent A followup is rejected with HTTP 403 (996.004ms)
+  Γ£ö SEC-RBAC-09: Assigned Agent A legitimately reads unmasked lead, updates status, and converts (7888.3796ms)
+  Γ£ö SEC-RBAC-10: Super Admin can access and manage any resource across agents (3453.6033ms)
+Γ£ö Focused RBAC & Resource Ownership Authorization Suite (51634.6077ms)
+Γä╣ tests 10
+Γä╣ suites 1
+Γä╣ pass 10
+Γä╣ fail 0
+Γä╣ cancelled 0
+Γä╣ skipped 0
+Γä╣ todo 0
+Γä╣ duration_ms 51642.195

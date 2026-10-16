@@ -17,8 +17,8 @@ Following targeted security remediation across Phases 1, 2, and 6, the defensive
 +--------------------------------------------------------------------------------+
 |                           SECURITY SCORECARD & RISK                            |
 |                                                                                |
-|  Total Security Assertions Executed:      50                                   |
-|  Security Assertions Passed:              50 (100.0%)                          |
+|  Total Security Assertions Executed:      60                                   |
+|  Security Assertions Passed:              60 (100.0%)                          |
 |  Critical (P0) Vulnerabilities Open:      0 (All 5 remediated & verified)      |
 |  High (P1) Vulnerabilities Open:          0 (All remediated & verified)        |
 |  Medium (P2) Vulnerabilities Open:        0 (All remediated & verified)        |
@@ -62,8 +62,25 @@ Following targeted security remediation across Phases 1, 2, and 6, the defensive
 - **Remediation Details:** Implemented HMAC-SHA256 signature verification on carrier incoming call webhooks (`x-vobiz-signature`). Unsigned or invalid signature payloads are rejected with HTTP 403 Forbidden.
 - **Verification Evidence:** `security-gap-results-fresh.txt` (TEST-GAP-10, TEST-GAP-11).
 
+### VULN-09: Broken Object Level Authorization (BOLA/IDOR) & RBAC Resource Ownership Bypass (DEF-35) — RESOLVED
+- **Audit Findings:** Standard CRM agents without elevated roles (`AGENT`, `SALES_AGENT`) were capable of mutating resources assigned to other agents:
+  1. `GET /api/v1/leads/:id` leaked unmasked customer phone numbers to non-assigned peer agents.
+  2. `PUT /api/v1/leads/:id` permitted unauthorized agents to overwrite customer data and reassign `assignedAgentId`.
+  3. `PUT /api/v1/leads/:id/status` permitted peer agents to transition another agent's lead status.
+  4. `POST /api/v1/leads/:id/convert` allowed peer agents to convert another agent's assigned lead.
+  5. `PUT /api/v1/tickets/:id/status` allowed agents to modify tickets assigned to colleagues.
+  6. `DELETE /calendar/:id` & `PATCH /api/v1/appointments/:id/cancel` allowed agents to cancel appointments belonging to other doctors/agents.
+  7. `PUT /api/v1/followups/:id/status` allowed agents to update followups assigned to other agents.
+  8. `PUT /api/v1/conversations/:id/read` allowed agents to mark other agents' private conversations as read.
+- **Remediation Details:** Implemented strict horizontal resource ownership checks across both Express legacy routes and NestJS controllers:
+  - Caller role and agent ID are validated against resource assignment (`assignedAgentId`, `agentId`, `doctorId`, `createdBy`).
+  - Elevated roles (`SUPER_ADMIN`, `ADMIN`, `SUPERVISOR`, `SENIOR_MANAGER`, `DEPARTMENT_MANAGER`) retain administrative authority across all resources.
+  - Unauthorized peer agents receive `HTTP 403 Forbidden` on mutation attempts and masked PII (`XXXX...`) on unassigned lead read queries.
+- **Verification Evidence:** `rbac-resource-ownership-results.txt` (SEC-RBAC-01 through SEC-RBAC-10: 10/10 PASS).
+
 ---
 
 ## 3. Security Acceptance Gate Verdict: **CERTIFIED PASS**
 
-The application complies with OWASP API Security Top 10 guidelines. No unmitigated P0 or P1 security vulnerabilities remain.
+The application complies with OWASP API Security Top 10 guidelines (including API1:2023 Broken Object Level Authorization and API5:2023 Broken Function Level Authorization). No unmitigated P0 or P1 security vulnerabilities remain.
+
