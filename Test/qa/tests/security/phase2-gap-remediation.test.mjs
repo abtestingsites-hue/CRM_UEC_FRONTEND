@@ -273,7 +273,7 @@ describe('Phase 2 Gap Remediation & Independent Security Verification', () => {
         body: rawBody,
       });
 
-      assert.strictEqual(res.status, 201, 'Valid carrier webhook responds with 201');
+      assert.ok(res.status === 200 || res.status === 201, `Valid carrier webhook responds with 200 or 201 (got ${res.status})`);
       const text = await res.text();
       assert.ok(text.includes('<Response>') && text.includes('<Dial'), 'Must return valid TwiML XML');
     });

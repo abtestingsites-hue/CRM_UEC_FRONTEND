@@ -1,0 +1,118 @@
+
+======================================================
+STAGE: 1 Virtual Users | Total Requests: 10
+======================================================
+Executed: 10 in 6.29s (1.59 req/sec)
+Status Codes: {"200":10}
+Error Rate: 0.00% | Timeouts: 0 | Server Errors: 0 | Conn Errors: 0
+Payload Validation Failures: 0
+Latency: min=9ms, p50=52ms, p95=1651ms, p99=1651ms, max=1651ms
+Verdicts: [Functional: PASS] [Performance SLA (p95 <= 3000ms, err <= 1%): PASS]
+--- Endpoint Telemetry Breakdown ---
+  * Leads List     : n=2, p50=1396ms, p95=1651ms, errors=0, timeouts=0
+  * Analytics      : n=2, p50=48ms, p95=884ms, errors=0, timeouts=0
+  * Calendar       : n=2, p50=48ms, p95=1319ms, errors=0, timeouts=0
+  * Tickets List   : n=2, p50=52ms, p95=832ms, errors=0, timeouts=0
+  * Health Check   : n=2, p50=9ms, p95=11ms, errors=0, timeouts=0
+
+======================================================
+STAGE: 5 Virtual Users | Total Requests: 25
+======================================================
+Executed: 25 in 4.16s (6.01 req/sec)
+Status Codes: {"200":25}
+Error Rate: 0.00% | Timeouts: 0 | Server Errors: 0 | Conn Errors: 0
+Payload Validation Failures: 0
+Latency: min=8ms, p50=114ms, p95=1593ms, p99=1657ms, max=1657ms
+Verdicts: [Functional: PASS] [Performance SLA (p95 <= 3000ms, err <= 1%): PASS]
+--- Endpoint Telemetry Breakdown ---
+  * Leads List     : n=5, p50=114ms, p95=1593ms, errors=0, timeouts=0
+  * Analytics      : n=5, p50=54ms, p95=105ms, errors=0, timeouts=0
+  * Calendar       : n=5, p50=1486ms, p95=1657ms, errors=0, timeouts=0
+  * Tickets List   : n=5, p50=813ms, p95=814ms, errors=0, timeouts=0
+  * Health Check   : n=5, p50=28ms, p95=63ms, errors=0, timeouts=0
+
+======================================================
+STAGE: 10 Virtual Users | Total Requests: 40
+======================================================
+Executed: 40 in 4.60s (8.70 req/sec)
+Status Codes: {"200":40}
+Error Rate: 0.00% | Timeouts: 0 | Server Errors: 0 | Conn Errors: 0
+Payload Validation Failures: 0
+Latency: min=16ms, p50=72ms, p95=1944ms, p99=2005ms, max=2005ms
+Verdicts: [Functional: PASS] [Performance SLA (p95 <= 3000ms, err <= 1%): PASS]
+--- Endpoint Telemetry Breakdown ---
+  * Leads List     : n=8, p50=71ms, p95=1677ms, errors=0, timeouts=0
+  * Analytics      : n=8, p50=55ms, p95=81ms, errors=0, timeouts=0
+  * Calendar       : n=8, p50=1894ms, p95=2005ms, errors=0, timeouts=0
+  * Tickets List   : n=8, p50=842ms, p95=861ms, errors=0, timeouts=0
+  * Health Check   : n=8, p50=43ms, p95=52ms, errors=0, timeouts=0
+
+======================================================
+STAGE: 25 Virtual Users | Total Requests: 75
+======================================================
+Executed: 75 in 1.50s (50.04 req/sec)
+Status Codes: {"200":75}
+Error Rate: 0.00% | Timeouts: 0 | Server Errors: 0 | Conn Errors: 0
+Payload Validation Failures: 0
+Latency: min=18ms, p50=213ms, p95=1277ms, p99=1285ms, max=1285ms
+Verdicts: [Functional: PASS] [Performance SLA (p95 <= 3000ms, err <= 1%): PASS]
+--- Endpoint Telemetry Breakdown ---
+  * Leads List     : n=15, p50=114ms, p95=254ms, errors=0, timeouts=0
+  * Analytics      : n=15, p50=628ms, p95=838ms, errors=0, timeouts=0
+  * Calendar       : n=15, p50=492ms, p95=1285ms, errors=0, timeouts=0
+  * Tickets List   : n=15, p50=152ms, p95=1007ms, errors=0, timeouts=0
+  * Health Check   : n=15, p50=25ms, p95=213ms, errors=0, timeouts=0
+
+======================================================
+STAGE: 50 Virtual Users | Total Requests: 100
+======================================================
+Executed: 100 in 2.58s (38.79 req/sec)
+Status Codes: {"200":100}
+Error Rate: 0.00% | Timeouts: 0 | Server Errors: 0 | Conn Errors: 0
+Payload Validation Failures: 0
+Latency: min=32ms, p50=243ms, p95=2431ms, p99=2437ms, max=2438ms
+Verdicts: [Functional: PASS] [Performance SLA (p95 <= 3000ms, err <= 1%): PASS]
+--- Endpoint Telemetry Breakdown ---
+  * Leads List     : n=20, p50=2305ms, p95=2437ms, errors=0, timeouts=0
+  * Analytics      : n=20, p50=117ms, p95=322ms, errors=0, timeouts=0
+  * Calendar       : n=20, p50=147ms, p95=307ms, errors=0, timeouts=0
+  * Tickets List   : n=20, p50=184ms, p95=308ms, errors=0, timeouts=0
+  * Health Check   : n=20, p50=136ms, p95=239ms, errors=0, timeouts=0
+
+======================================================
+STAGE: 100 Virtual Users | Total Requests: 100
+======================================================
+Executed: 100 in 1.56s (64.17 req/sec)
+Status Codes: {"200":100}
+Error Rate: 0.00% | Timeouts: 0 | Server Errors: 0 | Conn Errors: 0
+Payload Validation Failures: 0
+Latency: min=344ms, p50=513ms, p95=1498ms, p99=1504ms, max=1512ms
+Verdicts: [Functional: PASS] [Performance SLA (p95 <= 3000ms, err <= 1%): PASS]
+--- Endpoint Telemetry Breakdown ---
+  * Leads List     : n=20, p50=426ms, p95=537ms, errors=0, timeouts=0
+  * Analytics      : n=20, p50=503ms, p95=538ms, errors=0, timeouts=0
+  * Calendar       : n=20, p50=1473ms, p95=1504ms, errors=0, timeouts=0
+  * Tickets List   : n=20, p50=1036ms, p95=1079ms, errors=0, timeouts=0
+  * Health Check   : n=20, p50=469ms, p95=497ms, errors=0, timeouts=0
+
+======================================================
+VERIFYING ANALYTICS CACHING & CROSS-USER ISOLATION
+======================================================
+✅ Analytics caching verified safe. Responses valid without leaking credentials or sensitive PII.
+
+======================================================
+STAGED CONCURRENCY BENCHMARK SUMMARY TABLE
+======================================================
+┌─────────┬─────┬──────────┬─────────┬────────┬──────────┬───────┬─────────┬──────────┬──────────┬──────────┬────────────┬──────────┐
+│ (index) │ VUs │ Requests │ Success │ Errors │ Err Rate │ RPS   │ p50     │ p95      │ p99      │ Max      │ Functional │ Perf SLA │
+├─────────┼─────┼──────────┼─────────┼────────┼──────────┼───────┼─────────┼──────────┼──────────┼──────────┼────────────┼──────────┤
+│ 0       │ 1   │ 10       │ 10      │ 0      │ '0%'     │ 1.59  │ '52ms'  │ '1651ms' │ '1651ms' │ '1651ms' │ 'PASS'     │ 'PASS'   │
+│ 1       │ 5   │ 25       │ 25      │ 0      │ '0%'     │ 6.01  │ '114ms' │ '1593ms' │ '1657ms' │ '1657ms' │ 'PASS'     │ 'PASS'   │
+│ 2       │ 10  │ 40       │ 40      │ 0      │ '0%'     │ 8.7   │ '72ms'  │ '1944ms' │ '2005ms' │ '2005ms' │ 'PASS'     │ 'PASS'   │
+│ 3       │ 25  │ 75       │ 75      │ 0      │ '0%'     │ 50.04 │ '213ms' │ '1277ms' │ '1285ms' │ '1285ms' │ 'PASS'     │ 'PASS'   │
+│ 4       │ 50  │ 100      │ 100     │ 0      │ '0%'     │ 38.79 │ '243ms' │ '2431ms' │ '2437ms' │ '2438ms' │ 'PASS'     │ 'PASS'   │
+│ 5       │ 100 │ 100      │ 100     │ 0      │ '0%'     │ 64.17 │ '513ms' │ '1498ms' │ '1504ms' │ '1512ms' │ 'PASS'     │ 'PASS'   │
+└─────────┴─────┴──────────┴─────────┴────────┴──────────┴───────┴─────────┴──────────┴──────────┴──────────┴────────────┴──────────┘
+
+Aggregate Functional Gate: PASS
+Aggregate Performance SLA Gate: PASS

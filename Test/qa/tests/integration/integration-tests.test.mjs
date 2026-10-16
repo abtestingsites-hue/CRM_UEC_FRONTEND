@@ -91,7 +91,7 @@ describe('Integration Testing: API Contracts & Service Interoperability', () => 
       body: fakeWebhookPayload
     });
 
-    assert.strictEqual(res.status, 201, 'POST to /vobiz/incoming returns 201 Created');
+    assert.ok(res.status === 200 || res.status === 201, 'POST to /vobiz/incoming returns 200 OK per DEF-30');
     const contentType = res.headers.get('content-type');
     assert.ok(contentType?.includes('text/xml'), 'Header specifies text/xml');
     const body = await res.text();

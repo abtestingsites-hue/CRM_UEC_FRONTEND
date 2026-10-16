@@ -1,0 +1,38 @@
+▶ Phase 2 Gap Remediation & Independent Security Verification
+  ▶ 1. WebSocket Anti-Impersonation & Authentication
+    ✔ TEST-GAP-01: WebSocket agent_login without token is rejected with auth_error event (92.6148ms)
+    ✔ TEST-GAP-02: WebSocket agent_login with valid token and matching identity succeeds (105.4273ms)
+    ✔ TEST-GAP-03: WebSocket agent_login with token for mismatched user is blocked (49.9219ms)
+  ✔ 1. WebSocket Anti-Impersonation & Authentication (251.5894ms)
+  ▶ 2. JWT Verification & Claim Enforcement
+    ✔ TEST-GAP-04: JWT with missing subject/userId claims is rejected with 401 (142.6698ms)
+    ✔ TEST-GAP-05: JWT signed with wrong secret key is rejected with 401 (8.8258ms)
+    ✔ TEST-GAP-06: Malformed authorization header (not a bearer token) returns 401 (67.5026ms)
+  ✔ 2. JWT Verification & Claim Enforcement (220.2123ms)
+  ▶ 3. Resource Scoping & Cross-Agent Data Isolation
+    ✔ TEST-GAP-07: Non-elevated agent on GET /api/v1/conversations only receives assigned/pool conversations (3400.8385ms)
+    ✔ TEST-GAP-08: Elevated SUPER_ADMIN on GET /api/v1/conversations can view all conversations (1578.4119ms)
+    ✔ TEST-GAP-09: Non-elevated agent cannot poll another agent ringing call via query param spoofing (909.2437ms)
+  ✔ 3. Resource Scoping & Cross-Agent Data Isolation (5891.5253ms)
+  ▶ 4. Carrier Webhook Security & Signatures
+    ✔ TEST-GAP-10: Vobiz webhook with invalid HMAC signature is rejected with 403 (55.1559ms)
+    ✔ TEST-GAP-11: Vobiz webhook with valid HMAC signature is accepted with HTTP 201 XML response (147.4765ms)
+    ✔ TEST-GAP-12: Meta webhook verifies HMAC signature when META_APP_SECRET is tested (37.2296ms)
+  ✔ 4. Carrier Webhook Security & Signatures (246.1153ms)
+  ▶ 5. RBAC Matrix across all System Roles
+    ✔ TEST-GAP-13: Approvals review strictly permits elevated roles and denies non-elevated roles (407.8665ms)
+    ✔ TEST-GAP-14: Agent creation strictly permits ADMIN/SUPER_ADMIN and denies AGENT/SALES_AGENT/EMERGENCY_TEAM (179.5539ms)
+  ✔ 5. RBAC Matrix across all System Roles (589.8084ms)
+  ▶ 6. Error Handling & Information Disclosure
+    ✔ TEST-GAP-15: Malformed input does not leak stack traces or internal DB query code (22.4437ms)
+    ✔ TEST-GAP-16: Express trust proxy and security headers are active (14.8595ms)
+  ✔ 6. Error Handling & Information Disclosure (38.8157ms)
+✔ Phase 2 Gap Remediation & Independent Security Verification (7241.0436ms)
+ℹ tests 16
+ℹ suites 7
+ℹ pass 16
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 7973.5579

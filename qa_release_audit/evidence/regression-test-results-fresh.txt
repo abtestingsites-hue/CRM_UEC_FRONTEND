@@ -1,15 +1,15 @@
-﻿Γû╢ Regression Testing: Paramantra / ElderCare Core Baseline
-  Γ£ö REG-01: Application Root and Telephony Subsystems must stay online (45.3382ms)
-  Γ£ö REG-02: Agent Directory API must consistently return valid agent objects (2626.4189ms)
-  Γ£ö REG-03: Leads API must maintain queryability (393.3836ms)
-  Γ£ö REG-04: Inbound Webhook handler must acknowledge valid payloads (60.1824ms)
-  Γ£ö REG-05: Non-existent endpoints must cleanly return HTTP 404 without crashing (5.1815ms)
-Γ£ö Regression Testing: Paramantra / ElderCare Core Baseline (3132.778ms)
-Γä╣ tests 5
-Γä╣ suites 1
-Γä╣ pass 5
-Γä╣ fail 0
-Γä╣ cancelled 0
-Γä╣ skipped 0
-Γä╣ todo 0
-Γä╣ duration_ms 3220.8363
+▶ Regression Testing: Paramantra / ElderCare Core Baseline
+  ✔ REG-01: Application Root and Telephony Subsystems must stay online (209.5085ms)
+  ✔ REG-02: Agent Directory API enforces authentication and returns valid agents when authorized (1450.7854ms)
+  ✔ REG-03: Leads API must maintain queryability (1562.2634ms)
+  ✔ REG-04: Inbound Webhook handler must acknowledge valid payloads (7240.3539ms)
+  ✔ REG-05: Non-existent endpoints must cleanly return HTTP 404 without crashing (24.8132ms)
+✔ Regression Testing: Paramantra / ElderCare Core Baseline (10498.3933ms)
+ℹ tests 5
+ℹ suites 1
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 11358.2409

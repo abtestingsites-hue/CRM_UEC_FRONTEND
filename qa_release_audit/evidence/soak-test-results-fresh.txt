@@ -1,0 +1,38 @@
+======================================================
+PHASE 07: SUSTAINED CAPACITY & SOAK BENCHMARK
+Target: http://localhost:4000
+Concurrency: 25 Virtual Users | Iterations: 8
+Total Requests: 200
+======================================================
+
+Cycle 1/8: 25 requests in 2.62s | p50=263ms, p95=2464ms
+Cycle 2/8: 25 requests in 1.15s | p50=160ms, p95=1129ms
+Cycle 3/8: 25 requests in 0.16s | p50=127ms, p95=140ms
+Cycle 4/8: 25 requests in 0.15s | p50=72ms, p95=110ms
+Cycle 5/8: 25 requests in 1.88s | p50=99ms, p95=1867ms
+Cycle 6/8: 25 requests in 1.39s | p50=148ms, p95=1373ms
+Cycle 7/8: 25 requests in 0.26s | p50=175ms, p95=187ms
+Cycle 8/8: 25 requests in 2.42s | p50=117ms, p95=2400ms
+
+======================================================
+ENDURANCE & SOAK BENCHMARK SUMMARY
+======================================================
+┌─────────┬───────┬──────────┬─────────┬──────────┬────────┐
+│ (index) │ cycle │ duration │ p50     │ p95      │ errors │
+├─────────┼───────┼──────────┼─────────┼──────────┼────────┤
+│ 0       │ 1     │ '2.62'   │ '263ms' │ '2464ms' │ 0      │
+│ 1       │ 2     │ '1.15'   │ '160ms' │ '1129ms' │ 0      │
+│ 2       │ 3     │ '0.16'   │ '127ms' │ '140ms'  │ 0      │
+│ 3       │ 4     │ '0.15'   │ '72ms'  │ '110ms'  │ 0      │
+│ 4       │ 5     │ '1.88'   │ '99ms'  │ '1867ms' │ 0      │
+│ 5       │ 6     │ '1.39'   │ '148ms' │ '1373ms' │ 0      │
+│ 6       │ 7     │ '0.26'   │ '175ms' │ '187ms'  │ 0      │
+│ 7       │ 8     │ '2.42'   │ '117ms' │ '2400ms' │ 0      │
+└─────────┴───────┴──────────┴─────────┴──────────┴────────┘
+Total Executed: 200 requests
+Overall Duration: 14.09s | Sustained RPS: 14.19 req/sec
+Status Codes: {"200":200}
+Error Rate: 0.00% | Timeouts: 0
+Overall Latency: p50=140ms | p95=1873ms | p99=2462ms
+
+Sustained Capacity Verdict (25 VUs): CERTIFIED PASS

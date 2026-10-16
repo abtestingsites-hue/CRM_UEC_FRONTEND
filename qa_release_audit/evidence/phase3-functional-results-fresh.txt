@@ -1,0 +1,47 @@
+▶ Phase 3: CRM Functional Repair, Integration, Performance & Reliability
+  ▶ DEF-05: Leads Routing, Search, and Full Lifecycle
+    ✔ P3-DEF05-01: Creates a new lead with validation and persistence (2112.2986ms)
+    ✔ P3-DEF05-02: Search leads via search query parameter (1626.1248ms)
+    ✔ P3-DEF05-03: Update lead status and persist notes (3774.0392ms)
+    ✔ P3-DEF05-04: Full lead edit via PUT /api/v1/leads/:id (1959.4933ms)
+    ✔ P3-DEF05-05: Claim lead assignment to active agent (3122.5255ms)
+    ✔ P3-DEF05-06: Route backward-compatibility alias /leads returns 200 (2198.8377ms)
+  ✔ DEF-05: Leads Routing, Search, and Full Lifecycle (14806.3037ms)
+  ▶ DEF-23: Lead Conversion Sentiment & Notes Handling
+    ✔ Setup: Create temporary lead for conversion tests (1856.6265ms)
+    ✔ P3-DEF23-01: Convert lead with null notes succeeds without TypeError (5336.3196ms)
+    ✔ P3-DEF23-02: Convert lead with undefined/missing notes succeeds (9041.4748ms)
+    ✔ P3-DEF23-03: Convert lead with positive keywords sets POSITIVE sentiment (8083.0326ms)
+  ✔ DEF-23: Lead Conversion Sentiment & Notes Handling (24321.4873ms)
+  ▶ DEF-06: Dashboard Analytics Live Aggregations
+    ✔ P3-DEF06-01: GET /dashboard/analytics returns real DB KPIs and charts (1523.8452ms)
+    ✔ P3-DEF06-02: Canonical /api/v1/dashboard/analytics returns identical structure (59.5011ms)
+  ✔ DEF-06: Dashboard Analytics Live Aggregations (1586.2119ms)
+  ▶ DEF-07 & DEF-08: Calendar, Appointments & Health Routes
+    ✔ P3-DEF08-01: Health check /api/v1/health returns 200 with status (41.8203ms)
+    ✔ P3-DEF07-01: Calendar route /calendar responds with 200 without date errors (1567.9606ms)
+    ✔ P3-DEF07-02: Appointments calendar route /api/v1/appointments/calendar parity (48.9198ms)
+  ✔ DEF-07 & DEF-08: Calendar, Appointments & Health Routes (1665.4805ms)
+  ▶ DEF-14: Tickets Module Integration
+    ✔ P3-DEF14-01: GET /api/v1/tickets returns real ticket list with normalized fields (744.6959ms)
+    ✔ P3-DEF14-02: Updating ticket status responds with updated record (49.3186ms)
+  ✔ DEF-14: Tickets Module Integration (795.8498ms)
+  ▶ DEF-13: Omnichannel Real Message Dispatch Workflow
+    ✔ P3-DEF13-01: Message dispatch /api/v1/messages/send creates message and rejects empty recipient (56.564ms)
+    ✔ P3-DEF13-02: Message dispatch with conversationId succeeds or validates (6242.433ms)
+  ✔ DEF-13: Omnichannel Real Message Dispatch Workflow (6301.5143ms)
+  ▶ DEF-16: Redis Presence Latency Profile & Fallback
+    ✔ P3-DEF16-01: GET /api/v1/agents executes in under 2000ms with bounded fallback (1129.3481ms)
+  ✔ DEF-16: Redis Presence Latency Profile & Fallback (1130.8026ms)
+  ▶ DEF-15: AI Post-Call Processing Configuration
+    ✔ P3-DEF15-01: Configured AI model is supported active catalog model gemini-3.5-flash (19.7181ms)
+  ✔ DEF-15: AI Post-Call Processing Configuration (21.0703ms)
+✔ Phase 3: CRM Functional Repair, Integration, Performance & Reliability (50635.7653ms)
+ℹ tests 21
+ℹ suites 9
+ℹ pass 21
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 51350.9331

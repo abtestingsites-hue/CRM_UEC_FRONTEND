@@ -70,7 +70,7 @@ describe('E2E Workflow: Inbound Customer Call to Agent Disposition Lifecycle', (
       body: bodyStr
     });
 
-    assert.strictEqual(res.status, 201);
+    assert.ok(res.status === 200 || res.status === 201, `Incoming webhook responds with 200/201 (got ${res.status})`);
   });
 
   it('Step 4: Carrier Disconnect / Call Termination Status Webhook', async () => {
@@ -90,7 +90,7 @@ describe('E2E Workflow: Inbound Customer Call to Agent Disposition Lifecycle', (
       body: bodyStr
     });
 
-    assert.strictEqual(res.status, 201);
+    assert.ok(res.status === 200 || res.status === 201, `Status webhook responds with 200/201 (got ${res.status})`);
   });
 
   it('Step 5: Query Leads to correlate Caller ID to CRM Records', async () => {

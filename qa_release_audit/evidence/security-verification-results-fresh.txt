@@ -1,0 +1,27 @@
+▶ Phase 1 Verification: Security Hardening & Authentication Defect Fixes
+  ✔ TEST-SEC-01 (DEF-17): Enterprise HTTP security headers are present on responses (196.2485ms)
+  ✔ TEST-SEC-02: Public endpoints are accessible without authentication (40.6065ms)
+  ✔ TEST-SEC-03 (DEF-07): Vobiz inbound webhook accepts carrier calls and returns valid TwiML XML (112.8657ms)
+  ✔ TEST-SEC-04 (DEF-02): Unauthenticated access to /api/v1/agents is blocked with HTTP 401 (15.5365ms)
+  ✔ TEST-SEC-05 (DEF-02): Authenticated agent can query /api/v1/agents and PII (address/zipCode) is redacted (1316.6837ms)
+  ✔ TEST-SEC-06 (DEF-02): Authenticated SUPER_ADMIN access to /api/v1/agents retains administrative fields (1316.8956ms)
+  ✔ TEST-SEC-07 (DEF-03): Unauthenticated access to /telephony/calls/:callId/recording is blocked with HTTP 401 (31.0762ms)
+  ✔ TEST-SEC-08 (DEF-03): Unauthorized agent access to /telephony/calls/:callId/recording is blocked with HTTP 403 (IDOR defense) (1255.6123ms)
+  ✔ TEST-SEC-09 (DEF-03): Authorized SUPER_ADMIN access to /telephony/calls/:callId/recording passes auth checks (2292.2445ms)
+  ✔ TEST-SEC-10 (DEF-01): Login with wrong password returns HTTP 401 Unauthorized (1755.4048ms)
+  ✔ TEST-SEC-11 (DEF-01): Login with raw bcrypt password hash as input password is rejected with HTTP 401 (1123.1968ms)
+  ✔ TEST-SEC-12 (DEF-02): Request with forged or tampered JWT is rejected with HTTP 401 (27.9871ms)
+  ✔ TEST-SEC-13 (DEF-02): Request with expired JWT is rejected with HTTP 401 (26.2287ms)
+  ✔ TEST-SEC-14 (DEF-18): Brute-force rate limiting blocks rapid login attempts with HTTP 429 (7487.1561ms)
+  ✔ TEST-SEC-15: WebSocket authentication rejects tampered tokens with auth_error event (88.9659ms)
+  ✔ TEST-SEC-16: WebSocket agent login blocks agent identity spoofing/impersonation (711.062ms)
+  ✔ TEST-SEC-17 (DEF-04): Secret hygiene - .env is ignored and .env.example exists without live secrets (20.0739ms)
+✔ Phase 1 Verification: Security Hardening & Authentication Defect Fixes (17836.3548ms)
+ℹ tests 17
+ℹ suites 1
+ℹ pass 17
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 23770.8807

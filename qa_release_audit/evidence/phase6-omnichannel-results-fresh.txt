@@ -1,0 +1,33 @@
+▶ PHASE 06: Omnichannel Integration Repair Verification Suite
+  ▶ 1. Removal of False-Success Simulations & Safe Error Handling
+    ✔ OMNI-01: Outgoing WhatsApp safely guards missing provider credentials with 503 (1106.3566ms)
+    ✔ OMNI-02: Outgoing Instagram safely guards missing access token with 503 (1013.2629ms)
+    ✔ OMNI-03: Message dispatch route requires authentication (19.0542ms)
+  ✔ 1. Removal of False-Success Simulations & Safe Error Handling (2144.0644ms)
+  ▶ 2. Provider Contracts & Webhook Signatures
+    ✔ OMNI-04: Meta Webhook GET verification succeeds with valid token and challenge (30.5651ms)
+    ✔ OMNI-05: Meta Webhook GET verification rejects invalid verify token with 403 (15.3042ms)
+    ✔ OMNI-06: Meta Webhook alias /webhooks/meta route parity (14.4639ms)
+  ✔ 2. Provider Contracts & Webhook Signatures (63.117ms)
+  ▶ 3. Idempotency & Deduplication Processing
+    ✔ OMNI-07: Meta Webhook deduplicates repeated message events using messageId (mid) (6645.6565ms)
+    ✔ OMNI-08: WhatsApp Webhook deduplicates repeated MessageSid (4287.795ms)
+  ✔ 3. Idempotency & Deduplication Processing (10945.6179ms)
+  ▶ 4. Conversation Consistency & RBAC
+    ✔ OMNI-09: GET /api/v1/conversations returns conversation listing (1812.6578ms)
+    ✔ OMNI-10: GET /api/v1/conversations/:id/messages rejects non-UUID with 404 (79.2677ms)
+    ✔ OMNI-11: GET /api/v1/conversations/:id/messages enforces RBAC against unauthenticated callers (42.9523ms)
+    ✔ OMNI-12: PUT /api/v1/conversations/:id/read marks unread count as zero (956.8051ms)
+  ✔ 4. Conversation Consistency & RBAC (2895.1822ms)
+  ▶ 5. Credential Hygiene & Secret Handling
+    ✔ OMNI-13: No hardcoded Meta or WhatsApp access tokens in omnichannel source files (194.7162ms)
+  ✔ 5. Credential Hygiene & Secret Handling (195.3401ms)
+✔ PHASE 06: Omnichannel Integration Repair Verification Suite (16251.1748ms)
+ℹ tests 13
+ℹ suites 6
+ℹ pass 13
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 16833.9368
