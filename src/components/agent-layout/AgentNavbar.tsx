@@ -55,10 +55,9 @@ export function AgentNavbar() {
       <div className="flex-1 max-w-xl">
         <div className="relative group">
           <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-primary transition-colors" />
-          <input aria-label="Input field" 
+          <input aria-label="Search tasks, customers, or calls"
             type="text" 
             id="agent-navbar-search"
-            aria-label="Search tasks, customers, or calls"
             placeholder="Search tasks, customers, or calls..." 
             className="w-full bg-[#111] border border-[#222] focus:border-primary/50 rounded-xl pl-10 pr-4 py-2 text-sm outline-none text-white transition-all placeholder-slate-500"
           />

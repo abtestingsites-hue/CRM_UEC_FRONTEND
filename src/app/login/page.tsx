@@ -157,7 +157,7 @@ export default function LoginPage() {
 
               {/* Remember Me Checkbox */}
               <div className="flex items-center gap-2 py-1">
-                <input aria-label="Remember me" id="login-remember" type="checkbox"
+                <input aria-label="Remember me" type="checkbox"
                   id="rememberMe"
                   {...register('rememberMe')}
                   className="rounded border-[#262626] bg-[#141414] text-orange-500 focus:ring-orange-500"

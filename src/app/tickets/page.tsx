@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Filter, MoreHorizontal, Ticket } from 'lucide-react';
 import { CreateTicketModal } from '@/components/tickets/CreateTicketModal';
+import { apiFetch } from '@/lib/api';
 
 export default function TicketsPage() {
   const [tickets, setTickets] = useState<any[]>([]);

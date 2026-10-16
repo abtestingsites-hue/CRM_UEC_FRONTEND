@@ -52,10 +52,9 @@ export function ConversationSidebar() {
         <h2 className="font-bold text-lg text-white">Unified Inbox</h2>
         <div className="relative group">
           <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-primary transition-colors" />
-          <input aria-label="Input field" 
+          <input aria-label="Search messages"
             type="text" 
             id="search-unified-inbox"
-            aria-label="Search messages"
             placeholder="Search messages..." 
             className="w-full bg-[#111] border border-[#222] focus:border-primary rounded-lg pl-9 pr-3 py-2 text-sm outline-none transition-all text-white placeholder-slate-500"
           />

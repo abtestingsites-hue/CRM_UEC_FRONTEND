@@ -305,10 +305,9 @@ export function OmnichannelApp() {
           </div>
           <div className="relative group">
             <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-white transition-colors" />
-            <input aria-label="Input field" 
+            <input aria-label="Search conversations"
               type="text" 
               id="search-workspace-conversations"
-              aria-label="Search conversations"
               placeholder="Search conversations..." 
               className="w-full bg-[#111] border border-[#222] focus:border-slate-500 rounded-lg pl-9 pr-3 py-2 text-sm outline-none transition-all text-white placeholder-slate-500"
             />
