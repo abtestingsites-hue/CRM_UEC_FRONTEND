@@ -29,12 +29,17 @@ function calculatePercentile(latencies, p) {
   return Math.round(sorted[Math.max(0, index)]);
 }
 
+// Performance SLA Thresholds (Provisional Release Targets)
+const SLA_MAX_ERROR_RATE_PERCENT = 1.0; // <= 1% error rate
+const SLA_MAX_P95_LATENCY_MS = 3000;    // <= 3000ms p95 latency
+const SLA_MAX_PAYLOAD_FAILURES = 0;     // 0 validation failures
+
 const ENDPOINTS = [
-  { path: '/api/v1/leads', validator: (data) => Array.isArray(data) || Array.isArray(data?.leads) },
-  { path: '/dashboard/analytics', validator: (data) => typeof data === 'object' && data !== null },
-  { path: '/api/v1/appointments/calendar', validator: (data) => Array.isArray(data) || typeof data === 'object' },
-  { path: '/api/v1/tickets', validator: (data) => Array.isArray(data) || Array.isArray(data?.tickets) },
-  { path: '/api/v1/health', validator: (data) => data?.status === 'ok' || typeof data === 'object' },
+  { name: 'Leads List', path: '/api/v1/leads', validator: (data) => Array.isArray(data) || Array.isArray(data?.leads) },
+  { name: 'Analytics', path: '/dashboard/analytics', validator: (data) => typeof data === 'object' && data !== null && (data?.kpis || data?.liveStats) },
+  { name: 'Calendar', path: '/api/v1/appointments/calendar', validator: (data) => Array.isArray(data) || typeof data === 'object' },
+  { name: 'Tickets List', path: '/api/v1/tickets', validator: (data) => Array.isArray(data) || Array.isArray(data?.tickets) },
+  { name: 'Health Check', path: '/api/v1/health', validator: (data) => data?.status === 'ok' || typeof data === 'object' },
 ];
 
 async function runStage(vuCount, requestsPerVU) {
@@ -45,9 +50,15 @@ async function runStage(vuCount, requestsPerVU) {
 
   const latencies = [];
   const statusCounts = {};
+  const endpointStats = {};
+  for (const ep of ENDPOINTS) {
+    endpointStats[ep.name] = { latencies: [], statusCounts: {}, errors: 0, timeouts: 0, serverErrors: 0 };
+  }
+
   let payloadValidationFailures = 0;
   let timeouts = 0;
   let connectionErrors = 0;
+  let serverErrors = 0;
 
   const stageStartTime = performance.now();
 
@@ -55,6 +66,7 @@ async function runStage(vuCount, requestsPerVU) {
     for (let reqIndex = 0; reqIndex < requestsPerVU; reqIndex++) {
       const epConfig = ENDPOINTS[(vuId + reqIndex) % ENDPOINTS.length];
       const url = `${BASE_URL}${epConfig.path}`;
+      const epRecord = endpointStats[epConfig.name];
       const reqStart = performance.now();
 
       try {
@@ -68,27 +80,44 @@ async function runStage(vuCount, requestsPerVU) {
 
         const latency = performance.now() - reqStart;
         latencies.push(latency);
+        epRecord.latencies.push(latency);
+
         statusCounts[res.status] = (statusCounts[res.status] || 0) + 1;
+        epRecord.statusCounts[res.status] = (epRecord.statusCounts[res.status] || 0) + 1;
 
         if (res.status === 200) {
           try {
             const json = await res.json();
             if (!epConfig.validator(json)) {
               payloadValidationFailures++;
+              epRecord.errors++;
             }
           } catch (_) {
             payloadValidationFailures++;
+            epRecord.errors++;
           }
+        } else if (res.status >= 500) {
+          serverErrors++;
+          epRecord.serverErrors++;
+          epRecord.errors++;
+        } else {
+          epRecord.errors++;
         }
       } catch (err) {
         const latency = performance.now() - reqStart;
         latencies.push(latency);
+        epRecord.latencies.push(latency);
+        epRecord.errors++;
+
         if (err.name === 'TimeoutError') {
           timeouts++;
+          epRecord.timeouts++;
           statusCounts['TIMEOUT'] = (statusCounts['TIMEOUT'] || 0) + 1;
+          epRecord.statusCounts['TIMEOUT'] = (epRecord.statusCounts['TIMEOUT'] || 0) + 1;
         } else {
           connectionErrors++;
           statusCounts['CONN_ERR'] = (statusCounts['CONN_ERR'] || 0) + 1;
+          epRecord.statusCounts['CONN_ERR'] = (epRecord.statusCounts['CONN_ERR'] || 0) + 1;
         }
       }
     }
@@ -110,10 +139,28 @@ async function runStage(vuCount, requestsPerVU) {
   const min = latencies.length ? Math.round(Math.min(...latencies)) : 0;
   const max = latencies.length ? Math.round(Math.max(...latencies)) : 0;
 
+  // SLA Evaluation
+  const passesErrorRate = parseFloat(errorRate) <= SLA_MAX_ERROR_RATE_PERCENT;
+  const passesLatency = p95 <= SLA_MAX_P95_LATENCY_MS;
+  const passesFunctional = payloadValidationFailures === SLA_MAX_PAYLOAD_FAILURES;
+  const performanceVerdict = (passesErrorRate && passesLatency && passesFunctional) ? 'PASS' : 'FAIL';
+  const functionalVerdict = passesFunctional && (serverErrors === 0) ? 'PASS' : 'FAIL';
+
   console.log(`Executed: ${totalExecuted} in ${durationSec.toFixed(2)}s (${rps} req/sec)`);
   console.log(`Status Codes: ${JSON.stringify(statusCounts)}`);
-  console.log(`Error Rate: ${errorRate}% | Payload Failures: ${payloadValidationFailures}`);
+  console.log(`Error Rate: ${errorRate}% | Timeouts: ${timeouts} | Server Errors: ${serverErrors} | Conn Errors: ${connectionErrors}`);
+  console.log(`Payload Validation Failures: ${payloadValidationFailures}`);
   console.log(`Latency: min=${min}ms, p50=${p50}ms, p95=${p95}ms, p99=${p99}ms, max=${max}ms`);
+  console.log(`Verdicts: [Functional: ${functionalVerdict}] [Performance SLA (p95 <= ${SLA_MAX_P95_LATENCY_MS}ms, err <= ${SLA_MAX_ERROR_RATE_PERCENT}%): ${performanceVerdict}]`);
+
+  // Endpoint breakdown summary
+  console.log('--- Endpoint Telemetry Breakdown ---');
+  for (const ep of ENDPOINTS) {
+    const stats = endpointStats[ep.name];
+    const epP50 = calculatePercentile(stats.latencies, 50);
+    const epP95 = calculatePercentile(stats.latencies, 95);
+    console.log(`  * ${ep.name.padEnd(15)}: n=${stats.latencies.length}, p50=${epP50}ms, p95=${epP95}ms, errors=${stats.errors}, timeouts=${stats.timeouts}`);
+  }
 
   return {
     vuCount,
@@ -121,6 +168,9 @@ async function runStage(vuCount, requestsPerVU) {
     totalExecuted,
     success200,
     errors,
+    timeouts,
+    serverErrors,
+    connectionErrors,
     errorRate: parseFloat(errorRate),
     payloadValidationFailures,
     rps: parseFloat(rps),
@@ -129,7 +179,9 @@ async function runStage(vuCount, requestsPerVU) {
     p95,
     p99,
     max,
-    durationSec: parseFloat(durationSec.toFixed(2))
+    durationSec: parseFloat(durationSec.toFixed(2)),
+    functionalVerdict,
+    performanceVerdict
   };
 }
 
@@ -150,21 +202,21 @@ async function verifyAnalyticsIsolation() {
     { expiresIn: '1h' }
   );
 
-  // Request 1: Agent 1
   const res1 = await fetch(`${BASE_URL}/dashboard/analytics`, {
     headers: { Authorization: `Bearer ${agent1Token}` }
   });
   const data1 = await res1.json();
 
-  // Request 2: Agent 2
   const res2 = await fetch(`${BASE_URL}/dashboard/analytics`, {
     headers: { Authorization: `Bearer ${agent2Token}` }
   });
   const data2 = await res2.json();
 
-  assert.strictEqual(res1.status, 200);
-  assert.strictEqual(res2.status, 200);
-  console.log('Analytics caching verified safe. Responses valid without leaking credentials or sensitive PII.');
+  assert.strictEqual(res1.status, 200, 'Agent 1 request must succeed');
+  assert.strictEqual(res2.status, 200, 'Agent 2 request must succeed');
+  assert.ok(data1.kpis, 'Agent 1 response must contain kpis');
+  assert.ok(data2.kpis, 'Agent 2 response must contain kpis');
+  console.log('✅ Analytics caching verified safe. Responses valid without leaking credentials or sensitive PII.');
 }
 
 async function runAllStages() {
@@ -194,17 +246,25 @@ async function runAllStages() {
   console.table(stageResults.map(r => ({
     'VUs': r.vuCount,
     'Requests': r.totalExecuted,
-    'Success (200)': r.success200,
+    'Success': r.success200,
     'Errors': r.errors,
     'Err Rate': `${r.errorRate}%`,
     'RPS': r.rps,
     'p50': `${r.p50}ms`,
     'p95': `${r.p95}ms`,
     'p99': `${r.p99}ms`,
-    'Max': `${r.max}ms`
+    'Max': `${r.max}ms`,
+    'Functional': r.functionalVerdict,
+    'Perf SLA': r.performanceVerdict
   })));
 
-  return stageResults;
+  const allFunctionalPass = stageResults.every(r => r.functionalVerdict === 'PASS');
+  const allPerfPass = stageResults.every(r => r.performanceVerdict === 'PASS');
+
+  console.log(`\nAggregate Functional Gate: ${allFunctionalPass ? 'PASS' : 'FAIL'}`);
+  console.log(`Aggregate Performance SLA Gate: ${allPerfPass ? 'PASS' : 'FAIL'}`);
+
+  return { stageResults, allFunctionalPass, allPerfPass };
 }
 
 runAllStages().catch(err => {
