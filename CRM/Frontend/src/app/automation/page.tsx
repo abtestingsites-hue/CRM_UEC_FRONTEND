@@ -48,7 +48,7 @@ const EnterpriseTableWorkspace = ({ columns, data, primaryAction, searchPlacehol
       <div className="flex justify-between items-center mb-4 bg-[#101010] p-4 border border-[#1e1e1e] rounded-xl shadow-lg">
         <div className="relative">
           <Search className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
-          <input aria-label="Input field" 
+          <input aria-label="Search automation workflows" 
             type="text" 
             placeholder={searchPlaceholder || "Search records..."}
             className="bg-[#141414] border border-[#222] rounded-lg pl-9 pr-4 py-2 text-xs text-white outline-none focus:border-orange-500 w-72 transition-colors"
@@ -70,7 +70,7 @@ const EnterpriseTableWorkspace = ({ columns, data, primaryAction, searchPlacehol
       </div>
 
       <div className="border border-[#1e1e1e] rounded-xl overflow-hidden bg-[#0c0c0c] shadow-2xl">
-        <table className="w-full text-left text-xs">
+        <table aria-label="Automation workflow rules table" className="w-full text-left text-xs">
           <thead className="bg-[#121212] border-b border-[#1e1e1e]">
             <tr>
               {columns.map((col: string, idx: number) => (
@@ -182,7 +182,7 @@ export default function AutomationPage() {
               </div>
               <div className="space-y-1.5">
                 <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Trigger Event</label>
-                <select className="w-full bg-[#141414] border border-[#222] focus:border-orange-500 rounded-lg px-4 py-2 text-sm text-white outline-none">
+                <select aria-label="Automation trigger event" className="w-full bg-[#141414] border border-[#222] focus:border-orange-500 rounded-lg px-4 py-2 text-sm text-white outline-none">
                   <option>New Conversation Started</option>
                   <option>Outside Business Hours</option>
                   <option>Customer Idle &gt; 15 mins</option>
@@ -190,7 +190,7 @@ export default function AutomationPage() {
               </div>
               <div className="space-y-1.5">
                 <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Rule Priority</label>
-                <select className="w-full bg-[#141414] border border-[#222] focus:border-orange-500 rounded-lg px-4 py-2 text-sm text-white outline-none">
+                <select aria-label="Automation target channel" className="w-full bg-[#141414] border border-[#222] focus:border-orange-500 rounded-lg px-4 py-2 text-sm text-white outline-none">
                   <option>P1 - Critical (Overrides all)</option>
                   <option>P2 - High</option>
                   <option>P3 - Normal</option>
@@ -206,7 +206,7 @@ export default function AutomationPage() {
             </h3>
             <div className="space-y-1.5">
               <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Reply Content</label>
-              <textarea rows={4} defaultValue="Welcome to ElderCare! How can we assist you today? Please reply with your inquiry or type 'Menu' to see our services." className="w-full bg-[#141414] border border-[#222] focus:border-orange-500 rounded-lg px-4 py-3 text-sm text-white outline-none custom-scrollbar" />
+              <textarea aria-label="Template content" rows={4} defaultValue="Welcome to ElderCare! How can we assist you today? Please reply with your inquiry or type 'Menu' to see our services." className="w-full bg-[#141414] border border-[#222] focus:border-orange-500 rounded-lg px-4 py-3 text-sm text-white outline-none custom-scrollbar" />
             </div>
           </div>
 
@@ -338,7 +338,7 @@ export default function AutomationPage() {
             <div className="grid grid-cols-2 gap-6">
               <div className="space-y-1.5 col-span-2">
                 <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Welcome Message Flow (New Sessions)</label>
-                <select className="w-full bg-[#101010] border border-[#222] focus:border-orange-500 rounded-lg px-4 py-2.5 text-sm text-white outline-none">
+                <select aria-label="Automation condition" className="w-full bg-[#101010] border border-[#222] focus:border-orange-500 rounded-lg px-4 py-2.5 text-sm text-white outline-none">
                   <option>Global Welcome Flow (Interactive Menu)</option>
                   <option>Direct Agent Routing (No Bot)</option>
                   <option>Holiday Away Message</option>
@@ -354,7 +354,7 @@ export default function AutomationPage() {
               </div>
               <div className="space-y-1.5">
                 <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Escalation Department</label>
-                <select className="w-full bg-[#101010] border border-[#222] focus:border-orange-500 rounded-lg px-4 py-2 text-sm text-white outline-none">
+                <select aria-label="Automation action" className="w-full bg-[#101010] border border-[#222] focus:border-orange-500 rounded-lg px-4 py-2 text-sm text-white outline-none">
                   <option>Customer Support (Default)</option>
                   <option>Sales & Conversions</option>
                   <option>Technical Triage</option>
@@ -384,10 +384,10 @@ export default function AutomationPage() {
           <EnterpriseTableWorkspace 
             columns={['Template Name', 'Category', 'Language', 'Quality Rating', 'Approval Status', 'Usage 30d', 'Actions']}
             data={[
-              [<span className="font-bold text-white">marketing_promo_v1</span>, 'MARKETING', 'en_US', <span className="text-emerald-400 font-bold">High</span>, <span className="px-2 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full text-[9px] font-bold uppercase flex items-center w-fit gap-1"><CheckCircle2 className="w-3 h-3"/> Approved</span>, '4,231', <div className="flex justify-end gap-2"><button className="p-1 hover:text-orange-500"><Eye className="w-4 h-4"/></button><button className="p-1 hover:text-orange-500"><Edit2 className="w-4 h-4"/></button></div>],
-              [<span className="font-bold text-white">ticket_resolution_alert</span>, 'UTILITY', 'en_GB', <span className="text-emerald-400 font-bold">High</span>, <span className="px-2 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full text-[9px] font-bold uppercase flex items-center w-fit gap-1"><CheckCircle2 className="w-3 h-3"/> Approved</span>, '892', <div className="flex justify-end gap-2"><button className="p-1 hover:text-orange-500"><Eye className="w-4 h-4"/></button><button className="p-1 hover:text-orange-500"><Edit2 className="w-4 h-4"/></button></div>],
-              [<span className="font-bold text-white">lead_welcome_video</span>, 'MARKETING', 'es_ES', <span className="text-slate-400 font-bold">-</span>, <span className="px-2 py-0.5 bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded-full text-[9px] font-bold uppercase flex items-center w-fit gap-1"><Clock className="w-3 h-3"/> Pending</span>, '0', <div className="flex justify-end gap-2"><button className="p-1 hover:text-orange-500"><Eye className="w-4 h-4"/></button><button className="p-1 hover:text-orange-500"><Edit2 className="w-4 h-4"/></button></div>],
-              [<span className="font-bold text-white">otp_verification_2fa</span>, 'AUTHENTICATION', 'en_US', <span className="text-emerald-400 font-bold">High</span>, <span className="px-2 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full text-[9px] font-bold uppercase flex items-center w-fit gap-1"><CheckCircle2 className="w-3 h-3"/> Approved</span>, '12,504', <div className="flex justify-end gap-2"><button className="p-1 hover:text-orange-500"><Eye className="w-4 h-4"/></button><button className="p-1 hover:text-orange-500"><Edit2 className="w-4 h-4"/></button></div>],
+              [<span className="font-bold text-white">marketing_promo_v1</span>, 'MARKETING', 'en_US', <span className="text-emerald-400 font-bold">High</span>, <span className="px-2 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full text-[9px] font-bold uppercase flex items-center w-fit gap-1"><CheckCircle2 className="w-3 h-3"/> Approved</span>, '4,231', <div className="flex justify-end gap-2"><button aria-label="View rule" className="p-1 hover:text-orange-500"><Eye className="w-4 h-4"/></button><button aria-label="Edit rule" className="p-1 hover:text-orange-500"><Edit2 className="w-4 h-4"/></button></div>],
+              [<span className="font-bold text-white">ticket_resolution_alert</span>, 'UTILITY', 'en_GB', <span className="text-emerald-400 font-bold">High</span>, <span className="px-2 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full text-[9px] font-bold uppercase flex items-center w-fit gap-1"><CheckCircle2 className="w-3 h-3"/> Approved</span>, '892', <div className="flex justify-end gap-2"><button aria-label="View rule" className="p-1 hover:text-orange-500"><Eye className="w-4 h-4"/></button><button aria-label="Edit rule" className="p-1 hover:text-orange-500"><Edit2 className="w-4 h-4"/></button></div>],
+              [<span className="font-bold text-white">lead_welcome_video</span>, 'MARKETING', 'es_ES', <span className="text-slate-400 font-bold">-</span>, <span className="px-2 py-0.5 bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded-full text-[9px] font-bold uppercase flex items-center w-fit gap-1"><Clock className="w-3 h-3"/> Pending</span>, '0', <div className="flex justify-end gap-2"><button aria-label="View rule" className="p-1 hover:text-orange-500"><Eye className="w-4 h-4"/></button><button aria-label="Edit rule" className="p-1 hover:text-orange-500"><Edit2 className="w-4 h-4"/></button></div>],
+              [<span className="font-bold text-white">otp_verification_2fa</span>, 'AUTHENTICATION', 'en_US', <span className="text-emerald-400 font-bold">High</span>, <span className="px-2 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full text-[9px] font-bold uppercase flex items-center w-fit gap-1"><CheckCircle2 className="w-3 h-3"/> Approved</span>, '12,504', <div className="flex justify-end gap-2"><button aria-label="View rule" className="p-1 hover:text-orange-500"><Eye className="w-4 h-4"/></button><button aria-label="Edit rule" className="p-1 hover:text-orange-500"><Edit2 className="w-4 h-4"/></button></div>],
             ]}
             primaryAction="Create Template"
             searchPlaceholder="Search Omnichannel templates by name or category..."
@@ -432,7 +432,7 @@ export default function AutomationPage() {
             </h1>
             <div className="relative mt-4">
               <Search className="w-3.5 h-3.5 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
-              <input aria-label="Input field" 
+              <input aria-label="Search settings and rules" 
                 type="text" 
                 placeholder="Search settings..." 
                 value={searchQuery}

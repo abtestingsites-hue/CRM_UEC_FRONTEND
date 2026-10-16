@@ -30,7 +30,7 @@ export default function AIAgentsPage() {
                 <div className={`w-12 h-12 rounded-xl flex items-center justify-center border ${agent.bg}`}>
                   <Bot className={`w-6 h-6 ${agent.color}`} />
                 </div>
-                <button className="p-2 text-slate-500 hover:text-white transition-colors opacity-0 group-hover:opacity-100">
+                <button aria-label="AI agent options" className="p-2 text-slate-500 hover:text-white transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100 focus:outline-none">
                   <Settings className="w-4 h-4" />
                 </button>
               </div>

@@ -24,7 +24,7 @@ export default function AgentProfilePage() {
           role: parsed.role ? parsed.role.split('_').map((w: string) => w.charAt(0) + w.slice(1).toLowerCase()).join(' ') : prev.role,
         }));
       }
-    } catch (e) {}
+    } catch (e) { console.warn('[UI Exception Swallowed Fixed]:', e); }
   }, []);
 
   return (
@@ -67,7 +67,7 @@ export default function AgentProfilePage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-1.5">
                 <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Full Name</label>
-                <input aria-label="Input field" 
+                <input aria-label="Full Name" id="profile-name" 
                   type="text" 
                   value={user.name} 
                   disabled
@@ -76,7 +76,7 @@ export default function AgentProfilePage() {
               </div>
               <div className="space-y-1.5">
                 <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Email Address</label>
-                <input aria-label="Input field" 
+                <input aria-label="Email Address" id="profile-email" 
                   type="email" 
                   value={user.email} 
                   disabled
@@ -87,7 +87,7 @@ export default function AgentProfilePage() {
                 <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Role</label>
                 <div className="relative">
                   <Shield className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
-                  <input aria-label="Input field" 
+                  <input aria-label="User Role" id="profile-role" 
                     type="text" 
                     value={user.role} 
                     disabled
@@ -99,7 +99,7 @@ export default function AgentProfilePage() {
                 <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Phone</label>
                 <div className="relative">
                   <Phone className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
-                  <input aria-label="Input field" 
+                  <input aria-label="Phone Number" id="profile-phone" 
                     type="text" 
                     value={user.phone} 
                     disabled

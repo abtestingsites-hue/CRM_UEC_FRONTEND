@@ -45,7 +45,7 @@ export default function AgentCallCenter() {
           try {
             const stored = localStorage.getItem('crm_user');
             if (stored) currentAgentId = JSON.parse(stored).agentId;
-          } catch (e) { }
+          } catch (e) { console.warn('[UI Exception Swallowed Fixed]:', e); }
 
           setAgents(formattedAgents.filter((a: any) => a.id !== currentAgentId));
         }
@@ -101,7 +101,7 @@ export default function AgentCallCenter() {
             if (rawName.includes('@')) rawName = rawName.split('@')[0];
             currentAgentName = rawName.charAt(0).toUpperCase() + rawName.slice(1);
           }
-        } catch (e) { }
+        } catch (e) { console.warn('[UI Exception Swallowed Fixed]:', e); }
 
         mediaSocket.emit('initiateCall', {
           targetAgentId: agent.id, // Target the Agent UUID which is stored in Redis

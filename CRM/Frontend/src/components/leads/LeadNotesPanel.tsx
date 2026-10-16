@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Send, User, Calendar, Briefcase, PhoneCall, Edit2, History } from 'lucide-react';
 import { useLeadStore } from '@/store/useLeadStore';
 import { io, Socket } from 'socket.io-client';
@@ -209,7 +209,7 @@ export const LeadNotesPanel = ({ leadId }: { leadId: string }) => {
           </div>
         )}
         <form onSubmit={handleSubmit} className="flex gap-2">
-          <textarea
+          <textarea aria-label="Add a note for this lead"
             value={newNote}
             onChange={(e) => setNewNote(e.target.value)}
             placeholder={correctingNoteId ? "Type correction here..." : "Type a new audit note here..."}
@@ -224,6 +224,7 @@ export const LeadNotesPanel = ({ leadId }: { leadId: string }) => {
           />
           <button 
             type="submit" 
+            aria-label="Submit note"
             disabled={!newNote.trim() || submitting}
             className={`p-3 rounded-xl flex items-center justify-center transition-colors ${
               !newNote.trim() || submitting

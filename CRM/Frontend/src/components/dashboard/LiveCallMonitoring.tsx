@@ -12,14 +12,14 @@ export function LiveCallMonitoring() {
       </div>
 
       <div className="overflow-x-auto">
-        <table className="w-full text-left border-collapse">
+        <table aria-label="Live Call Monitoring Table" className="w-full text-left border-collapse">
           <thead>
             <tr className="border-b border-border text-slate-500 text-sm">
-              <th className="pb-3 font-medium pl-4">Agent</th>
-              <th className="pb-3 font-medium">Customer</th>
-              <th className="pb-3 font-medium">Duration</th>
-              <th className="pb-3 font-medium">Sentiment</th>
-              <th className="pb-3 font-medium text-right pr-4">Actions</th>
+              <th scope="col" className="pb-3 font-medium pl-4">Agent</th>
+              <th scope="col" className="pb-3 font-medium">Customer</th>
+              <th scope="col" className="pb-3 font-medium">Duration</th>
+              <th scope="col" className="pb-3 font-medium">Sentiment</th>
+              <th scope="col" className="pb-3 font-medium text-right pr-4">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -39,13 +39,13 @@ export function LiveCallMonitoring() {
               </td>
               <td className="py-4 pr-4 text-right">
                 <div className="flex items-center justify-end gap-2">
-                  <button className="p-2 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-lg text-slate-500 hover:text-primary transition-colors tooltip-trigger" title="Listen (Silent)">
+                  <button aria-label="Listen to live call" className="p-2 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-lg text-slate-500 hover:text-primary transition-colors tooltip-trigger" title="Listen (Silent)">
                     <Eye className="w-4 h-4" />
                   </button>
-                  <button className="p-2 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-lg text-slate-500 hover:text-amber-500 transition-colors tooltip-trigger" title="Whisper (Agent Only)">
+                  <button aria-label="Whisper to agent" className="p-2 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-lg text-slate-500 hover:text-amber-500 transition-colors tooltip-trigger" title="Whisper (Agent Only)">
                     <MicOff className="w-4 h-4" />
                   </button>
-                  <button className="p-2 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-lg text-slate-500 hover:text-rose-500 transition-colors tooltip-trigger" title="Barge In">
+                  <button aria-label="Barge into call" className="p-2 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-lg text-slate-500 hover:text-rose-500 transition-colors tooltip-trigger" title="Barge In">
                     <Mic className="w-4 h-4" />
                   </button>
                 </div>
@@ -67,13 +67,13 @@ export function LiveCallMonitoring() {
               </td>
               <td className="py-4 pr-4 text-right">
                 <div className="flex items-center justify-end gap-2">
-                  <button className="p-2 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-lg text-slate-500 hover:text-primary transition-colors tooltip-trigger" title="Listen (Silent)">
+                  <button aria-label="Listen to live call" className="p-2 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-lg text-slate-500 hover:text-primary transition-colors tooltip-trigger" title="Listen (Silent)">
                     <Eye className="w-4 h-4" />
                   </button>
-                  <button className="p-2 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-lg text-slate-500 hover:text-amber-500 transition-colors tooltip-trigger" title="Whisper (Agent Only)">
+                  <button aria-label="Whisper to agent" className="p-2 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-lg text-slate-500 hover:text-amber-500 transition-colors tooltip-trigger" title="Whisper (Agent Only)">
                     <MicOff className="w-4 h-4" />
                   </button>
-                  <button className="p-2 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-lg text-slate-500 hover:text-rose-500 transition-colors tooltip-trigger" title="Barge In">
+                  <button aria-label="Barge into call" className="p-2 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-lg text-slate-500 hover:text-rose-500 transition-colors tooltip-trigger" title="Barge In">
                     <Mic className="w-4 h-4" />
                   </button>
                 </div>

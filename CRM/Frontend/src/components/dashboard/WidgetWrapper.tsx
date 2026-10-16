@@ -36,10 +36,11 @@ export function WidgetWrapper({ title, children, dataForExport }: WidgetWrapperP
         {/* Header Tools */}
         <div className="flex items-center justify-between mb-4 shrink-0">
           <h3 className="text-sm font-bold text-slate-200 tracking-wide">{title}</h3>
-          <div className="flex items-center gap-1.5 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+          <div className="flex items-center gap-1.5 opacity-100 md:opacity-0 md:group-hover:opacity-100 md:focus-within:opacity-100 transition-opacity">
             <button 
               onClick={() => setShowDrillDown(true)} 
               title="Drill-down details"
+              aria-label="Drill-down details"
               className="p-2 hover:bg-[#1a1a1a] rounded-lg text-slate-400 hover:text-white"
             >
               <Table className="w-4 h-4 md:w-3.5 md:h-3.5" />
@@ -47,6 +48,7 @@ export function WidgetWrapper({ title, children, dataForExport }: WidgetWrapperP
             <button 
               onClick={exportToCSV} 
               title="Export CSV"
+              aria-label="Export widget data to CSV"
               className="p-2 hover:bg-[#1a1a1a] rounded-lg text-slate-400 hover:text-white"
             >
               <Download className="w-4 h-4 md:w-3.5 md:h-3.5" />
@@ -54,6 +56,7 @@ export function WidgetWrapper({ title, children, dataForExport }: WidgetWrapperP
             <button 
               onClick={() => setIsFullscreen(true)} 
               title="Maximize"
+              aria-label="Maximize widget"
               className="p-2 hover:bg-[#1a1a1a] rounded-lg text-slate-400 hover:text-white"
             >
               <Maximize2 className="w-4 h-4 md:w-3.5 md:h-3.5" />
@@ -73,6 +76,7 @@ export function WidgetWrapper({ title, children, dataForExport }: WidgetWrapperP
           <div className="w-full h-full bg-[#0b0b0b] border border-[#1e1e1e] rounded-3xl p-5 md:p-6 flex flex-col relative max-w-6xl max-h-[85vh] text-white">
             <button 
               onClick={() => setIsFullscreen(false)}
+              aria-label="Close expanded view"
               className="absolute top-5 right-5 p-2 bg-[#141414] hover:bg-[#202020] border border-[#262626] rounded-xl text-slate-400 hover:text-white"
             >
               <X className="w-5 h-5" />
@@ -96,6 +100,7 @@ export function WidgetWrapper({ title, children, dataForExport }: WidgetWrapperP
               </div>
               <button 
                 onClick={() => setShowDrillDown(false)}
+                aria-label="Close drill-down details"
                 className="p-2 bg-[#141414] hover:bg-[#202020] border border-[#262626] rounded-xl text-slate-400 hover:text-white"
               >
                 <X className="w-4 h-4" />
@@ -105,11 +110,11 @@ export function WidgetWrapper({ title, children, dataForExport }: WidgetWrapperP
             <div className="flex-1 overflow-y-auto custom-scrollbar">
               {dataForExport && dataForExport.length > 0 ? (
                 <div className="border border-[#1c1c1c] rounded-xl overflow-hidden shadow-sm">
-                  <table className="w-full text-left text-xs border-collapse">
+                  <table aria-label="Widget drill-down details table" className="w-full text-left text-xs border-collapse">
                     <thead>
                       <tr className="bg-[#121212] border-b border-[#1c1c1c] text-slate-400 font-bold uppercase tracking-wider">
                         {Object.keys(dataForExport[0]).map(key => (
-                          <th key={key} className="p-3 font-semibold">{key.replace(/([A-Z])/g, ' $1')}</th>
+                          <th scope="col" key={key} className="p-3 font-semibold">{key.replace(/([A-Z])/g, ' $1')}</th>
                         ))}
                       </tr>
                     </thead>

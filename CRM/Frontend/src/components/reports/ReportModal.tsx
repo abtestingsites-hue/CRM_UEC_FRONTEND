@@ -94,7 +94,7 @@ export const ReportModal: React.FC<ReportModalProps> = ({ leadId, isOpen, onClos
             <FileText className="w-5 h-5 text-blue-400" />
             AI Lead History Report
           </h2>
-          <button onClick={onClose} className="p-2 hover:bg-[#222] rounded-full transition text-slate-400">
+          <button aria-label="Close dialog" onClick={onClose} className="p-2 hover:bg-[#222] rounded-full transition text-slate-400">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -148,7 +148,7 @@ export const ReportModal: React.FC<ReportModalProps> = ({ leadId, isOpen, onClos
             
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-2 bg-[#1a1a1a] border border-[#333] rounded-lg p-1 mr-2">
-                <input aria-label="Input field" 
+                <input aria-label="Manager Email Address" 
                   type="email" 
                   placeholder="manager@company.com" 
                   className="bg-transparent text-sm text-white px-3 py-1.5 outline-none w-48 placeholder-slate-500"

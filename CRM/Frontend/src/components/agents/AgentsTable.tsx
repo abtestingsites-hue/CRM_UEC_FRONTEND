@@ -25,15 +25,15 @@ export function AgentsTable({ agents, onRefresh }: AgentsTableProps) {
     <>
       {/* Desktop Table View */}
       <div className="hidden md:block overflow-x-auto">
-        <table className="w-full text-left text-sm">
+        <table aria-label="Agents roster directory table" className="w-full text-left text-sm">
           <thead className="text-xs text-slate-500 bg-[#111] uppercase border-b border-[#222] sticky top-0 z-10">
             <tr>
-              <th className="px-6 py-4 font-semibold">Agent</th>
-              <th className="px-6 py-4 font-semibold">Contact Info</th>
-              <th className="px-6 py-4 font-semibold">Role</th>
-              <th className="px-6 py-4 font-semibold">Status</th>
-              <th className="px-6 py-4 font-semibold">Joined / Active</th>
-              <th className="px-6 py-4 font-semibold text-right">Actions</th>
+              <th scope="col" className="px-6 py-4 font-semibold">Agent</th>
+              <th scope="col" className="px-6 py-4 font-semibold">Contact Info</th>
+              <th scope="col" className="px-6 py-4 font-semibold">Role</th>
+              <th scope="col" className="px-6 py-4 font-semibold">Status</th>
+              <th scope="col" className="px-6 py-4 font-semibold">Joined / Active</th>
+              <th scope="col" className="px-6 py-4 font-semibold text-right">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-[#222]">

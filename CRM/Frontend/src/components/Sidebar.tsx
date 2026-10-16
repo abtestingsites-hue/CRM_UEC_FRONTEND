@@ -25,7 +25,7 @@ export function Sidebar() {
         if (stored) {
           setCurrentUser(JSON.parse(stored));
         }
-      } catch (e) {}
+      } catch (e) { console.warn('[UI Exception Swallowed Fixed]:', e); }
     }
   }, [user]);
 
@@ -86,7 +86,7 @@ export function Sidebar() {
             </div>
           </div>
           <select
-            value={status}
+            aria-label="Agent availability status" value={status}
             onChange={(e) => setStatus(e.target.value as any)}
             className="w-full bg-[#141414] border border-[#262626] rounded-lg px-2.5 py-1.5 text-xs text-white outline-none focus:border-orange-500"
           >
@@ -138,6 +138,7 @@ export function Sidebar() {
           </div>
           <button
             onClick={handleLogout}
+            aria-label="Log Out Session"
             className="p-1.5 rounded-lg text-slate-500 hover:text-red-500 hover:bg-red-500/10 transition-colors"
             title="Log Out Session"
           >

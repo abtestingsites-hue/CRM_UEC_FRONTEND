@@ -30,7 +30,7 @@ export function AuthWrapper({ children }: { children: React.ReactNode }) {
       try {
         const user = JSON.parse(userStr);
         useAuthStore.getState().setUser(user);
-      } catch (e) {}
+      } catch (e) { console.warn('[UI Exception Swallowed Fixed]:', e); }
     }
 
     if (!token && pathname !== "/login") {
@@ -41,7 +41,7 @@ export function AuthWrapper({ children }: { children: React.ReactNode }) {
         try {
           const user = JSON.parse(userStr);
           role = user.role || 'ADMIN';
-        } catch (e) {}
+        } catch (e) { console.warn('[UI Exception Swallowed Fixed]:', e); }
       }
       
       if (role === 'AGENT') {
@@ -55,7 +55,7 @@ export function AuthWrapper({ children }: { children: React.ReactNode }) {
         try {
           const user = JSON.parse(userStr);
           role = user.role || 'ADMIN';
-        } catch (e) {}
+        } catch (e) { console.warn('[UI Exception Swallowed Fixed]:', e); }
       }
       
       const isAgentPortalPath = pathname === '/agent' || (pathname.startsWith('/agent/') && pathname !== '/agent/profile');

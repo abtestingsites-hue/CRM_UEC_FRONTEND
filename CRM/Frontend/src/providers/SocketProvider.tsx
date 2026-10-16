@@ -368,7 +368,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
               setIncomingCall(data.call);
             }
           }
-        } catch (e) {}
+        } catch (e) { console.warn('[UI Exception Swallowed Fixed]:', e); }
       }
     }, 5000);
 

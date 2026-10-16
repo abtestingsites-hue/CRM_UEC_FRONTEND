@@ -39,7 +39,9 @@ export function ManualLeadEntryModal({ isOpen, onClose }: ManualLeadEntryModalPr
     try {
       const userStr = localStorage.getItem('crm_user');
       if (userStr) user = JSON.parse(userStr);
-    } catch (err) {}
+    } catch (err) {
+      console.warn('Could not parse crm_user from localStorage:', err);
+    }
 
     const token = localStorage.getItem('crm_token') || 'mock_token';
     const agentId = user?.id || undefined;
@@ -88,6 +90,8 @@ export function ManualLeadEntryModal({ isOpen, onClose }: ManualLeadEntryModalPr
                 <p className="text-xs text-slate-400">Add a new prospective customer</p>
               </div>
               <button 
+                type="button"
+                aria-label="Close dialog"
                 onClick={onClose}
                 className="p-2 text-slate-400 hover:text-white hover:bg-[#222] rounded-xl transition-colors"
               >
@@ -112,7 +116,7 @@ export function ManualLeadEntryModal({ isOpen, onClose }: ManualLeadEntryModalPr
                       <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <User className="w-4 h-4 text-slate-500" />
                       </div>
-                      <input aria-label="Input field" 
+                      <input id="lead-customer-name" aria-label="Customer Name" 
                         type="text" 
                         value={formData.customerName}
                         onChange={(e) => setFormData({...formData, customerName: e.target.value})}
@@ -127,7 +131,7 @@ export function ManualLeadEntryModal({ isOpen, onClose }: ManualLeadEntryModalPr
                       <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <Phone className="w-4 h-4 text-slate-500" />
                       </div>
-                      <input aria-label="Input field" 
+                      <input id="lead-phone-number" aria-label="Customer Phone Number" 
                         type="tel" 
                         required
                         value={formData.phoneNumber}
@@ -144,7 +148,7 @@ export function ManualLeadEntryModal({ isOpen, onClose }: ManualLeadEntryModalPr
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                       <Mail className="w-4 h-4 text-slate-500" />
                     </div>
-                    <input aria-label="Input field" 
+                    <input id="lead-email-address" aria-label="Customer Email Address" 
                       type="email" 
                       value={formData.email}
                       onChange={(e) => setFormData({...formData, email: e.target.value})}
@@ -161,6 +165,8 @@ export function ManualLeadEntryModal({ isOpen, onClose }: ManualLeadEntryModalPr
                         <Tag className="w-4 h-4 text-slate-500" />
                       </div>
                       <select 
+                        id="lead-service-interest"
+                        aria-label="Service Interest"
                         value={formData.serviceInterest}
                         onChange={(e) => setFormData({...formData, serviceInterest: e.target.value})}
                         className="w-full bg-[#111] border border-[#333] text-white text-sm rounded-xl pl-9 pr-4 py-2.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/50 transition-all appearance-none"
@@ -180,7 +186,7 @@ export function ManualLeadEntryModal({ isOpen, onClose }: ManualLeadEntryModalPr
                       <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <Tag className="w-4 h-4 text-slate-500" />
                       </div>
-                      <input aria-label="Input field" 
+                      <input id="lead-source" aria-label="Lead Source" 
                         type="text" 
                         value={formData.source}
                         onChange={(e) => setFormData({...formData, source: e.target.value})}
@@ -192,12 +198,14 @@ export function ManualLeadEntryModal({ isOpen, onClose }: ManualLeadEntryModalPr
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Additional Notes</label>
+                  <label htmlFor="lead-notes" className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Additional Notes</label>
                   <div className="relative">
                     <div className="absolute top-3 left-3 pointer-events-none">
                       <FileText className="w-4 h-4 text-slate-500" />
                     </div>
                     <textarea 
+                      id="lead-notes"
+                      aria-label="Additional Notes"
                       rows={3}
                       value={formData.notes}
                       onChange={(e) => setFormData({...formData, notes: e.target.value})}

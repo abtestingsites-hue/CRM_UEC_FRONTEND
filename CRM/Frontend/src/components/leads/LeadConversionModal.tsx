@@ -139,7 +139,7 @@ export function LeadConversionModal({ leadId, onClose, onSubmit }: LeadConversio
 
               <div>
                 <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-3">Call Notes</label>
-                <textarea
+                <textarea aria-label="Conversion notes"
                   rows={4}
                   className="w-full bg-[#111] border border-[#333] focus:border-blue-500 rounded-xl px-4 py-3 text-sm text-white outline-none resize-none"
                   value={notes}
@@ -182,7 +182,7 @@ export function LeadConversionModal({ leadId, onClose, onSubmit }: LeadConversio
 
               <div>
                 <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-3">Purpose</label>
-                <textarea
+                <textarea aria-label="Follow up instructions"
                   value={appointmentPurpose}
                   onChange={(e) => setAppointmentPurpose(e.target.value)}
                   className="w-full bg-[#111] border border-[#333] focus:border-emerald-500 rounded-xl px-4 py-3 text-sm outline-none text-white transition-colors h-24 resize-none"

@@ -40,7 +40,7 @@ export function AgentSidebar() {
     if (userStr) {
       try {
         setUser(JSON.parse(userStr));
-      } catch (e) {}
+      } catch (e) { console.warn('[UI Exception Swallowed Fixed]:', e); }
     }
   }, []);
 

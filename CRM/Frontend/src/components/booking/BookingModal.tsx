@@ -104,7 +104,7 @@ export function BookingModal({ isOpen, onClose, customerId: initialCustomerId, a
             {step === 2 && 'Select Time Slot'}
             {step === 3 && 'Booking Confirmed'}
           </h2>
-          <button onClick={onClose} className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors">
+          <button aria-label="Close dialog" onClick={onClose} className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors">
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
           </button>
         </div>
@@ -120,8 +120,8 @@ export function BookingModal({ isOpen, onClose, customerId: initialCustomerId, a
           {step === 1 && (
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Patient ID</label>
-                <input aria-label="Input field" 
+                <label htmlFor="booking-patient-id" className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Patient ID</label>
+                <input id="booking-patient-id" aria-label="Patient ID" 
                   type="text" 
                   value={customerId} 
                   onChange={(e) => setCustomerId(e.target.value)} 
@@ -131,8 +131,8 @@ export function BookingModal({ isOpen, onClose, customerId: initialCustomerId, a
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Doctor ID</label>
-                <input aria-label="Input field" 
+                <label htmlFor="booking-doctor-id" className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Doctor ID</label>
+                <input id="booking-doctor-id" aria-label="Doctor ID" 
                   type="text" 
                   value={doctorId} 
                   onChange={(e) => setDoctorId(e.target.value)}
@@ -142,8 +142,8 @@ export function BookingModal({ isOpen, onClose, customerId: initialCustomerId, a
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Treatment / Reason</label>
-                <input aria-label="Input field" 
+                <label htmlFor="booking-treatment" className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Treatment / Reason</label>
+                <input id="booking-treatment" aria-label="Treatment or Reason" 
                   type="text" 
                   value={treatment} 
                   onChange={(e) => setTreatment(e.target.value)}
@@ -152,8 +152,8 @@ export function BookingModal({ isOpen, onClose, customerId: initialCustomerId, a
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Date</label>
-                <input aria-label="Input field" 
+                <label htmlFor="booking-date" className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Date</label>
+                <input id="booking-date" aria-label="Appointment Date" 
                   type="date" 
                   value={date} 
                   onChange={(e) => setDate(e.target.value)}

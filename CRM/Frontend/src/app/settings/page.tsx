@@ -123,7 +123,7 @@ const EnterpriseTableWorkspace = ({ columns, data, primaryAction, searchPlacehol
       <div className="flex justify-between items-center mb-4 bg-[#101010] p-4 border border-[#1e1e1e] rounded-xl shadow-lg">
         <div className="relative">
           <Search className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
-          <input aria-label="Input field" 
+          <input aria-label="Search system settings" 
             type="text" 
             placeholder={searchPlaceholder || "Search records..."}
             className="bg-[#141414] border border-[#222] rounded-lg pl-9 pr-4 py-2 text-xs text-white outline-none focus:border-orange-500 w-72 transition-colors"
@@ -145,7 +145,7 @@ const EnterpriseTableWorkspace = ({ columns, data, primaryAction, searchPlacehol
       </div>
 
       <div className="border border-[#1e1e1e] rounded-xl overflow-hidden bg-[#0c0c0c] shadow-2xl">
-        <table className="w-full text-left text-xs">
+        <table aria-label="Settings configuration table 1" className="w-full text-left text-xs">
           <thead className="bg-[#121212] border-b border-[#1e1e1e]">
             <tr>
               {columns.map((col: string, idx: number) => (
@@ -230,7 +230,7 @@ export default function SettingsPage() {
       if (storedUser) {
         setCurrentUser(JSON.parse(storedUser));
       }
-    } catch (e) {}
+    } catch (e) { console.warn('[UI Exception Swallowed Fixed]:', e); }
 
     // Pre-populate branches for demo
     setBranches([
@@ -289,7 +289,7 @@ export default function SettingsPage() {
               </div>
               <div className="space-y-1.5 col-span-2">
                 <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Registered Address</label>
-                <textarea rows={2} defaultValue="Plot 45, Sector 44, Institutional Area, Gurugram, Haryana 122003" className="w-full bg-[#101010] border border-[#222] focus:border-orange-500 rounded-lg px-4 py-2 text-sm text-white outline-none custom-scrollbar" />
+                <textarea aria-label="Setting description" rows={2} defaultValue="Plot 45, Sector 44, Institutional Area, Gurugram, Haryana 122003" className="w-full bg-[#101010] border border-[#222] focus:border-orange-500 rounded-lg px-4 py-2 text-sm text-white outline-none custom-scrollbar" />
               </div>
             </div>
           </EnterpriseFormWorkspace>
@@ -353,14 +353,14 @@ export default function SettingsPage() {
             </div>
             
             <div className="border border-[#1e1e1e] rounded-xl overflow-hidden bg-[#0c0c0c] shadow-2xl">
-              <table className="w-full text-left text-xs">
+              <table aria-label="Settings configuration table 2" className="w-full text-left text-xs">
                 <thead className="bg-[#121212] border-b border-[#1e1e1e]">
                   <tr>
-                    <th className="px-5 py-3 font-bold text-slate-400 uppercase tracking-wider">Module Resource</th>
-                    <th className="px-5 py-3 font-bold text-slate-400 uppercase tracking-wider text-center">View</th>
-                    <th className="px-5 py-3 font-bold text-slate-400 uppercase tracking-wider text-center">Create</th>
-                    <th className="px-5 py-3 font-bold text-slate-400 uppercase tracking-wider text-center">Edit</th>
-                    <th className="px-5 py-3 font-bold text-slate-400 uppercase tracking-wider text-center">Delete</th>
+                    <th scope="col" className="px-5 py-3 font-bold text-slate-400 uppercase tracking-wider">Module Resource</th>
+                    <th scope="col" className="px-5 py-3 font-bold text-slate-400 uppercase tracking-wider text-center">View</th>
+                    <th scope="col" className="px-5 py-3 font-bold text-slate-400 uppercase tracking-wider text-center">Create</th>
+                    <th scope="col" className="px-5 py-3 font-bold text-slate-400 uppercase tracking-wider text-center">Edit</th>
+                    <th scope="col" className="px-5 py-3 font-bold text-slate-400 uppercase tracking-wider text-center">Delete</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#1e1e1e]">
@@ -407,7 +407,7 @@ export default function SettingsPage() {
               </div>
               <div className="space-y-1.5">
                 <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Encryption Protocol</label>
-                <select className="w-full bg-[#101010] border border-[#222] focus:border-orange-500 rounded-lg px-3 py-2 text-sm text-white outline-none">
+                <select aria-label="System setting option" className="w-full bg-[#101010] border border-[#222] focus:border-orange-500 rounded-lg px-3 py-2 text-sm text-white outline-none">
                   <option>TLS / STARTTLS</option>
                   <option>SSL</option>
                   <option>Unencrypted (Not Recommended)</option>
@@ -526,7 +526,7 @@ export default function SettingsPage() {
             </h1>
             <div className="relative mt-4">
               <Search className="w-3.5 h-3.5 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
-              <input aria-label="Input field" 
+              <input aria-label="Search configuration options" 
                 type="text" 
                 placeholder="Search settings..." 
                 value={searchQuery}

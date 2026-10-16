@@ -62,7 +62,7 @@ export default function TicketsPage() {
         <div className="p-4 border-b border-[#222] flex items-center justify-between bg-[#0a0a0a]">
           <div className="relative group w-64">
             <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-primary transition-colors" />
-            <input aria-label="Input field" 
+            <input aria-label="Search support tickets" 
               type="text" 
               placeholder="Search tickets..." 
               className="w-full bg-[#111] border border-[#333] focus:border-primary rounded-lg pl-9 pr-3 py-2 text-sm outline-none transition-all text-white placeholder-slate-500"
@@ -80,16 +80,16 @@ export default function TicketsPage() {
                <div className="w-6 h-6 border-2 border-slate-500/20 border-t-slate-500 rounded-full animate-spin"></div>
             </div>
           ) : (
-            <table className="w-full text-left text-sm">
+            <table aria-label="Support tickets management table" className="w-full text-left text-sm">
               <thead className="text-xs text-slate-500 bg-[#111] uppercase border-b border-[#222] sticky top-0">
                 <tr>
-                  <th className="px-6 py-4 font-semibold">Ticket ID</th>
-                  <th className="px-6 py-4 font-semibold">Customer</th>
-                  <th className="px-6 py-4 font-semibold">Subject</th>
-                  <th className="px-6 py-4 font-semibold">Status</th>
-                  <th className="px-6 py-4 font-semibold">Priority</th>
-                  <th className="px-6 py-4 font-semibold">Last Updated</th>
-                  <th className="px-6 py-4 font-semibold text-right">Actions</th>
+                  <th scope="col" className="px-6 py-4 font-semibold">Ticket ID</th>
+                  <th scope="col" className="px-6 py-4 font-semibold">Customer</th>
+                  <th scope="col" className="px-6 py-4 font-semibold">Subject</th>
+                  <th scope="col" className="px-6 py-4 font-semibold">Status</th>
+                  <th scope="col" className="px-6 py-4 font-semibold">Priority</th>
+                  <th scope="col" className="px-6 py-4 font-semibold">Last Updated</th>
+                  <th scope="col" className="px-6 py-4 font-semibold text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#222]">

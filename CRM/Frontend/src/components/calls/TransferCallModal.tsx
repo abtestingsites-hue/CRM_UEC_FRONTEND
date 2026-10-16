@@ -28,7 +28,7 @@ export function TransferCallModal({ agentName, department, onClose, onSuccess }:
           <h2 className="text-lg font-bold text-white flex items-center gap-2">
             <PhoneForwarded className="w-5 h-5 text-primary" /> Transfer Call
           </h2>
-          <button onClick={onClose} className="text-slate-500 hover:text-white transition-colors">
+          <button aria-label="Close dialog" onClick={onClose} className="text-slate-500 hover:text-white transition-colors">
             <X className="w-5 h-5" />
           </button>
         </div>

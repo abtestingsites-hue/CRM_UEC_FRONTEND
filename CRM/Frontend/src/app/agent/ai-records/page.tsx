@@ -20,7 +20,7 @@ export default function AiRecordsPage() {
             agentId = user.agentId;
             role = user.role;
           }
-        } catch(e) {}
+        } catch (e) { console.warn('[UI Exception Swallowed Fixed]:', e); }
 
         const { apiFetch } = require('@/lib/api');
         const res = await apiFetch('/api/v1/telephony/history');
