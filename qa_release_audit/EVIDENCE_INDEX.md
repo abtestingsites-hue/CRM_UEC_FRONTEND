@@ -54,3 +54,4 @@ All finalized release deliverables are saved in [`qa_release_audit/`](file:///d:
 10. [`REGRESSION_AND_RELEASE_GATE_REPORT.md`](file:///d:/Testing/Crm_summary%20working/qa_release_audit/REGRESSION_AND_RELEASE_GATE_REPORT.md) — Reconciled evaluation of all 7 enterprise release acceptance gates.
 11. [`UAT_CHECKLIST.md`](file:///d:/Testing/Crm_summary%20working/qa_release_audit/UAT_CHECKLIST.md) — 7 role-based business acceptance scenarios verified with live Super Admin session (`Raghav@uec.com`).
 12. [`EVIDENCE_INDEX.md`](file:///d:/Testing/Crm_summary%20working/qa_release_audit/EVIDENCE_INDEX.md) — Environment metadata, raw evidence index, and master deliverable links.
+13. [`CRM_RELEASE_READINESS_DECISION.md`](file:///d:/Testing/Crm_summary%20working/qa_release_audit/CRM_RELEASE_READINESS_DECISION.md) — Phase 10 Production Readiness Review & Release Gate Acceptance Decision.
