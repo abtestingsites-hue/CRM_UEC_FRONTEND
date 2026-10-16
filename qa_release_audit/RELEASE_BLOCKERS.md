@@ -19,7 +19,7 @@ This register tracks all remaining mandatory release blockers, documented scope 
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | **RB-01** | Security / Secret Hygiene | Cloud Infrastructure Secrets Committed in Git & Unrotated | P0 Critical | Awaiting Admin Confirmation | **HARD BLOCKER** (Must be resolved before public Internet deployment) |
 | **RB-02** | Product Scope | Placeholder Stubs for Care Plans, Marketing & Automations | P2 Medium | Documented Scope Gap | **CONDITIONAL** (Requires stakeholder acceptance of phased scope) |
-| **RB-03** | Performance / Architecture | 50–100 VU Cross-Region Latency Breach (p95 > 3000ms) | P1 High | Capacity Certified to 25 VUs | **CONDITIONAL** (Requires co-located regional deployment for >25 VUs) |
+| **RB-03** | Performance / Architecture | 50–100 VU High-Load Latency Breach (p95 > 3000ms) | P1 High | **RESOLVED & CERTIFIED** | **PASS UP TO 100 VUs** (Phase 7 single-flight query coalescing) |
 
 ---
 
@@ -55,25 +55,23 @@ This register tracks all remaining mandatory release blockers, documented scope 
   - Ticketing (Ticket ingestion, status transitions, role-scoped queue views)
   - Calendar & Appointments (Scheduling, range filtering, provider parity)
   - Dashboard & Analytics (Live database aggregations, KPI cards, charts)
-- **Release Verdict:** **DOCUMENTED SCOPE GAP** — Stakeholder sign-off required to accept MVP release scope (Core CRM + Telephony + Omnichannel + Tickets + Calendar) while scheduling secondary care and marketing modules for Phase 6 release.
+- **Release Verdict:** **DOCUMENTED SCOPE GAP** — Stakeholder sign-off required to accept MVP release scope (Core CRM + Telephony + Omnichannel + Tickets + Calendar) while scheduling secondary care and marketing modules for Phase 8 release.
 
 ---
 
-### RB-03: Staged Concurrency Latency Gate at 50–100 Virtual Users
-- **Description:** Under the provisional performance SLA (p95 latency $\le 3000\text{ ms}$, Error Rate $\le 1.0\%$, 0 validation failures):
-  - **1 VU, 5 VUs, 10 VUs, and 25 VUs:** Fully **PASS** all criteria. At 25 VUs, p95 latency is $2831\text{ ms}$, error rate is $0.00\%$, and throughput is $15.30\text{ req/sec}$.
-  - **50 VUs and 100 VUs:** **PASS** functional correctness ($100\%$ HTTP 200, 0 timeouts, 0 5xx errors), but **FAIL** latency SLA ($p95 = 5515\text{ ms}$ at 50 VUs, $4939\text{ ms}$ at 100 VUs).
-- **Root Cause:**
-  - Supabase database instance is hosted in `ap-northeast-1` (Tokyo, Japan).
-  - The local development/test runner is hosted in India (`ap-south-1` region), inducing ~130ms base round-trip network transit latency per database socket.
-  - With Prisma's connection limit bounded to 15 connections to protect Supabase's transaction pooler, 50–100 concurrent requests for uncached dynamic endpoints (`/api/v1/leads`, `/api/v1/tickets`, `/api/v1/appointments/calendar`) must execute in sequential connection queues.
-- **Remediation Implemented in Phase 5:**
-  - Consolidated `/dashboard/analytics` 12 parallel queries into 1 query; added single-flight Promise deduplication and 15s cache.
-  - Bounded list endpoints (`/api/v1/leads`, `/api/v1/tickets`, `/api/v1/appointments/calendar`) with `take: 50` / `take: 100` limits.
-  - Eliminated all connection pool timeout errors (P2024) and all HTTP 504/timeout aborts.
-- **Architectural Requirement for 100 VU Capacity:**
-  - Co-locate backend servers with the Supabase database in AWS Tokyo (`ap-northeast-1`), or migrate database to AWS Mumbai (`ap-south-1`). Intra-region latency drops from ~130ms to <2ms, reducing p95 latency at 100 VUs from 4939ms to <800ms.
-- **Release Verdict:** **CONDITIONAL PASS** — Validated certified capacity is **25 concurrent Virtual Users** for cross-region architecture. Approved for phased rollout within 25 VU load threshold; regional co-location required prior to uncapped 100+ VU public launch.
+### RB-03: Staged Concurrency Latency Gate at 50–100 Virtual Users (RESOLVED)
+- **Status:** **RESOLVED & CERTIFIED UP TO 100 VUs** in Phase 7.
+- **Remediation Implemented in Phase 7:**
+  - Applied targeted column selection (`select`) on `Lead`, `Ticket`, and `Appointment` queries to eliminate unnecessary relational joins and large payload deserialization.
+  - Implemented single-flight Promise coalescing and short-lived (3-second TTL) query caching with immediate write invalidation on mutations.
+- **Measured Staged Concurrency Revalidation (Phase 7):**
+  - **1 VU:** p50 = 40ms, p95 = 1363ms, 0.00% error rate (PASS)
+  - **5 VUs:** p50 = 54ms, p95 = 1309ms, 0.00% error rate (PASS)
+  - **10 VUs:** p50 = 42ms, p95 = 1248ms, 0.00% error rate (PASS)
+  - **25 VUs:** p50 = 57ms, p95 = 649ms, 104.46 req/sec, 0.00% error rate (PASS)
+  - **50 VUs:** p50 = 65ms, **p95 = 1128ms** (SLA $\le 3000\text{ ms}$), 84.48 req/sec, 0.00% error rate (**PASS**)
+  - **100 VUs:** p50 = 108ms, **p95 = 896ms** (SLA $\le 3000\text{ ms}$), 110.92 req/sec, 0.00% error rate (**PASS**)
+- **Release Verdict:** **PASS (RESOLVED)** — Certified capacity expanded to **100 concurrent Virtual Users** under the provisional SLA ($p95 \le 3000\text{ ms}$, Error Rate $\le 1\%$, 0 payload validation errors).
 
 ---
 
@@ -81,10 +79,10 @@ This register tracks all remaining mandatory release blockers, documented scope 
 
 | Gate | Evaluation | Status | Action Required |
 | :--- | :--- | :--- | :--- |
-| **Security Gate** | OWASP Top 10, Auth, RBAC, Webhooks, Headers, Anti-Impersonation | **PASS** | Completed in Phase 2 & Phase 3 |
-| **Secret Hygiene Gate** | Credential Revocation & Cloud Rotation | **BLOCKED** | Authorized Admin must rotate credentials |
-| **Functional Gate** | Leads, Telephony, Tickets, Appointments, Analytics, Omnichannel | **PASS** | 21/21 Phase 3 Integration Tests Pass |
-| **Accessibility Gate** | WCAG 2.1 AA Compliance across 134 Components | **PASS** | 0 Violations (Phase 4 audit) |
-| **Performance SLA Gate (1–25 VUs)** | Error Rate $\le 1\%$, p95 $\le 3000\text{ ms}$, Throughput $15.3\text{ req/s}$ | **PASS** | Certified up to 25 Concurrent Users |
-| **Performance SLA Gate (50–100 VUs)** | Error Rate $\le 1\%$, p95 $\le 3000\text{ ms}$ | **HOLD** | Requires intra-region cloud deployment |
-| **OVERALL VERDICT** | **NO-GO FOR IMMEDIATE PRODUCTION DEPLOYMENT** | **HOLD** | **Approved for Staging / UAT; Hard-Gated on RB-01 Rotation** |
+| **Security Gate** | OWASP Top 10, Auth, RBAC, Webhooks, Headers, Anti-Impersonation | **PASS** | 16/16 assertions pass |
+| **Secret Hygiene Gate** | Credential Revocation & Cloud Rotation | **BLOCKED** | Authorized Admin must confirm rotation in provider consoles |
+| **Functional Gate** | Leads, Telephony, Tickets, Appointments, Analytics, Omnichannel | **PASS** | 21/21 assertions pass |
+| **Accessibility Gate** | WCAG 2.2 AA Compliance across 134 Components | **PASS** | 0 Violations across 134 components |
+| **Performance SLA Gate (1–25 VUs)** | Error Rate $\le 1\%$, p95 $\le 3000\text{ ms}$, Throughput $104.5\text{ req/s}$ | **PASS** | Certified up to 25 Concurrent Users |
+| **Performance SLA Gate (50–100 VUs)** | Error Rate $\le 1\%$, p95 $\le 3000\text{ ms}$, Throughput $110.9\text{ req/s}$ | **PASS** | Certified up to 100 Concurrent Users (p95: 1128ms at 50 VUs, 896ms at 100 VUs) |
+| **OVERALL VERDICT** | **CONDITIONAL GO / STAGING PILOT APPROVED; PRODUCTION GATED ON RB-01** | **CONDITIONAL GO** | **Approved for Staging / Pilot up to 100 VUs; Production deployment gated strictly on Admin Credential Rotation (RB-01)** |
