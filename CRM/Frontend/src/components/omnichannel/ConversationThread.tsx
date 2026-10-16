@@ -349,66 +349,10 @@ export function ConversationThread() {
           <button
             onClick={() => {
               if (!activeConv) return;
-              // Mock sending an incoming voice message from customer
-              const voiceMsg: any = {
-                id: Date.now().toString(),
-                sender: 'customer',
-                content: '',
-                timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-                status: 'delivered',
-                attachmentType: 'audio',
-                attachmentUrl: 'mock.mp3'
-              };
-              addMessage(activeConv.id, voiceMsg);
-
-              // Immediately add AI wait message
-              addMessage(activeConv.id, {
-                id: (Date.now() + 1).toString(),
-                sender: 'system',
-                content: "Thank you for your voice message. I'm analysing it now. Please wait a moment.",
-                timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-                status: 'delivered'
-              } as any);
-
-              fetch(`http://localhost:3001/omnichannel/mock-voice-message`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ conversationId: activeConv.id, audioUrl: 'mock.mp3' })
-              }).catch(console.error);
-
-              // Simulate the delayed backend injection of insights & AI reply
-              setTimeout(() => {
-                const updatedVoiceMsg = {
-                  ...voiceMsg,
-                  transcript: "à®Žà®©à®•à¯à®•à¯ à®’à®°à¯ à®ªà¯à®¤à®¿à®¯ à®šà¯‡à®µà¯ˆ à®¤à®¿à®Ÿà¯à®Ÿà®®à¯ à®¤à¯‡à®µà¯ˆ, à®…à®¤à¯ˆ à®Žà®ªà¯à®ªà®Ÿà®¿ à®ªà¯†à®±à¯à®µà®¤à¯?",
-                  translation: "I need a new service plan, how do I get it?",
-                  detectedLanguage: "Tamil",
-                  aiIntent: "Plan Upgrade Inquiry"
-                };
-                // We're mutating state directly for this mock, in a real app this would come via websocket
-                const convMessages = useConversationStore.getState().messages[activeConv.id] || [];
-                const msgIndex = convMessages.findIndex((m: any) => m.id === voiceMsg.id);
-                if (msgIndex !== -1) {
-                  const newMessages = [...convMessages];
-                  newMessages[msgIndex] = updatedVoiceMsg;
-                  useConversationStore.setState(state => ({
-                    messages: { ...state.messages, [activeConv.id]: newMessages }
-                  }));
-                }
-
-                // Inject the AI Suggestion
-                addMessage(activeConv.id, {
-                  id: (Date.now() + 1).toString(),
-                  sender: 'system',
-                  content: "Hello! I'd be happy to help you upgrade your service plan. Our premium package includes 24/7 care support and priority doctor visits. Shall I send you the pricing details?",
-                  timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-                  status: 'delivered',
-                  isAiSuggested: true
-                });
-              }, 3000);
+              alert('Voice recording requires configured media storage. Please use text messaging for current conversation.');
             }}
             className="p-2 text-slate-400 hover:text-orange-500 transition-colors"
-            title="Simulate Incoming Voice Note"
+            title="Voice Note"
           >
             <Mic className="w-5 h-5" />
           </button>

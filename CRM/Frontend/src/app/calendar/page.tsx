@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useState, useEffect } from 'react';
 import { Calendar as CalendarIcon, Clock, Users, Plus, ChevronLeft, ChevronRight, Check, Tag } from 'lucide-react';
@@ -123,8 +123,15 @@ export default function CalendarPage() {
         setIsModalOpen(false);
         reset();
         fetchEvents();
+      } else {
+        const errJson = await res.json().catch(() => ({}));
+        console.error('Failed to create calendar appointment:', errJson);
+        alert(errJson.error || 'Failed to create appointment');
       }
-    } catch (e) { }
+    } catch (e: any) {
+      console.error('Error creating calendar appointment:', e);
+      alert(e.message || 'Error creating appointment');
+    }
   };
 
   // Color Mapping Helper
