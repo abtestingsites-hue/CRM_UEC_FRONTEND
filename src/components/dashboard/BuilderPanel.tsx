@@ -43,7 +43,7 @@ export function BuilderPanel() {
         <form onSubmit={handleAddWidget} className="flex-1 flex flex-wrap items-end gap-4">
           <div className="flex flex-col">
             <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-1">Widget Title</span>
-            <input 
+            <input aria-label="Input field" 
               type="text" 
               value={widgetTitle}
               onChange={(e) => setWidgetTitle(e.target.value)}

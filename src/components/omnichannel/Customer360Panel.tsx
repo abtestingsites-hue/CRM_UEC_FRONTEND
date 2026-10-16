@@ -43,9 +43,7 @@ export function Customer360Panel() {
         )}
         <div className="relative inline-block mt-2">
           {profilePic ? (
-            <img 
-              src={profilePic} 
-              alt="Avatar" 
+            <img alt="Customer avatar" src={profilePic} 
               className="w-24 h-24 rounded-full mx-auto mb-4 border-2 border-[#222] object-cover shadow-lg bg-[#111]" 
               onError={(e) => {
                 (e.target as HTMLImageElement).style.display = 'none';

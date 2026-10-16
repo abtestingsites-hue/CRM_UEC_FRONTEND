@@ -74,15 +74,15 @@ export function EditAgentModal({ agent, onClose, onSuccess }: EditAgentModalProp
           <form id="edit-agent-form" onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-xs font-semibold text-slate-400 uppercase mb-2">Full Name</label>
-              <input required name="name" value={formData.name} onChange={handleChange} type="text" className="w-full bg-[#111] border border-[#333] focus:border-blue-500 rounded-lg px-4 py-2 text-sm outline-none text-white transition-colors" />
+              <input aria-label="Name" required name="name" value={formData.name} onChange={handleChange} type="text" className="w-full bg-[#111] border border-[#333] focus:border-blue-500 rounded-lg px-4 py-2 text-sm outline-none text-white transition-colors" />
             </div>
             <div>
               <label className="block text-xs font-semibold text-slate-400 uppercase mb-2">Email Address</label>
-              <input required name="email" value={formData.email} onChange={handleChange} type="email" className="w-full bg-[#111] border border-[#333] focus:border-blue-500 rounded-lg px-4 py-2 text-sm outline-none text-white transition-colors" />
+              <input aria-label="Email" required name="email" value={formData.email} onChange={handleChange} type="email" className="w-full bg-[#111] border border-[#333] focus:border-blue-500 rounded-lg px-4 py-2 text-sm outline-none text-white transition-colors" />
             </div>
             <div>
               <label className="block text-xs font-semibold text-slate-400 uppercase mb-2">Phone Number</label>
-              <input name="phone" value={formData.phone} onChange={handleChange} type="text" className="w-full bg-[#111] border border-[#333] focus:border-blue-500 rounded-lg px-4 py-2 text-sm outline-none text-white transition-colors" />
+              <input aria-label="Phone" name="phone" value={formData.phone} onChange={handleChange} type="text" className="w-full bg-[#111] border border-[#333] focus:border-blue-500 rounded-lg px-4 py-2 text-sm outline-none text-white transition-colors" />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
@@ -105,7 +105,7 @@ export function EditAgentModal({ agent, onClose, onSuccess }: EditAgentModalProp
             </div>
             <div>
               <label className="block text-xs font-semibold text-slate-400 uppercase mb-2">Department</label>
-              <input name="department" value={formData.department} onChange={handleChange} type="text" className="w-full bg-[#111] border border-[#333] focus:border-blue-500 rounded-lg px-4 py-2 text-sm outline-none text-white transition-colors" />
+              <input aria-label="Department" name="department" value={formData.department} onChange={handleChange} type="text" className="w-full bg-[#111] border border-[#333] focus:border-blue-500 rounded-lg px-4 py-2 text-sm outline-none text-white transition-colors" />
             </div>
           </form>
         </div>

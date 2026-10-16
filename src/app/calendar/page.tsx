@@ -440,7 +440,7 @@ export default function CalendarPage() {
             <form onSubmit={handleSubmit(handleCreateEvent)} className="p-6 space-y-4">
               <div className="space-y-1.5">
                 <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Appointment Title</label>
-                <input type="text" {...register('title')} required placeholder="e.g. In-Home Medical Visit" className="w-full bg-[#141414] border border-[#262626] focus:border-orange-500 rounded-lg px-3 py-2 text-sm text-white outline-none" />
+                <input aria-label="eg In-Home Medical Visit" type="text" {...register('title')} required placeholder="e.g. In-Home Medical Visit" className="w-full bg-[#141414] border border-[#262626] focus:border-orange-500 rounded-lg px-3 py-2 text-sm text-white outline-none" />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
@@ -472,11 +472,11 @@ export default function CalendarPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Start Time</label>
-                  <input type="datetime-local" {...register('startTime')} required className="w-full bg-[#141414] border border-[#262626] focus:border-orange-500 rounded-lg px-3 py-2 text-xs text-white outline-none" />
+                  <input aria-label="W full bg 141414 border border 262626 focusborder orange 500 rounded lg px 3 py 2 text xs text white outline none" type="datetime-local" {...register('startTime')} required className="w-full bg-[#141414] border border-[#262626] focus:border-orange-500 rounded-lg px-3 py-2 text-xs text-white outline-none" />
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">End Time</label>
-                  <input type="datetime-local" {...register('endTime')} required className="w-full bg-[#141414] border border-[#262626] focus:border-orange-500 rounded-lg px-3 py-2 text-xs text-white outline-none" />
+                  <input aria-label="W full bg 141414 border border 262626 focusborder orange 500 rounded lg px 3 py 2 text xs text white outline none" type="datetime-local" {...register('endTime')} required className="w-full bg-[#141414] border border-[#262626] focus:border-orange-500 rounded-lg px-3 py-2 text-xs text-white outline-none" />
                 </div>
               </div>
 

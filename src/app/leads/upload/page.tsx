@@ -65,8 +65,7 @@ export default function LeadUploadPage() {
           onDrop={handleDrop}
           className={`border-2 border-dashed rounded-2xl p-12 text-center transition-colors ${file ? 'border-primary bg-primary/5' : 'border-[#333] hover:border-primary/50 bg-[#111]'}`}
         >
-          <input
-            type="file"
+          <input aria-label="Upload lead CSV or Excel file" type="file"
             id="file-upload"
             className="hidden"
             accept=".xlsx,.csv"

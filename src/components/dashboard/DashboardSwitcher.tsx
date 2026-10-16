@@ -149,7 +149,7 @@ export function DashboardSwitcher({
           {/* Start Date */}
           <div className="flex flex-col">
             <span className="text-[9px] text-slate-500 font-bold uppercase tracking-wider mb-1">Start Date</span>
-            <input 
+            <input aria-label="Input field" 
               type="date" 
               value={startDate}
               onChange={(e) => setFilters({ startDate: e.target.value })}
@@ -159,7 +159,7 @@ export function DashboardSwitcher({
           {/* End Date */}
           <div className="flex flex-col">
             <span className="text-[9px] text-slate-500 font-bold uppercase tracking-wider mb-1">End Date</span>
-            <input 
+            <input aria-label="Input field" 
               type="date" 
               value={endDate}
               onChange={(e) => setFilters({ endDate: e.target.value })}

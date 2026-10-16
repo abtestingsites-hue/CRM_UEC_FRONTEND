@@ -19,7 +19,7 @@ export default function AgentAISummary() {
         <div className="p-4 border-b border-[#222] flex items-center">
           <div className="relative w-72">
             <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
-            <input 
+            <input aria-label="Input field" 
               type="text" 
               placeholder="Search your call summaries..." 
               className="w-full bg-[#111] border border-[#333] focus:border-primary rounded-lg pl-9 pr-3 py-2 text-sm outline-none text-white transition-all placeholder-slate-500"

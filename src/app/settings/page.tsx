@@ -123,7 +123,7 @@ const EnterpriseTableWorkspace = ({ columns, data, primaryAction, searchPlacehol
       <div className="flex justify-between items-center mb-4 bg-[#101010] p-4 border border-[#1e1e1e] rounded-xl shadow-lg">
         <div className="relative">
           <Search className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
-          <input 
+          <input aria-label="Input field" 
             type="text" 
             placeholder={searchPlaceholder || "Search records..."}
             className="bg-[#141414] border border-[#222] rounded-lg pl-9 pr-4 py-2 text-xs text-white outline-none focus:border-orange-500 w-72 transition-colors"
@@ -277,15 +277,15 @@ export default function SettingsPage() {
             <div className="grid grid-cols-2 gap-5">
               <div className="space-y-1.5">
                 <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Company Name</label>
-                <input type="text" defaultValue="ElderCare CRM" className="w-full bg-[#101010] border border-[#222] focus:border-orange-500 rounded-lg px-4 py-2 text-sm text-white outline-none" />
+                <input aria-label="W full bg 101010 border border 222 focusborder orange 500 rounded lg px 4 py 2 text sm text white outline none" type="text" defaultValue="ElderCare CRM" className="w-full bg-[#101010] border border-[#222] focus:border-orange-500 rounded-lg px-4 py-2 text-sm text-white outline-none" />
               </div>
               <div className="space-y-1.5">
                 <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Tax Registration (GST/VAT)</label>
-                <input type="text" defaultValue="29ABCDE1234F1Z5" className="w-full bg-[#101010] border border-[#222] focus:border-orange-500 rounded-lg px-4 py-2 text-sm text-white outline-none" />
+                <input aria-label="W full bg 101010 border border 222 focusborder orange 500 rounded lg px 4 py 2 text sm text white outline none" type="text" defaultValue="29ABCDE1234F1Z5" className="w-full bg-[#101010] border border-[#222] focus:border-orange-500 rounded-lg px-4 py-2 text-sm text-white outline-none" />
               </div>
               <div className="space-y-1.5 col-span-2">
                 <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Corporate Website</label>
-                <input type="url" defaultValue="https://www.eldercarecrm.com" className="w-full bg-[#101010] border border-[#222] focus:border-orange-500 rounded-lg px-4 py-2 text-sm text-white outline-none" />
+                <input aria-label="W full bg 101010 border border 222 focusborder orange 500 rounded lg px 4 py 2 text sm text white outline none" type="url" defaultValue="https://www.eldercarecrm.com" className="w-full bg-[#101010] border border-[#222] focus:border-orange-500 rounded-lg px-4 py-2 text-sm text-white outline-none" />
               </div>
               <div className="space-y-1.5 col-span-2">
                 <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Registered Address</label>
@@ -399,11 +399,11 @@ export default function SettingsPage() {
             <div className="grid grid-cols-2 gap-5">
               <div className="space-y-1.5 col-span-2">
                 <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">SMTP Host</label>
-                <input type="text" defaultValue="smtp.office365.com" className="w-full bg-[#101010] border border-[#222] focus:border-orange-500 rounded-lg px-4 py-2 text-sm text-white outline-none" />
+                <input aria-label="W full bg 101010 border border 222 focusborder orange 500 rounded lg px 4 py 2 text sm text white outline none" type="text" defaultValue="smtp.office365.com" className="w-full bg-[#101010] border border-[#222] focus:border-orange-500 rounded-lg px-4 py-2 text-sm text-white outline-none" />
               </div>
               <div className="space-y-1.5">
                 <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">SMTP Port</label>
-                <input type="number" defaultValue={587} className="w-full bg-[#101010] border border-[#222] focus:border-orange-500 rounded-lg px-4 py-2 text-sm text-white outline-none" />
+                <input aria-label="W full bg 101010 border border 222 focusborder orange 500 rounded lg px 4 py 2 text sm text white outline none" type="number" defaultValue={587} className="w-full bg-[#101010] border border-[#222] focus:border-orange-500 rounded-lg px-4 py-2 text-sm text-white outline-none" />
               </div>
               <div className="space-y-1.5">
                 <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Encryption Protocol</label>
@@ -415,11 +415,11 @@ export default function SettingsPage() {
               </div>
               <div className="space-y-1.5">
                 <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Username / Email Auth</label>
-                <input type="text" defaultValue="alerts@eldercarecrm.com" className="w-full bg-[#101010] border border-[#222] focus:border-orange-500 rounded-lg px-4 py-2 text-sm text-white outline-none" />
+                <input aria-label="W full bg 101010 border border 222 focusborder orange 500 rounded lg px 4 py 2 text sm text white outline none" type="text" defaultValue="alerts@eldercarecrm.com" className="w-full bg-[#101010] border border-[#222] focus:border-orange-500 rounded-lg px-4 py-2 text-sm text-white outline-none" />
               </div>
               <div className="space-y-1.5">
                 <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Password / App Password</label>
-                <input type="password" defaultValue="********" className="w-full bg-[#101010] border border-[#222] focus:border-orange-500 rounded-lg px-4 py-2 text-sm text-white outline-none" />
+                <input aria-label="W full bg 101010 border border 222 focusborder orange 500 rounded lg px 4 py 2 text sm text white outline none" type="password" defaultValue="********" className="w-full bg-[#101010] border border-[#222] focus:border-orange-500 rounded-lg px-4 py-2 text-sm text-white outline-none" />
               </div>
             </div>
           </EnterpriseFormWorkspace>
@@ -526,7 +526,7 @@ export default function SettingsPage() {
             </h1>
             <div className="relative mt-4">
               <Search className="w-3.5 h-3.5 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
-              <input 
+              <input aria-label="Input field" 
                 type="text" 
                 placeholder="Search settings..." 
                 value={searchQuery}

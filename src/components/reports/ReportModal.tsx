@@ -148,7 +148,7 @@ export const ReportModal: React.FC<ReportModalProps> = ({ leadId, isOpen, onClos
             
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-2 bg-[#1a1a1a] border border-[#333] rounded-lg p-1 mr-2">
-                <input 
+                <input aria-label="Input field" 
                   type="email" 
                   placeholder="manager@company.com" 
                   className="bg-transparent text-sm text-white px-3 py-1.5 outline-none w-48 placeholder-slate-500"

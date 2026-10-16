@@ -126,8 +126,7 @@ export default function LoginPage() {
                 <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">Email Address</label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-                  <input
-                    type="email"
+                  <input aria-label="Email address" id="login-email" type="email"
                     {...register('email')}
                     className="w-full bg-[#141414] border border-[#262626] focus:border-orange-500 rounded-lg pl-10 pr-4 py-2.5 text-sm text-white placeholder-slate-600 outline-none transition-all"
                     placeholder="name@company.com"
@@ -145,8 +144,7 @@ export default function LoginPage() {
                 </div>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-                  <input
-                    type="password"
+                  <input aria-label="Password" id="login-password" type="password"
                     {...register('password')}
                     className="w-full bg-[#141414] border border-[#262626] focus:border-orange-500 rounded-lg pl-10 pr-4 py-2.5 text-sm text-white placeholder-slate-600 outline-none transition-all"
                     placeholder="••••••••"
@@ -159,8 +157,7 @@ export default function LoginPage() {
 
               {/* Remember Me Checkbox */}
               <div className="flex items-center gap-2 py-1">
-                <input
-                  type="checkbox"
+                <input aria-label="Remember me" id="login-remember" type="checkbox"
                   id="rememberMe"
                   {...register('rememberMe')}
                   className="rounded border-[#262626] bg-[#141414] text-orange-500 focus:ring-orange-500"

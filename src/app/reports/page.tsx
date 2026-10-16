@@ -404,7 +404,7 @@ export default function ReportsPage() {
             {/* Start Date */}
             <div className="flex flex-col">
               <span className="text-[9px] text-slate-500 font-bold uppercase tracking-wider mb-1">Start Date</span>
-              <input 
+              <input aria-label="Input field" 
                 type="date" 
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
@@ -414,7 +414,7 @@ export default function ReportsPage() {
             {/* End Date */}
             <div className="flex flex-col">
               <span className="text-[9px] text-slate-500 font-bold uppercase tracking-wider mb-1">End Date</span>
-              <input 
+              <input aria-label="Input field" 
                 type="date" 
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
@@ -651,7 +651,7 @@ export default function ReportsPage() {
             <div className="p-6 space-y-4">
               <div className="space-y-1.5">
                 <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Cron Schedule Pattern</label>
-                <input 
+                <input aria-label="Input field" 
                   type="text" 
                   value={cronExpression} 
                   onChange={(e) => setCronExpression(e.target.value)}
@@ -691,7 +691,7 @@ export default function ReportsPage() {
             <div className="p-6 space-y-4">
               <div className="space-y-1.5">
                 <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Recipient Email Address</label>
-                <input 
+                <input aria-label="Input field" 
                   type="email" 
                   value={emailInput} 
                   onChange={(e) => setEmailInput(e.target.value)}

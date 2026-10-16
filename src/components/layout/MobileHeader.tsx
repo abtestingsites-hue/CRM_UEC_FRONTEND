@@ -56,8 +56,7 @@ export function MobileHeader({ shouldShowAgentShell, onOpenMenu }: MobileHeaderP
       {isSearchOpen ? (
         <div className="flex-1 flex items-center gap-2 animate-in fade-in duration-150">
           <Search className="w-4 h-4 text-slate-400 shrink-0" />
-          <input
-            type="text"
+          <input aria-label="Search" id="mobile-search-input" type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search CRM..."

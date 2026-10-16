@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useState, useEffect } from 'react';
 import { Users, Phone, PhoneOutgoing, Video, ShieldCheck, PhoneCall, PhoneOff } from "lucide-react";
@@ -209,8 +209,7 @@ export default function AgentCallCenter() {
                     <PhoneOutgoing className="w-5 h-5 text-primary" /> Outbound Dialer
                   </h2>
                   <div className="flex flex-col sm:flex-row gap-2 w-full">
-                    <input
-                      id="outbound-phone"
+                    <input id="outbound-phone" aria-label="Enter customer phone number"
                       type="text"
                       placeholder="Enter customer phone number (+91...)"
                       className="flex-1 bg-[#111] border border-[#333] rounded-lg px-4 py-2 text-white outline-none focus:border-primary text-sm"

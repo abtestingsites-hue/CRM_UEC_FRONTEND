@@ -611,7 +611,7 @@ export default function TargetManagementPage() {
 
               <div className="flex flex-col">
                 <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1.5">Conversion Count Target</span>
-                <input 
+                <input aria-label="Input field" 
                   type="number" 
                   value={newTargetVal} 
                   onChange={(e) => setNewTargetVal(Number(e.target.value))}

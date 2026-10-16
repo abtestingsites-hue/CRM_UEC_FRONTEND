@@ -176,7 +176,7 @@ export function ReportsAnalyticsDashboard() {
               <h2 className="text-md font-bold text-white">Schedule Report Dispatch</h2>
             </div>
             <div className="p-6 space-y-4">
-              <input 
+              <input aria-label="Input field" 
                 type="text" 
                 value={cronExpression} 
                 onChange={(e) => setCronExpression(e.target.value)}
