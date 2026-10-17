@@ -1,0 +1,26 @@
+﻿Γû╢ DEF-10: Automation Rules & Settings Department API Integration
+  Γû╢ Workflow Automation CRUD Endpoints
+    Γ£ö DEF10-AUTO-01: POST /api/v1/automations creates a new automation rule with persistence (1404.6183ms)
+    Γ£ö DEF10-AUTO-02: GET /api/v1/automations returns list including the newly created rule (1430ms)
+    Γ£ö DEF10-AUTO-03: PATCH /api/v1/automations/:id/toggle flips isActive status (3264.2588ms)
+    Γ£ö DEF10-AUTO-04: PUT /api/v1/automations/:id updates rule configuration (2503.6692ms)
+    Γ£ö DEF10-AUTO-05: DELETE /api/v1/automations/:id removes rule cleanly (3167.1159ms)
+  Γ£ö Workflow Automation CRUD Endpoints (11785.6696ms)
+  Γû╢ Settings Department CRUD Endpoints
+    Γ£ö DEF10-DEPT-01: POST /api/v1/departments creates a new department record (1985.6576ms)
+    Γ£ö DEF10-DEPT-02: GET /api/v1/departments returns list including new department (1215.5162ms)
+    Γ£ö DEF10-DEPT-03: DELETE /api/v1/departments/:id deletes department (1426.0733ms)
+  Γ£ö Settings Department CRUD Endpoints (4635.3942ms)
+  Γû╢ Security & RBAC Enforcement on Unwired Modules
+    Γ£ö DEF10-SEC-01: Unauthenticated callers are rejected with 401 Unauthorized (32.5456ms)
+    Γ£ö DEF10-SEC-02: Non-elevated AGENT role cannot mutate automations or departments (403) (644.235ms)
+  Γ£ö Security & RBAC Enforcement on Unwired Modules (678.5366ms)
+Γ£ö DEF-10: Automation Rules & Settings Department API Integration (17104.3373ms)
+Γä╣ tests 10
+Γä╣ suites 4
+Γä╣ pass 10
+Γä╣ fail 0
+Γä╣ cancelled 0
+Γä╣ skipped 0
+Γä╣ todo 0
+Γä╣ duration_ms 17124.6841

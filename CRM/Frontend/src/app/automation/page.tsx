@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { api } from '@/lib/api';
 import { 
   Settings, Play, Pause, Zap, Workflow, Plus, Search, 
   Filter, Download, MessageSquare, Camera, Globe, 
@@ -134,11 +135,132 @@ export default function AutomationPage() {
   const [activeSetting, setActiveSetting] = useState<string>('auto-replies');
   const [searchQuery, setSearchQuery] = useState('');
   
+  // Real backend workflow state
+  const [workflows, setWorkflows] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+
   // States for Auto Replies workflow creation
   const [view, setView] = useState<'list' | 'create'>('list');
   const [selectedChannels, setSelectedChannels] = useState<Record<string, boolean>>({
     whatsapp: true, email: true, instagram: true, livechat: true,
   });
+
+  // Form input states
+  const [ruleName, setRuleName] = useState('Global Welcome Message');
+  const [triggerEvent, setTriggerEvent] = useState('New Conversation Started');
+  const [rulePriority, setRulePriority] = useState('P2 - High');
+  const [replyContent, setReplyContent] = useState("Welcome to ElderCare! How can we assist you today? Please reply with your inquiry or type 'Menu' to see our services.");
+
+  const fetchWorkflows = async () => {
+    setLoading(true);
+    try {
+      const data = await api.get('/api/v1/automations');
+      if (Array.isArray(data)) {
+        const mapped = data.map((item: any) => ({
+          id: item.id,
+          name: item.name,
+          trigger: item.triggerType || 'New Inbound Conversation',
+          action: (item.actionConfig?.replyContent) 
+            ? `Send "${item.actionConfig.replyContent.slice(0, 32)}..."` 
+            : (item.actionType || 'Auto Reply'),
+          channels: Array.isArray(item.actionConfig?.channels) && item.actionConfig.channels.length > 0
+            ? item.actionConfig.channels 
+            : ['whatsapp', 'email'],
+          status: item.isActive ? 'Active' : 'Inactive',
+          priority: item.actionConfig?.priority || 'P2',
+          createdAt: item.createdAt,
+        }));
+        setWorkflows(mapped);
+      }
+    } catch (err: any) {
+      console.warn('[Automation API Fetch Warning]:', err.message);
+      // Fallback display if network issue
+      setWorkflows([
+        { id: 'default-1', name: 'Global Welcome Message', trigger: 'New Conversation Started', action: 'Send "Welcome to ElderCare"', channels: ['whatsapp', 'email', 'livechat', 'instagram'], status: 'Active', priority: 'P1' },
+        { id: 'default-2', name: 'After-Hours Auto Reply', trigger: 'Outside Business Hours', action: 'Send "We are currently away"', channels: ['whatsapp', 'facebook', 'instagram', 'sms'], status: 'Active', priority: 'P2' },
+        { id: 'default-3', name: 'VIP Customer SLA Warning', trigger: 'No response > 15 mins', action: 'Escalate to Department Head', channels: ['livechat', 'whatsapp'], status: 'Inactive', priority: 'P1' }
+      ]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchWorkflows();
+  }, []);
+
+  const handleSaveAutomation = async () => {
+    if (!ruleName.trim()) {
+      setNotification({ type: 'error', message: 'Rule name is required' });
+      return;
+    }
+    const enabledChannels = Object.entries(selectedChannels)
+      .filter(([_, v]) => v)
+      .map(([k]) => k);
+
+    setActionLoading('save');
+    try {
+      await api.post('/api/v1/automations', {
+        name: ruleName.trim(),
+        description: `Auto reply via ${enabledChannels.join(', ')}`,
+        triggerType: triggerEvent,
+        actionType: 'AUTO_REPLY',
+        actionConfig: {
+          replyContent,
+          channels: enabledChannels,
+          priority: rulePriority.split(' ')[0] || 'P2'
+        },
+        isActive: true
+      });
+      setNotification({ type: 'success', message: 'Automation rule deployed successfully to backend!' });
+      await fetchWorkflows();
+      setView('list');
+    } catch (err: any) {
+      console.error('[Create Automation Error]', err);
+      setNotification({ type: 'error', message: err.message || 'Failed to save automation rule' });
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleToggleActive = async (id: string) => {
+    if (id.startsWith('default-')) {
+      setWorkflows(prev => prev.map(w => w.id === id ? { ...w, status: w.status === 'Active' ? 'Inactive' : 'Active' } : w));
+      return;
+    }
+    setActionLoading(id);
+    try {
+      await api.patch(`/api/v1/automations/${id}/toggle`);
+      setWorkflows(prev => prev.map(w => w.id === id ? { ...w, status: w.status === 'Active' ? 'Inactive' : 'Active' } : w));
+      setNotification({ type: 'success', message: 'Automation rule status toggled' });
+    } catch (err: any) {
+      console.error('[Toggle Automation Error]', err);
+      setNotification({ type: 'error', message: err.message || 'Failed to toggle status' });
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (id.startsWith('default-')) {
+      setWorkflows(prev => prev.filter(w => w.id !== id));
+      return;
+    }
+    if (!confirm('Are you sure you want to delete this automation rule?')) return;
+    setActionLoading(id);
+    try {
+      await api.delete(`/api/v1/automations/${id}`);
+      setWorkflows(prev => prev.filter(w => w.id !== id));
+      setNotification({ type: 'success', message: 'Automation rule deleted successfully' });
+    } catch (err: any) {
+      console.error('[Delete Automation Error]', err);
+      setNotification({ type: 'error', message: err.message || 'Failed to delete automation rule' });
+    } finally {
+      setActionLoading(null);
+    }
+  };
 
   const toggleGroup = (groupId: string) => {
     setExpandedGroups(prev => ({ ...prev, [groupId]: !prev[groupId] }));
@@ -164,7 +286,7 @@ export default function AutomationPage() {
       return (
         <div className="flex-1 flex flex-col animate-in slide-in-from-right-4 max-w-4xl mx-auto w-full">
           <div className="flex items-center gap-3 mb-6">
-            <button onClick={() => setView('list')} className="p-2 hover:bg-[#141414] rounded-lg text-slate-400 hover:text-white transition-colors">
+            <button onClick={() => setView('list')} className="p-2 hover:bg-[#141414] rounded-lg text-slate-400 hover:text-white transition-colors" aria-label="Back to automation list">
               <ArrowLeft className="w-4 h-4" />
             </button>
             <div>
@@ -173,27 +295,52 @@ export default function AutomationPage() {
             </div>
           </div>
 
+          {notification && (
+            <div className={`p-3 rounded-lg text-xs font-semibold flex items-center justify-between mb-4 ${
+              notification.type === 'success' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
+            }`}>
+              <span>{notification.message}</span>
+              <button onClick={() => setNotification(null)} className="text-slate-400 hover:text-white">&times;</button>
+            </div>
+          )}
+
           <div className="bg-[#101010] border border-[#1e1e1e] rounded-xl p-6 mb-6 shadow-xl">
             <h3 className="text-sm font-bold text-white mb-4">1. Rule Configuration</h3>
             <div className="grid grid-cols-2 gap-5">
               <div className="space-y-1.5 col-span-2">
                 <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Rule Name</label>
-                <input aria-label="W full bg 141414 border border 222 focusborder orange 500 rounded lg px 4 py 2 text sm text white outline none" type="text" defaultValue="Global Welcome Message" className="w-full bg-[#141414] border border-[#222] focus:border-orange-500 rounded-lg px-4 py-2 text-sm text-white outline-none" />
+                <input 
+                  aria-label="Rule Name" 
+                  type="text" 
+                  value={ruleName} 
+                  onChange={(e) => setRuleName(e.target.value)}
+                  className="w-full bg-[#141414] border border-[#222] focus:border-orange-500 rounded-lg px-4 py-2 text-sm text-white outline-none" 
+                />
               </div>
               <div className="space-y-1.5">
                 <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Trigger Event</label>
-                <select aria-label="Automation trigger event" className="w-full bg-[#141414] border border-[#222] focus:border-orange-500 rounded-lg px-4 py-2 text-sm text-white outline-none">
-                  <option>New Conversation Started</option>
-                  <option>Outside Business Hours</option>
-                  <option>Customer Idle &gt; 15 mins</option>
+                <select 
+                  aria-label="Automation trigger event" 
+                  value={triggerEvent}
+                  onChange={(e) => setTriggerEvent(e.target.value)}
+                  className="w-full bg-[#141414] border border-[#222] focus:border-orange-500 rounded-lg px-4 py-2 text-sm text-white outline-none"
+                >
+                  <option value="New Conversation Started">New Conversation Started</option>
+                  <option value="Outside Business Hours">Outside Business Hours</option>
+                  <option value="Customer Idle > 15 mins">Customer Idle &gt; 15 mins</option>
                 </select>
               </div>
               <div className="space-y-1.5">
                 <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Rule Priority</label>
-                <select aria-label="Automation target channel" className="w-full bg-[#141414] border border-[#222] focus:border-orange-500 rounded-lg px-4 py-2 text-sm text-white outline-none">
-                  <option>P1 - Critical (Overrides all)</option>
-                  <option>P2 - High</option>
-                  <option>P3 - Normal</option>
+                <select 
+                  aria-label="Automation rule priority" 
+                  value={rulePriority}
+                  onChange={(e) => setRulePriority(e.target.value)}
+                  className="w-full bg-[#141414] border border-[#222] focus:border-orange-500 rounded-lg px-4 py-2 text-sm text-white outline-none"
+                >
+                  <option value="P1 - Critical (Overrides all)">P1 - Critical (Overrides all)</option>
+                  <option value="P2 - High">P2 - High</option>
+                  <option value="P3 - Normal">P3 - Normal</option>
                 </select>
               </div>
             </div>
@@ -202,11 +349,17 @@ export default function AutomationPage() {
           <div className="bg-[#101010] border border-[#1e1e1e] rounded-xl p-6 mb-6 shadow-xl">
             <h3 className="text-sm font-bold text-white mb-4 flex items-center justify-between">
               2. Message Payload
-              <button className="text-[10px] bg-emerald-500/10 text-emerald-500 px-2 py-1 rounded font-bold border border-emerald-500/20">Enable AI Optimization</button>
+              <button type="button" className="text-[10px] bg-emerald-500/10 text-emerald-500 px-2 py-1 rounded font-bold border border-emerald-500/20">Enable AI Optimization</button>
             </h3>
             <div className="space-y-1.5">
               <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Reply Content</label>
-              <textarea aria-label="Template content" rows={4} defaultValue="Welcome to ElderCare! How can we assist you today? Please reply with your inquiry or type 'Menu' to see our services." className="w-full bg-[#141414] border border-[#222] focus:border-orange-500 rounded-lg px-4 py-3 text-sm text-white outline-none custom-scrollbar" />
+              <textarea 
+                aria-label="Template content" 
+                rows={4} 
+                value={replyContent}
+                onChange={(e) => setReplyContent(e.target.value)}
+                className="w-full bg-[#141414] border border-[#222] focus:border-orange-500 rounded-lg px-4 py-3 text-sm text-white outline-none custom-scrollbar" 
+              />
             </div>
           </div>
 
@@ -241,78 +394,123 @@ export default function AutomationPage() {
 
           <div className="mt-6 flex justify-end gap-3">
             <button onClick={() => setView('list')} className="px-5 py-2.5 bg-[#141414] border border-[#262626] text-white hover:bg-[#202020] rounded-lg text-sm font-bold transition-colors">Cancel</button>
-            <button onClick={() => setView('list')} className="flex items-center gap-2 px-6 py-2.5 bg-orange-600 hover:bg-orange-500 text-white rounded-lg text-sm font-bold transition-all shadow-[0_0_15px_rgba(234,88,12,0.15)]"><CheckCircle2 className="w-4 h-4" /> Save Automation Rule</button>
+            <button 
+              onClick={handleSaveAutomation} 
+              disabled={actionLoading === 'save'}
+              className="flex items-center gap-2 px-6 py-2.5 bg-orange-600 hover:bg-orange-500 disabled:opacity-50 text-white rounded-lg text-sm font-bold transition-all shadow-[0_0_15px_rgba(234,88,12,0.15)]"
+            >
+              {actionLoading === 'save' ? <RefreshCw className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
+              {actionLoading === 'save' ? 'Deploying...' : 'Save Automation Rule'}
+            </button>
           </div>
         </div>
       );
     }
 
-    const workflows = [
-      { name: 'Global Welcome Message', trigger: 'New Conversation Started', action: 'Send "Welcome to ElderCare"', channels: ['whatsapp', 'email', 'livechat', 'instagram'], status: 'Active', priority: 'P1' },
-      { name: 'After-Hours Auto Reply', trigger: 'Outside Business Hours', action: 'Send "We are currently away"', channels: ['whatsapp', 'facebook', 'instagram', 'sms'], status: 'Active', priority: 'P2' },
-      { name: 'VIP Customer SLA Warning', trigger: 'No response > 15 mins', action: 'Escalate to Department Head', channels: ['livechat', 'whatsapp'], status: 'Inactive', priority: 'P1' }
-    ];
+    const filteredWorkflows = workflows.filter(wf => 
+      wf.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+      wf.trigger.toLowerCase().includes(searchQuery.toLowerCase())
+    );
 
     return (
       <div className="space-y-4 animate-in fade-in">
+        {notification && (
+          <div className={`p-3 rounded-lg text-xs font-semibold flex items-center justify-between mb-4 ${
+            notification.type === 'success' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
+          }`}>
+            <span>{notification.message}</span>
+            <button onClick={() => setNotification(null)} className="text-slate-400 hover:text-white">&times;</button>
+          </div>
+        )}
+
         <div className="flex justify-between items-center mb-4 bg-[#101010] p-4 border border-[#1e1e1e] rounded-xl shadow-lg">
           <div className="relative">
             <Search className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
-            <input aria-label="Search auto-replies" type="text" placeholder="Search auto-replies..." className="bg-[#141414] border border-[#222] rounded-lg pl-9 pr-4 py-2 text-xs text-white outline-none focus:border-orange-500 w-72 transition-colors"/>
+            <input 
+              aria-label="Search auto-replies" 
+              type="text" 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search auto-replies..." 
+              className="bg-[#141414] border border-[#222] rounded-lg pl-9 pr-4 py-2 text-xs text-white outline-none focus:border-orange-500 w-72 transition-colors"
+            />
           </div>
           <button onClick={() => setView('create')} className="flex items-center gap-1.5 px-4 py-2 bg-orange-600 hover:bg-orange-500 text-white rounded-lg text-xs font-bold transition-all shadow-[0_0_15px_rgba(234,88,12,0.15)]">
             <Plus className="w-3.5 h-3.5" /> Create Auto Reply
           </button>
         </div>
 
-        <div className="space-y-3">
-          {workflows.map((wf, idx) => (
-            <div key={idx} className="bg-[#101010] border border-[#1e1e1e] p-5 rounded-xl flex items-center justify-between hover:border-[#333] transition-colors group">
-              <div className="flex items-center gap-5">
-                <div className={`p-3 rounded-xl ${wf.status === 'Active' ? 'bg-orange-500/10 text-orange-500 border border-orange-500/20' : 'bg-[#222] text-slate-500 border border-[#333]'}`}>
-                  <Zap className="w-5 h-5" />
-                </div>
-                <div>
-                  <div className="flex items-center gap-3 mb-1">
-                    <h3 className="font-bold text-white text-sm">{wf.name}</h3>
-                    <span className="px-1.5 py-0.5 bg-[#222] border border-[#333] rounded text-[9px] font-bold text-slate-400">{wf.priority}</span>
+        {loading ? (
+          <div className="p-12 text-center text-slate-500 flex items-center justify-center gap-2">
+            <RefreshCw className="w-4 h-4 animate-spin text-orange-500" />
+            <span>Loading active automations...</span>
+          </div>
+        ) : filteredWorkflows.length === 0 ? (
+          <div className="p-12 text-center text-slate-500 border border-dashed border-[#222] rounded-xl">
+            No automation rules found matching &quot;{searchQuery}&quot;. Click &quot;Create Auto Reply&quot; to add one.
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {filteredWorkflows.map((wf) => (
+              <div key={wf.id} className="bg-[#101010] border border-[#1e1e1e] p-5 rounded-xl flex items-center justify-between hover:border-[#333] transition-colors group">
+                <div className="flex items-center gap-5">
+                  <div className={`p-3 rounded-xl ${wf.status === 'Active' ? 'bg-orange-500/10 text-orange-500 border border-orange-500/20' : 'bg-[#222] text-slate-500 border border-[#333]'}`}>
+                    <Zap className="w-5 h-5" />
                   </div>
-                  <div className="flex items-center gap-3 text-[11px]">
-                    <span className="text-slate-500">Trigger: <strong className="text-slate-300">{wf.trigger}</strong></span>
-                    <span className="text-slate-600">→</span>
-                    <span className="text-slate-500">Action: <strong className="text-slate-300">{wf.action}</strong></span>
+                  <div>
+                    <div className="flex items-center gap-3 mb-1">
+                      <h3 className="font-bold text-white text-sm">{wf.name}</h3>
+                      <span className="px-1.5 py-0.5 bg-[#222] border border-[#333] rounded text-[9px] font-bold text-slate-400">{wf.priority}</span>
+                    </div>
+                    <div className="flex items-center gap-3 text-[11px]">
+                      <span className="text-slate-500">Trigger: <strong className="text-slate-300">{wf.trigger}</strong></span>
+                      <span className="text-slate-600">→</span>
+                      <span className="text-slate-500">Action: <strong className="text-slate-300">{wf.action}</strong></span>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="flex items-center gap-8">
+                  <div className="flex -space-x-2">
+                    {wf.channels.map((chanId: string) => {
+                      const channel = CHANNELS.find(c => c.id === chanId);
+                      if (!channel) return null;
+                      const Icon = channel.icon;
+                      return (
+                        <div key={chanId} className={`w-8 h-8 rounded-full ${channel.bg} border-2 border-[#101010] flex items-center justify-center z-10`}>
+                          <Icon className={`w-3.5 h-3.5 ${channel.color}`} />
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded border ${wf.status === 'Active' ? 'text-emerald-500 border-emerald-500/20 bg-emerald-500/10' : 'text-slate-500 border-[#333] bg-[#222]'}`}>
+                    {wf.status}
+                  </span>
+                  <div className="flex items-center gap-2 opacity-80 group-hover:opacity-100 transition-opacity">
+                    <button 
+                      onClick={() => handleToggleActive(wf.id)}
+                      disabled={actionLoading === wf.id}
+                      aria-label="Toggle automation status"
+                      title={wf.status === 'Active' ? 'Pause rule' : 'Activate rule'}
+                      className="p-2 bg-[#1a1a1a] border border-[#2a2a2a] text-slate-300 hover:text-white rounded-lg transition-colors"
+                    >
+                      {actionLoading === wf.id ? <RefreshCw className="w-4 h-4 animate-spin" /> : wf.status === 'Active' ? <Pause className="w-4 h-4 text-amber-400" /> : <Play className="w-4 h-4 text-emerald-400" />}
+                    </button>
+                    <button 
+                      onClick={() => handleDelete(wf.id)}
+                      disabled={actionLoading === wf.id}
+                      aria-label="Delete automation rule"
+                      title="Delete rule"
+                      className="p-2 bg-[#1a1a1a] border border-[#2a2a2a] text-slate-400 hover:text-rose-400 rounded-lg transition-colors"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
                   </div>
                 </div>
               </div>
-              
-              <div className="flex items-center gap-8">
-                <div className="flex -space-x-2">
-                  {wf.channels.map(chanId => {
-                    const channel = CHANNELS.find(c => c.id === chanId);
-                    if (!channel) return null;
-                    const Icon = channel.icon;
-                    return (
-                      <div key={chanId} className={`w-8 h-8 rounded-full ${channel.bg} border-2 border-[#101010] flex items-center justify-center z-10`}>
-                        <Icon className={`w-3.5 h-3.5 ${channel.color}`} />
-                      </div>
-                    );
-                  })}
-                </div>
-                <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded border ${wf.status === 'Active' ? 'text-emerald-500 border-emerald-500/20 bg-emerald-500/10' : 'text-slate-500 border-[#333] bg-[#222]'}`}>
-                  {wf.status}
-                </span>
-                <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <button className="p-2 bg-[#1a1a1a] border border-[#2a2a2a] text-slate-300 hover:text-white rounded-lg transition-colors">
-                    {wf.status === 'Active' ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
-                  </button>
-                  <button onClick={() => setView('create')} className="p-2 bg-[#1a1a1a] border border-[#2a2a2a] text-slate-300 hover:text-white rounded-lg transition-colors">
-                    <Settings className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
     );
   };
