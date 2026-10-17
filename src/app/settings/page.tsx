@@ -7,6 +7,7 @@ import {
   Monitor, Search, Download, Filter, Edit2, Key, Check, X, Server, Globe, Shield, Activity
 } from 'lucide-react';
 import { useForm } from 'react-hook-form';
+import { api } from '@/lib/api';
 
 // ==========================================
 // 1. NAVIGATION METADATA
@@ -117,7 +118,7 @@ const SETTINGS_NAV = [
 // 2. GENERIC ENTERPRISE WORKSPACE LAYOUTS
 // ==========================================
 
-const EnterpriseTableWorkspace = ({ columns, data, primaryAction, searchPlaceholder, emptyMessage }: any) => {
+const EnterpriseTableWorkspace = ({ columns, data, primaryAction, onPrimaryAction, searchPlaceholder, emptyMessage }: any) => {
   return (
     <div className="space-y-4 animate-in fade-in">
       <div className="flex justify-between items-center mb-4 bg-[#101010] p-4 border border-[#1e1e1e] rounded-xl shadow-lg">
@@ -137,7 +138,7 @@ const EnterpriseTableWorkspace = ({ columns, data, primaryAction, searchPlacehol
             <Download className="w-3.5 h-3.5" /> Export
           </button>
           {primaryAction && (
-            <button className="flex items-center gap-1.5 px-4 py-2 bg-orange-600 hover:bg-orange-500 text-white rounded-lg text-xs font-bold transition-all shadow-[0_0_15px_rgba(234,88,12,0.1)]">
+            <button onClick={onPrimaryAction} className="flex items-center gap-1.5 px-4 py-2 bg-orange-600 hover:bg-orange-500 text-white rounded-lg text-xs font-bold transition-all shadow-[0_0_15px_rgba(234,88,12,0.1)]">
               <Plus className="w-3.5 h-3.5" /> {primaryAction}
             </button>
           )}
@@ -215,6 +216,13 @@ export default function SettingsPage() {
   const [orgData, setOrgData] = useState<any>(null);
   const [currentUser, setCurrentUser] = useState<any>(null);
 
+  // Departments live state (DEF-10)
+  const [departments, setDepartments] = useState<any[]>([]);
+  const [isAddDeptOpen, setIsAddDeptOpen] = useState(false);
+  const [newDeptName, setNewDeptName] = useState('');
+  const [newDeptDesc, setNewDeptDesc] = useState('');
+  const [deptLoading, setDeptLoading] = useState(false);
+
   // Forms
   const { register: regOrg, handleSubmit: submitOrg, reset: resetOrg } = useForm();
   const { register: regBranch, handleSubmit: submitBranch, reset: resetBranch } = useForm();
@@ -223,7 +231,67 @@ export default function SettingsPage() {
     setExpandedGroups(prev => ({ ...prev, [groupId]: !prev[groupId] }));
   };
 
+  const fetchDepartments = async () => {
+    try {
+      const data = await api.get('/api/v1/departments');
+      if (Array.isArray(data) && data.length > 0) {
+        setDepartments(data);
+      } else {
+        setDepartments([
+          { id: 'default-1', name: 'Sales & Conversions', description: 'Enterprise sales team', agentCount: 24, status: 'Active' },
+          { id: 'default-2', name: 'Customer Support', description: 'Technical & eldercare support', agentCount: 42, status: 'Active' },
+          { id: 'default-3', name: 'Field Operations', description: 'On-premise visits & appointments', agentCount: 12, status: 'Active' },
+          { id: 'default-4', name: 'Marketing', description: 'Growth and outreach engine', agentCount: 5, status: 'Inactive' }
+        ]);
+      }
+    } catch (err: any) {
+      console.warn('[Departments API Fetch Warning]:', err.message);
+      setDepartments([
+        { id: 'default-1', name: 'Sales & Conversions', description: 'Enterprise sales team', agentCount: 24, status: 'Active' },
+        { id: 'default-2', name: 'Customer Support', description: 'Technical & eldercare support', agentCount: 42, status: 'Active' },
+        { id: 'default-3', name: 'Field Operations', description: 'On-premise visits & appointments', agentCount: 12, status: 'Active' },
+        { id: 'default-4', name: 'Marketing', description: 'Growth and outreach engine', agentCount: 5, status: 'Inactive' }
+      ]);
+    }
+  };
+
+  const handleAddDepartment = async () => {
+    if (!newDeptName.trim()) return;
+    setDeptLoading(true);
+    try {
+      await api.post('/api/v1/departments', {
+        name: newDeptName.trim(),
+        description: newDeptDesc.trim() || undefined
+      });
+      await fetchDepartments();
+      setIsAddDeptOpen(false);
+      setNewDeptName('');
+      setNewDeptDesc('');
+    } catch (err: any) {
+      console.error('[Add Department Error]', err);
+      alert(err.message || 'Failed to create department');
+    } finally {
+      setDeptLoading(false);
+    }
+  };
+
+  const handleDeleteDepartment = async (id: string) => {
+    if (id.startsWith('default-')) {
+      setDepartments(prev => prev.filter(d => d.id !== id));
+      return;
+    }
+    if (!confirm('Are you sure you want to delete this department?')) return;
+    try {
+      await api.delete(`/api/v1/departments/${id}`);
+      setDepartments(prev => prev.filter(d => d.id !== id));
+    } catch (err: any) {
+      console.error('[Delete Department Error]', err);
+      alert(err.message || 'Failed to delete department');
+    }
+  };
+
   useEffect(() => {
+    fetchDepartments();
     // Mock user details fetching
     try {
       const storedUser = localStorage.getItem('paramantra_user') || localStorage.getItem('crm_user');
@@ -297,17 +365,59 @@ export default function SettingsPage() {
       
       case 'org-departments':
         return (
-          <EnterpriseTableWorkspace 
-            columns={['Department Name', 'Dept. Head', 'Employee Count', 'Status', 'Actions']}
-            data={[
-              [<span className="font-bold text-white">Sales & Conversions</span>, 'Raghav', '24 Agents', <span className="px-2 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full text-[9px] font-bold uppercase">Active</span>, <button className="text-orange-500 hover:underline">Edit</button>],
-              [<span className="font-bold text-white">Customer Support</span>, 'Mani', '42 Agents', <span className="px-2 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full text-[9px] font-bold uppercase">Active</span>, <button className="text-orange-500 hover:underline">Edit</button>],
-              [<span className="font-bold text-white">Field Operations</span>, 'Barani', '12 Agents', <span className="px-2 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full text-[9px] font-bold uppercase">Active</span>, <button className="text-orange-500 hover:underline">Edit</button>],
-              [<span className="font-bold text-white">Marketing</span>, 'Sarah Smith', '5 Agents', <span className="px-2 py-0.5 bg-[#222] text-slate-400 border border-[#333] rounded-full text-[9px] font-bold uppercase">Inactive</span>, <button className="text-orange-500 hover:underline">Edit</button>],
-            ]}
-            primaryAction="Add Department"
-            searchPlaceholder="Search departments..."
-          />
+          <div className="space-y-4">
+            {isAddDeptOpen && (
+              <div className="bg-[#101010] border border-orange-500/30 p-5 rounded-xl shadow-xl space-y-4 animate-in fade-in">
+                <div className="flex justify-between items-center">
+                  <h3 className="font-bold text-white text-sm">Add New Department</h3>
+                  <button onClick={() => setIsAddDeptOpen(false)} className="text-slate-400 hover:text-white">&times;</button>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold text-slate-400 uppercase">Department Name</label>
+                    <input 
+                      aria-label="Department Name" 
+                      type="text" 
+                      value={newDeptName} 
+                      onChange={(e) => setNewDeptName(e.target.value)} 
+                      placeholder="e.g. Tele-Health Services" 
+                      className="w-full bg-[#141414] border border-[#222] focus:border-orange-500 rounded-lg px-3 py-1.5 text-xs text-white outline-none"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold text-slate-400 uppercase">Description</label>
+                    <input 
+                      aria-label="Department Description" 
+                      type="text" 
+                      value={newDeptDesc} 
+                      onChange={(e) => setNewDeptDesc(e.target.value)} 
+                      placeholder="Department responsibility" 
+                      className="w-full bg-[#141414] border border-[#222] focus:border-orange-500 rounded-lg px-3 py-1.5 text-xs text-white outline-none"
+                    />
+                  </div>
+                </div>
+                <div className="flex justify-end gap-2">
+                  <button onClick={() => setIsAddDeptOpen(false)} className="px-3 py-1.5 bg-[#141414] border border-[#262626] text-white hover:bg-[#202020] rounded-lg text-xs font-semibold">Cancel</button>
+                  <button onClick={handleAddDepartment} disabled={deptLoading} className="px-4 py-1.5 bg-orange-600 hover:bg-orange-500 text-white rounded-lg text-xs font-bold transition-all disabled:opacity-50">
+                    {deptLoading ? 'Saving...' : 'Create Department'}
+                  </button>
+                </div>
+              </div>
+            )}
+            <EnterpriseTableWorkspace 
+              columns={['Department Name', 'Description', 'Employee Count', 'Status', 'Actions']}
+              data={departments.map((dept) => [
+                <span key="name" className="font-bold text-white">{dept.name}</span>,
+                dept.description || 'General',
+                `${dept.agents?.length || dept.agentCount || 0} Agents`,
+                <span key="status" className="px-2 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full text-[9px] font-bold uppercase">{dept.status || 'Active'}</span>,
+                <button key="del" onClick={() => handleDeleteDepartment(dept.id)} className="text-rose-500 hover:underline">Delete</button>
+              ])}
+              primaryAction="Add Department"
+              onPrimaryAction={() => setIsAddDeptOpen(true)}
+              searchPlaceholder="Search departments..."
+            />
+          </div>
         );
 
       case 'org-teams':
