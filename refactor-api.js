@@ -22,22 +22,22 @@ function processFile(filePath) {
   let needsApiFetch = false;
   let needsApiBaseUrl = false;
 
-  // 1. Replace fetch(`http://localhost:4000...`)
-  // Regex looks for fetch('http://localhost:4000/path') or fetch(`http://localhost:4000/path`)
+  // 1. Replace fetch(`https://crm-uec-backend.onrender.com...`)
+  // Regex looks for fetch('https://crm-uec-backend.onrender.com/path') or fetch(`https://crm-uec-backend.onrender.com/path`)
   const fetchRegex = /fetch\s*\(\s*(['"`])http:\/\/localhost:4000(.*?)\1/g;
   if (fetchRegex.test(content)) {
     needsApiFetch = true;
     content = content.replace(fetchRegex, 'apiFetch($1$2$1');
   }
 
-  // Handle template literals with variables e.g. fetch(`http://localhost:4000/api/v1/leads/${id}`)
+  // Handle template literals with variables e.g. fetch(`https://crm-uec-backend.onrender.com/api/v1/leads/${id}`)
   const fetchTemplateRegex = /fetch\s*\(\s*`http:\/\/localhost:4000(.*?)`/g;
   if (fetchTemplateRegex.test(content)) {
     needsApiFetch = true;
     content = content.replace(fetchTemplateRegex, 'apiFetch(`$1`');
   }
 
-  // 2. Replace axios(`http://localhost:4000...`)
+  // 2. Replace axios(`https://crm-uec-backend.onrender.com...`)
   const axiosRegex = /axios(\.[a-z]+)?\s*\(\s*`http:\/\/localhost:4000(.*?)`/g;
   if (axiosRegex.test(content)) {
     needsApiBaseUrl = true;
@@ -49,7 +49,7 @@ function processFile(filePath) {
     content = content.replace(axiosQuoteRegex, 'axios$1(`${API_BASE_URL}$3`');
   }
 
-  // 3. Replace loose variables e.g. let url = 'http://localhost:4000...'
+  // 3. Replace loose variables e.g. let url = 'https://crm-uec-backend.onrender.com...'
   const looseUrlRegex = /(['"`])http:\/\/localhost:4000(.*?)(\1)/g;
   if (looseUrlRegex.test(content)) {
     // Only replace if it wasn't already caught by fetch/axios, but to be safe we replace remaining occurrences with API_BASE_URL string interpolation
