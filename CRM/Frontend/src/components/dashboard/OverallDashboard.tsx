@@ -8,6 +8,7 @@ import { AgentLeaderboard } from './AgentLeaderboard';
 import { SlaGauge } from './SlaGauge';
 import { CallVolumeHeatmap } from './CallVolumeHeatmap';
 import { SentimentTrend } from './SentimentTrend';
+import { OmnichannelEnquiriesChart } from './OmnichannelEnquiriesChart';
 import { RightSidebarPanels } from './RightSidebarPanels';
 
 export function OverallDashboard({ data }: { data?: any }) {
@@ -49,12 +50,18 @@ export function OverallDashboard({ data }: { data?: any }) {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-            <div className="md:col-span-2 bg-[#050505] border border-[#222] rounded-xl p-3">
-              <CallVolumeHeatmap data={data} />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
+            <div className="md:col-span-2">
+              <OmnichannelEnquiriesChart />
             </div>
-            <div className="bg-[#050505] border border-[#222] rounded-xl p-3">
+            <div>
               <SentimentTrend data={data} />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 gap-3">
+            <div className="bg-[#050505] border border-[#222] rounded-xl p-3">
+              <CallVolumeHeatmap data={data} />
             </div>
           </div>
         </div>

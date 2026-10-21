@@ -2,9 +2,10 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { Search, Bell, Clock, AlertTriangle, Activity, CheckCircle2 } from 'lucide-react';
+import { Search, Bell, Clock, AlertTriangle, Activity, CheckCircle2, Users } from 'lucide-react';
 import { useQueueStore } from '@/store/queueStore';
 import { motion, AnimatePresence } from 'framer-motion';
+import { apiFetch } from '@/lib/api';
 
 export function Navbar() {
   const { callsInQueue, emergencyAlerts } = useQueueStore();
@@ -17,6 +18,9 @@ export function Navbar() {
   const [userName, setUserName] = useState('Agent Smith');
   const [userRole, setUserRole] = useState('Tier 2 Support');
   const [userInitials, setUserInitials] = useState('AS');
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
+  const [activeAgentsCount, setActiveAgentsCount] = useState<number | null>(null);
+  const [agentBreakdown, setAgentBreakdown] = useState<{ available: number; busy: number; wrapUp: number }>({ available: 0, busy: 0, wrapUp: 0 });
 
   useEffect(() => {
     try {
@@ -30,10 +34,46 @@ export function Navbar() {
         if (user.role) {
           const formattedRole = user.role.split('_').map((w: string) => w.charAt(0) + w.slice(1).toLowerCase()).join(' ');
           setUserRole(formattedRole);
+          if (user.role === 'SUPER_ADMIN') {
+            setIsSuperAdmin(true);
+          }
         }
       }
     } catch (e) { console.warn('[UI Exception Swallowed Fixed]:', e); }
   }, []);
+
+  useEffect(() => {
+    if (!isSuperAdmin) return;
+    let isMounted = true;
+
+    const fetchActiveCount = async () => {
+      try {
+        const token = localStorage.getItem('paramantra_access_token');
+        if (!token) return;
+        const res = await apiFetch('/api/v1/super-admin/active-agents', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (res.ok && isMounted) {
+          const data = await res.json();
+          if (data && typeof data.count === 'number') {
+            setActiveAgentsCount(data.count);
+            if (data.breakdown) {
+              setAgentBreakdown(data.breakdown);
+            }
+          }
+        }
+      } catch (err) {
+        // Silently preserve existing state
+      }
+    };
+
+    fetchActiveCount();
+    const interval = setInterval(fetchActiveCount, 30000);
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+    };
+  }, [isSuperAdmin]);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -75,6 +115,19 @@ export function Navbar() {
             <Activity className="w-3 h-3" />
             Live Mode
           </motion.div>
+
+          {isSuperAdmin && (
+            <motion.div 
+              whileHover={{ scale: 1.05 }}
+              title={`Active Agents Breakdown: ${agentBreakdown.available} Available, ${agentBreakdown.busy} Busy, ${agentBreakdown.wrapUp} Wrap-up`}
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-emerald-500/40 bg-emerald-950/20 text-[10px] font-medium text-emerald-400 cursor-pointer hover:bg-emerald-900/30 transition-colors"
+            >
+              <Users className="w-3 h-3 text-emerald-400" />
+              <span className="font-bold text-white">{activeAgentsCount !== null ? activeAgentsCount : '...'}</span>
+              <span>Active Agents</span>
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse ml-0.5"></span>
+            </motion.div>
+          )}
 
           <motion.div 
             whileHover={{ scale: 1.05 }}
