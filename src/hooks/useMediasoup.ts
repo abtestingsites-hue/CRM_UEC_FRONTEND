@@ -1,6 +1,13 @@
 import { useState, useEffect, useRef } from 'react';
-import { Device } from 'mediasoup-client';
 import { Socket } from 'socket.io-client';
+
+const ICE_SERVERS: RTCConfiguration = {
+  iceServers: [
+    { urls: 'stun:stun.l.google.com:19302' },
+    { urls: 'stun:stun1.l.google.com:19302' },
+    { urls: 'stun:stun2.l.google.com:19302' },
+  ],
+};
 
 export const useMediasoup = (
   socket: Socket | null, 
@@ -8,174 +15,195 @@ export const useMediasoup = (
   isMuted: boolean,
   isSpeaker: boolean
 ) => {
-  const deviceRef = useRef<Device | null>(null);
   const [micState, setMicState] = useState<'IDLE' | 'CONNECTING' | 'CONNECTED' | 'ERROR'>('IDLE');
   const [error, setError] = useState<string | null>(null);
+
+  const pcRef = useRef<RTCPeerConnection | null>(null);
+  const localStreamRef = useRef<MediaStream | null>(null);
 
   const speakerRef = useRef(isSpeaker);
   useEffect(() => {
     speakerRef.current = isSpeaker;
-  }, [isSpeaker]);
+    const audioEl = (window as any)[`remoteAudio_${activeCallSid}`];
+    if (audioEl) {
+      audioEl.muted = !isSpeaker;
+    }
+  }, [isSpeaker, activeCallSid]);
 
-  const sendTransportRef = useRef<any>(null);
-  const recvTransportRef = useRef<any>(null);
-  const audioProducerRef = useRef<any>(null);
-  const audioConsumerRef = useRef<any>(null);
+  // Handle Microphone Mute
+  useEffect(() => {
+    if (localStreamRef.current) {
+      localStreamRef.current.getAudioTracks().forEach((track) => {
+        track.enabled = !isMuted;
+      });
+    }
+  }, [isMuted]);
 
   useEffect(() => {
-    if (!socket || !activeCallSid) return;
+    if (!socket || !activeCallSid) {
+      setMicState('IDLE');
+      return;
+    }
 
     let mounted = true;
+    setMicState('CONNECTING');
+    console.log(`[Pure WebRTC] Initializing connection for call: ${activeCallSid}`);
 
-    const initMediasoup = async () => {
+    const pc = new RTCPeerConnection(ICE_SERVERS);
+    pcRef.current = pc;
+
+    // Handle incoming remote audio stream
+    pc.ontrack = (event) => {
+      console.log('[Pure WebRTC] Remote track received:', event.track.kind);
+      const [remoteStream] = event.streams;
+      if (remoteStream) {
+        let audioEl = (window as any)[`remoteAudio_${activeCallSid}`];
+        if (!audioEl) {
+          audioEl = document.createElement('audio');
+          audioEl.autoplay = true;
+          (window as any)[`remoteAudio_${activeCallSid}`] = audioEl;
+        }
+        audioEl.srcObject = remoteStream;
+        audioEl.muted = !speakerRef.current;
+        audioEl.play().catch((e: any) => console.error('[Pure WebRTC] Audio play blocked:', e));
+      }
+    };
+
+    // Forward local ICE candidates to peer via signaling server
+    pc.onicecandidate = (event) => {
+      if (event.candidate && socket.connected) {
+        socket.emit('webrtc_ice_candidate', {
+          callSid: activeCallSid,
+          candidate: event.candidate,
+        });
+      }
+    };
+
+    // Monitor connection states
+    pc.onconnectionstatechange = () => {
+      console.log('[Pure WebRTC] Connection state:', pc.connectionState);
+      if (!mounted) return;
+      if (pc.connectionState === 'connected') {
+        setMicState('CONNECTED');
+      } else if (pc.connectionState === 'failed') {
+        setError('WebRTC connection failed');
+        setMicState('ERROR');
+      } else if (pc.connectionState === 'closed') {
+        setMicState('IDLE');
+      }
+    };
+
+    // Setup media & join room
+    const initAudio = async () => {
       try {
-        setMicState('CONNECTING');
-        console.log('Initializing Mediasoup device...');
-        
-        // 1. Get Router Capabilities
-        const capabilities = await new Promise<any>((resolve, reject) => {
-          socket.emit('getRouterRtpCapabilities', {}, (res: any) => {
-            if (res.error) reject(new Error(res.error));
-            else resolve(res.capabilities);
-          });
+        const stream = await navigator.mediaDevices.getUserMedia({
+          audio: {
+            echoCancellation: true,
+            noiseSuppression: true,
+            autoGainControl: true,
+          },
         });
 
-        const newDevice = new Device();
-        await newDevice.load({ routerRtpCapabilities: capabilities });
-        if (mounted) deviceRef.current = newDevice;
-
-        // 2. Create Send Transport
-        console.log('Requesting send transport from backend...');
-        const sendTransportParams = await new Promise<any>((resolve, reject) => {
-          socket.emit('createWebRtcTransport', {}, (res: any) => {
-            if (!res) return reject(new Error('No response from createWebRtcTransport'));
-            if (res.error) reject(new Error(res.error));
-            else resolve(res.params);
-          });
-        });
-        
-        console.log('Send transport params received:', sendTransportParams);
-
-        const sendTransport = newDevice.createSendTransport(sendTransportParams);
-        sendTransportRef.current = sendTransport;
-
-        sendTransport.on('connect', async ({ dtlsParameters }, callback, errback) => {
-          console.log('sendTransport connect event fired');
-          socket.emit('connectWebRtcTransport', { transportId: sendTransport.id, dtlsParameters }, (res: any) => {
-            if (!res) return errback(new Error('No response on connect'));
-            if (res.error) errback(new Error(res.error));
-            else callback();
-          });
-        });
-
-        sendTransport.on('produce', async ({ kind, rtpParameters }, callback, errback) => {
-          console.log('sendTransport produce event fired');
-          socket.emit('produce', { transportId: sendTransport.id, kind, rtpParameters, callSid: activeCallSid }, (res: any) => {
-            if (!res) return errback(new Error('No response on produce'));
-            if (res.error) errback(new Error(res.error));
-            else callback({ id: res.id });
-          });
-        });
-
-        sendTransport.on('connectionstatechange', (state) => {
-          console.log('sendTransport connectionstatechange:', state);
-        });
-
-        // 3. Create Receive Transport
-        const recvTransportParams = await new Promise<any>((resolve, reject) => {
-          socket.emit('createWebRtcTransport', {}, (res: any) => {
-            if (res.error) reject(new Error(res.error));
-            else resolve(res.params);
-          });
-        });
-
-        const recvTransport = newDevice.createRecvTransport(recvTransportParams);
-        recvTransportRef.current = recvTransport;
-
-        recvTransport.on('connect', async ({ dtlsParameters }, callback, errback) => {
-          socket.emit('connectWebRtcTransport', { transportId: recvTransport.id, dtlsParameters }, (res: any) => {
-            if (res.error) errback(new Error(res.error));
-            else callback();
-          });
-        });
-
-        // 4. Start Mic
-        if (!mounted) return;
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        const audioTrack = stream.getAudioTracks()[0];
-        
         if (!mounted) {
-          audioTrack.stop();
+          stream.getTracks().forEach((t) => t.stop());
           return;
         }
 
-        audioProducerRef.current = await sendTransport.produce({ track: audioTrack });
-        if (mounted) setMicState('CONNECTED');
+        localStreamRef.current = stream;
+        stream.getAudioTracks().forEach((track) => {
+          track.enabled = !isMuted;
+          pc.addTrack(track, stream);
+        });
 
+        // Join signaling room
+        socket.emit('webrtc_join', { callSid: activeCallSid });
+        if (mounted) setMicState('CONNECTED');
       } catch (err: any) {
-        console.error('Mediasoup init error:', err);
+        console.error('[Pure WebRTC] Microphone access error:', err);
         if (mounted) {
-          setError(err.message);
+          setError(err.message || 'Microphone access denied');
           setMicState('ERROR');
         }
       }
     };
 
-    initMediasoup();
+    initAudio();
 
-    const handleNewProducer = async ({ producerId, callSid }: any) => {
-      if (callSid !== activeCallSid) return;
-      const currentDevice = deviceRef.current;
-      if (!currentDevice || !recvTransportRef.current) return;
-
+    // Signaling Handlers
+    const handlePeerJoined = async ({ socketId }: { socketId: string }) => {
       try {
-        const consumerParams = await new Promise<any>((resolve, reject) => {
-          socket.emit('consume', {
-            transportId: recvTransportRef.current.id,
-            producerId,
-            rtpCapabilities: currentDevice.rtpCapabilities
-          }, (res: any) => {
-            if (res.error) reject(new Error(res.error));
-            else resolve(res.params);
-          });
+        console.log(`[Pure WebRTC] Peer joined (${socketId}), creating offer...`);
+        const offer = await pc.createOffer();
+        await pc.setLocalDescription(offer);
+        socket.emit('webrtc_offer', {
+          callSid: activeCallSid,
+          sdp: offer,
+          targetSocketId: socketId,
         });
-
-        const consumer = await recvTransportRef.current.consume({
-          id: consumerParams.id,
-          producerId: consumerParams.producerId,
-          kind: consumerParams.kind,
-          rtpParameters: consumerParams.rtpParameters,
-        });
-
-        audioConsumerRef.current = consumer;
-
-        // Create a global audio element to play the remote stream
-        const track = consumer.track;
-        const stream = new MediaStream([track]);
-        const audio = document.createElement('audio');
-        audio.srcObject = stream;
-        audio.muted = !speakerRef.current; // Apply initial mute state
-        audio.play().catch(e => console.error('Audio play blocked:', e));
-        
-        // Expose audio globally so it can be cleaned up
-        (window as any)[`remoteAudio_${activeCallSid}`] = audio;
-
       } catch (err) {
-        console.error('Error consuming remote stream:', err);
+        console.error('[Pure WebRTC] Error creating offer:', err);
       }
     };
 
-    socket.on('newProducer', handleNewProducer);
+    const handleOffer = async ({ from, sdp }: { from: string; sdp: RTCSessionDescriptionInit }) => {
+      try {
+        console.log(`[Pure WebRTC] Received offer from ${from}, creating answer...`);
+        await pc.setRemoteDescription(new RTCSessionDescription(sdp));
+        const answer = await pc.createAnswer();
+        await pc.setLocalDescription(answer);
+        socket.emit('webrtc_answer', {
+          callSid: activeCallSid,
+          sdp: answer,
+          targetSocketId: from,
+        });
+      } catch (err) {
+        console.error('[Pure WebRTC] Error handling offer:', err);
+      }
+    };
+
+    const handleAnswer = async ({ sdp }: { sdp: RTCSessionDescriptionInit }) => {
+      try {
+        console.log('[Pure WebRTC] Received answer, applying remote description...');
+        if (pc.signalingState !== 'stable') {
+          await pc.setRemoteDescription(new RTCSessionDescription(sdp));
+        }
+      } catch (err) {
+        console.error('[Pure WebRTC] Error handling answer:', err);
+      }
+    };
+
+    const handleIceCandidate = async ({ candidate }: { candidate: RTCIceCandidateInit }) => {
+      try {
+        if (candidate && pc.remoteDescription) {
+          await pc.addIceCandidate(new RTCIceCandidate(candidate));
+        }
+      } catch (err) {
+        console.error('[Pure WebRTC] Error adding ICE candidate:', err);
+      }
+    };
+
+    socket.on('webrtc_peer_joined', handlePeerJoined);
+    socket.on('webrtc_offer', handleOffer);
+    socket.on('webrtc_answer', handleAnswer);
+    socket.on('webrtc_ice_candidate', handleIceCandidate);
 
     return () => {
       mounted = false;
-      socket.off('newProducer', handleNewProducer);
-      
-      if (audioProducerRef.current) audioProducerRef.current.close();
-      if (audioConsumerRef.current) audioConsumerRef.current.close();
-      if (sendTransportRef.current) sendTransportRef.current.close();
-      if (recvTransportRef.current) recvTransportRef.current.close();
-      
+      socket.off('webrtc_peer_joined', handlePeerJoined);
+      socket.off('webrtc_offer', handleOffer);
+      socket.off('webrtc_answer', handleAnswer);
+      socket.off('webrtc_ice_candidate', handleIceCandidate);
+
+      socket.emit('webrtc_leave', { callSid: activeCallSid });
+
+      if (localStreamRef.current) {
+        localStreamRef.current.getTracks().forEach((t) => t.stop());
+        localStreamRef.current = null;
+      }
+
+      pc.close();
+      pcRef.current = null;
+
       const audioEl = (window as any)[`remoteAudio_${activeCallSid}`];
       if (audioEl) {
         audioEl.pause();
@@ -183,27 +211,7 @@ export const useMediasoup = (
         delete (window as any)[`remoteAudio_${activeCallSid}`];
       }
     };
-  }, [socket, activeCallSid]); // Removed device to prevent infinite loop
+  }, [socket, activeCallSid]);
 
-  // Handle Microphone Mute
-  useEffect(() => {
-    if (audioProducerRef.current) {
-      if (isMuted) {
-        audioProducerRef.current.pause();
-      } else {
-        audioProducerRef.current.resume();
-      }
-    }
-  }, [isMuted]);
-
-  // Handle Speaker (Remote Audio Mute)
-  useEffect(() => {
-    if (!activeCallSid) return;
-    const audioEl = (window as any)[`remoteAudio_${activeCallSid}`];
-    if (audioEl) {
-      audioEl.muted = !isSpeaker;
-    }
-  }, [isSpeaker, activeCallSid]);
-
-  return { device: deviceRef.current, micState, error };
+  return { device: null, micState, error };
 };
