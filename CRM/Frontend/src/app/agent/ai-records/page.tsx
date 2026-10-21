@@ -162,7 +162,7 @@ export default function AiRecordsPage() {
                         </h4>
                         {record.recordingUrl ? (
                           <div className="bg-[#050505] border border-[#222] rounded-xl p-4">
-                            <audio src={record.recordingUrl} controls className="w-full h-10" />
+                            <audio src={record.recordingUrl} controls preload="metadata" crossOrigin="anonymous" className="w-full h-10" />
                           </div>
                         ) : (
                           <div className="bg-[#050505] border border-[#222] rounded-xl p-4 text-slate-500 italic text-xs">
