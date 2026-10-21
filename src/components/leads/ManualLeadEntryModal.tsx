@@ -34,7 +34,7 @@ export function ManualLeadEntryModal({ isOpen, onClose }: ManualLeadEntryModalPr
 
     setIsLoading(true);
     
-    // Simulate getting the current user from auth
+    // Retrieve current user from storage
     let user = null;
     try {
       const userStr = localStorage.getItem('crm_user');
@@ -43,8 +43,8 @@ export function ManualLeadEntryModal({ isOpen, onClose }: ManualLeadEntryModalPr
       console.warn('Could not parse crm_user from localStorage:', err);
     }
 
-    const token = localStorage.getItem('crm_token') || 'mock_token';
-    const agentId = user?.id || undefined;
+    const token = localStorage.getItem('paramantra_access_token') || localStorage.getItem('crm_token') || localStorage.getItem('token') || '';
+    const agentId = user?.agentId || user?.id || undefined;
 
     const success = await addLead({ ...formData, agentId } as any, token);
     

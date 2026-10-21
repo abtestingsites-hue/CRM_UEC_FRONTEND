@@ -1,11 +1,7 @@
 import React from 'react';
-export function AgentLeaderboard() {
-  const agents = [
-    { name: 'Raghav (Super Admin)', calls: 142, aht: '04:12', csat: '4.9', sla: '98%' },
-    { name: 'Mani (Care)', calls: 128, aht: '03:45', csat: '4.8', sla: '96%' },
-    { name: 'Barani (Support)', calls: 115, aht: '04:30', csat: '4.7', sla: '95%' },
-    { name: 'Arun M. (Sales)', calls: 95, aht: '05:10', csat: '4.5', sla: '90%' },
-  ];
+
+export function AgentLeaderboard({ data }: { data?: any }) {
+  const agents: any[] = data?.metrics?.agentLeaderboard || data?.charts?.agentLeaderboard || [];
 
   return (
     <div className="bg-[#0a0a0a] border border-[#222] p-4 rounded-xl shadow-sm h-[220px] flex flex-col">
@@ -18,28 +14,34 @@ export function AgentLeaderboard() {
       </div>
 
       <div className="flex-1 overflow-auto custom-scrollbar">
-        <table aria-label="Agent performance leaderboard table" className="w-full text-left text-sm">
-          <thead className="text-[10px] uppercase text-slate-500 bg-[#111] sticky top-0">
-            <tr>
-              <th scope="col" className="py-2 px-2 font-medium">Agent</th>
-              <th scope="col" className="py-2 px-2 font-medium text-right">Calls</th>
-              <th scope="col" className="py-2 px-2 font-medium text-right">AHT</th>
-              <th scope="col" className="py-2 px-2 font-medium text-right">CSAT</th>
-              <th scope="col" className="py-2 px-2 font-medium text-right">SLA</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-[#222]">
-            {agents.map((agent, i) => (
-              <tr key={i} className="hover:bg-[#111] transition-colors">
-                <td className="py-2.5 px-2 text-slate-300 text-xs font-medium">{agent.name}</td>
-                <td className="py-2.5 px-2 text-slate-400 text-xs text-right">{agent.calls}</td>
-                <td className="py-2.5 px-2 text-slate-400 text-xs text-right font-mono">{agent.aht}</td>
-                <td className="py-2.5 px-2 text-primary text-xs text-right font-bold">{agent.csat}</td>
-                <td className="py-2.5 px-2 text-emerald-500 text-xs text-right font-bold">{agent.sla}</td>
+        {agents.length === 0 ? (
+          <div className="h-full flex items-center justify-center text-xs text-slate-500">
+            No agent performance data recorded for this period.
+          </div>
+        ) : (
+          <table aria-label="Agent performance leaderboard table" className="w-full text-left text-sm">
+            <thead className="text-[10px] uppercase text-slate-500 bg-[#111] sticky top-0">
+              <tr>
+                <th scope="col" className="py-2 px-2 font-medium">Agent</th>
+                <th scope="col" className="py-2 px-2 font-medium text-right">Calls</th>
+                <th scope="col" className="py-2 px-2 font-medium text-right">AHT</th>
+                <th scope="col" className="py-2 px-2 font-medium text-right">CSAT</th>
+                <th scope="col" className="py-2 px-2 font-medium text-right">SLA</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="divide-y divide-[#222]">
+              {agents.map((agent, i) => (
+                <tr key={i} className="hover:bg-[#111] transition-colors">
+                  <td className="py-2.5 px-2 text-slate-300 text-xs font-medium">{agent.name}</td>
+                  <td className="py-2.5 px-2 text-slate-400 text-xs text-right">{agent.calls ?? 0}</td>
+                  <td className="py-2.5 px-2 text-slate-400 text-xs text-right font-mono">{agent.aht || '0m'}</td>
+                  <td className="py-2.5 px-2 text-primary text-xs text-right font-bold">{agent.csat || '5.0'}</td>
+                  <td className="py-2.5 px-2 text-emerald-500 text-xs text-right font-bold">{agent.sla || '100%'}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </div>
     </div>
   );

@@ -1,15 +1,16 @@
 import React from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 
-export function OmnichannelTrends() {
-  const data = [
-    { name: 'WhatsApp', value: 345, color: '#25D366' },
-    { name: 'Instagram', value: 210, color: '#E1306C' },
-    { name: 'Voice Calls', value: 180, color: '#f97316' },
-    { name: 'Emails', value: 85, color: '#3b82f6' },
+export function OmnichannelTrends({ data }: { data?: any }) {
+  const chartItems: any[] = data?.metrics?.omnichannelShare || data?.charts?.omnichannelShare || [];
+  const fallback = [
+    { name: 'WhatsApp', value: 0, color: '#25D366' },
+    { name: 'Instagram', value: 0, color: '#E1306C' },
+    { name: 'Voice Calls', value: data?.metrics?.totalCalls ?? data?.liveStats?.totalCalls ?? 0, color: '#f97316' },
+    { name: 'Emails', value: 0, color: '#3b82f6' },
   ];
-
-  const total = data.reduce((sum, item) => sum + item.value, 0);
+  const items = chartItems.length > 0 ? chartItems : fallback;
+  const total = items.reduce((sum, item) => sum + (item.value || 0), 0);
 
   return (
     <div className="bg-[#0a0a0a] border border-[#222] p-4 rounded-xl shadow-sm h-[220px] flex flex-col">
@@ -26,7 +27,7 @@ export function OmnichannelTrends() {
           <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
             <PieChart>
               <Pie
-                data={data}
+                data={items}
                 cx="50%"
                 cy="50%"
                 innerRadius={35}
@@ -35,7 +36,7 @@ export function OmnichannelTrends() {
                 dataKey="value"
                 stroke="none"
               >
-                {data.map((entry, index) => (
+                {items.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={entry.color} />
                 ))}
               </Pie>
@@ -54,7 +55,7 @@ export function OmnichannelTrends() {
         
         {/* Legend */}
         <div className="flex-1 ml-4 space-y-2">
-          {data.map((item) => {
+          {items.map((item) => {
             const percent = total === 0 ? 0 : Math.round((item.value / total) * 100);
             return (
               <div key={item.name} className="flex items-center justify-between text-[11px]">
