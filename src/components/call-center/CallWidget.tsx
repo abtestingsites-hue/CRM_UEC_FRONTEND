@@ -8,7 +8,7 @@ import { PostCallFeedbackModal } from '@/components/call-center/PostCallFeedback
 import { LeadConversionModal } from '@/components/leads/LeadConversionModal';
 import { useMediasoup } from '@/hooks/useMediasoup';
 import { LiveKitRoom, RoomAudioRenderer, useConnectionState, useRoomContext, useLocalParticipant, useRemoteParticipants } from '@livekit/components-react';
-function LiveKitManager({ setCallState, setWebrtcConnected, callSid, isMuted, callCategory, telephonySocket }: any) {
+function LiveKitManager({ setCallState, setWebrtcConnected, callSid, isMuted, isSpeaker, callCategory, telephonySocket }: any) {
   const room = useRoomContext();
   const state = useConnectionState();
   const { localParticipant } = useLocalParticipant();
@@ -20,6 +20,24 @@ function LiveKitManager({ setCallState, setWebrtcConnected, callSid, isMuted, ca
   }, [callSid]);
 
   const hasStartedRecording = useRef(false);
+
+  // Helper to mark call as CONNECTED and trigger recording once
+  const markConnectedAndRecord = () => {
+    setCallState('CONNECTED');
+    setWebrtcConnected(true);
+    if (telephonySocket && room && !hasStartedRecording.current) {
+      hasStartedRecording.current = true;
+      console.log(`[CALL-RECORDING] Emitting startRecording callSid=${callSid} roomName=${room.name}`);
+      telephonySocket.emit('startRecording', { callSid, roomName: room.name });
+    }
+  };
+
+  // Autoplay unlock
+  useEffect(() => {
+    if (room && typeof (room as any).startAudio === 'function') {
+      (room as any).startAudio().catch((e: any) => console.log('[LK-ROOT] startAudio autoplay wait:', e));
+    }
+  }, [room, state]);
 
   useEffect(() => {
     console.log('[LK-MANAGER]', 'room_context_available', { callSid, roomName: room?.name, state: room?.state });
@@ -38,24 +56,29 @@ function LiveKitManager({ setCallState, setWebrtcConnected, callSid, isMuted, ca
     const checkSipStatus = (participantIdentity: string, status: string) => {
       console.log(`[CALL-LIVEKIT-SIP-STATE] callSessionId=${callSid} participantIdentity=${participantIdentity} sip.callStatus=${status}`);
       if (status === 'active') {
-        setCallState('CONNECTED');
-        if (telephonySocket && room && !hasStartedRecording.current) {
-          hasStartedRecording.current = true;
-          console.log(`[CALL-RECORDING] Emitting startRecording callSid=${callSid} roomName=${room.name}`);
-          telephonySocket.emit('startRecording', { callSid, roomName: room.name });
-        }
+        markConnectedAndRecord();
       } else if (status === 'hangup' || status === 'disconnect') {
         setCallState('ENDED');
       }
     };
 
     const events = {
-      connected: () => logEvent('connected'),
+      connected: () => {
+        logEvent('connected');
+        if (typeof (room as any).startAudio === 'function') {
+          (room as any).startAudio().catch(() => {});
+        }
+      },
       disconnected: (reason: any) => logEvent('disconnected', reason),
       reconnecting: () => logEvent('reconnecting'),
       reconnected: () => logEvent('reconnected'),
       mediaDevicesError: (e: any) => logEvent('media_devices_error', e),
-      participantConnected: (p: any) => logEvent('participant_connected', p),
+      participantConnected: (p: any) => {
+        logEvent('participant_connected', p);
+        if (!p.isLocal) {
+          markConnectedAndRecord();
+        }
+      },
       participantDisconnected: (p: any) => logEvent('participant_disconnected', p),
       participantAttributesChanged: (changedAttributes: any, participant: any) => {
         if (participant.identity.startsWith('sip_') && changedAttributes['sip.callStatus']) {
@@ -94,64 +117,42 @@ function LiveKitManager({ setCallState, setWebrtcConnected, callSid, isMuted, ca
   useEffect(() => {
     if (!room || state !== 'connected') return;
     
-    // Explicitly scan remote participants immediately in case attributes were set before listener attached
-    const sipParticipants = remoteParticipants.filter(p => p.identity.startsWith('sip_'));
-    sipParticipants.forEach(p => {
-       const status = p.attributes?.['sip.callStatus'];
-       if (status === 'active') {
-          setCallState('CONNECTED');
-          if (telephonySocket && !hasStartedRecording.current) {
-            hasStartedRecording.current = true;
-            console.log(`[CALL-RECORDING] Emitting startRecording callSid=${callSid} roomName=${room.name}`);
-            telephonySocket.emit('startRecording', { callSid, roomName: room.name });
-          }
-       } else if (status === 'hangup' || status === 'disconnect') {
-          setCallState('ENDED');
-       }
-    });
-  }, [remoteParticipants, room, state, setCallState, telephonySocket, callSid]);
+    // Explicitly scan remote participants in case they joined before listeners attached
+    if (remoteParticipants.length > 0) {
+      const hasActive = remoteParticipants.some(p => {
+        const isSipActive = p.attributes?.['sip.callStatus'] === 'active';
+        const hasAudio = p.audioTrackPublications?.size > 0;
+        return isSipActive || hasAudio || p.identity.startsWith('sip_');
+      });
+      if (hasActive) {
+        markConnectedAndRecord();
+      }
+    }
+  }, [remoteParticipants, room, state]);
 
   useEffect(() => {
-    // A SIP participant's identity starts with sip_ or they are a remote participant
-    const hasRemoteParticipant = remoteParticipants.length > 0;
-    
     if (state === 'connected') {
       if (callCategory === 'Inbound') {
-        // Inbound calls are already connected the moment the agent joins the room
-        setCallState('CONNECTED');
-        setWebrtcConnected(true);
+        markConnectedAndRecord();
         console.log('[WEBRTC-DIAGNOSTIC]', JSON.stringify({
           event: 'room_connected_inbound',
           callId: callSid,
-          roomName: room.name,
+          roomName: room?.name,
           connectionState: state,
           reason: 'LiveKit Room is fully connected (Inbound).'
         }));
       } else {
-        // OUTBOUND CALL
-        // Just because we joined the LiveKit room does NOT mean the PSTN answered.
-        // We wait for the sip.callStatus to become 'active' from LiveKit!
-        setCallState('RINGING');
+        // Outbound call
+        if (remoteParticipants.length > 0) {
+          markConnectedAndRecord();
+        } else {
+          setCallState('RINGING');
+        }
         setWebrtcConnected(true);
-        console.log('[WEBRTC-DIAGNOSTIC]', JSON.stringify({
-          event: 'room_connected_waiting',
-          callId: callSid,
-          roomName: room.name,
-          connectionState: state,
-          reason: 'LiveKit connected. Business state remains DIALING/RINGING until sip.callStatus becomes active.'
-        }));
       }
     } else if (state === 'connecting') {
       setCallState('CONNECTING');
-      console.log('[WEBRTC-DIAGNOSTIC]', JSON.stringify({
-        event: 'room_connect_start',
-        callId: callSid,
-        roomName: room?.name,
-        connectionState: state,
-        reason: 'LiveKit Room is attempting to connect.'
-      }));
     } else if (state === 'disconnected') {
-      // Do not end the call here!
       console.log('[WEBRTC-DIAGNOSTIC]', JSON.stringify({
         event: 'room_disconnected',
         callId: callSid,
@@ -161,7 +162,7 @@ function LiveKitManager({ setCallState, setWebrtcConnected, callSid, isMuted, ca
         reason: 'LiveKit Room disconnected.'
       }));
     }
-  }, [state, room, callSid, setCallState, setWebrtcConnected, callCategory]);
+  }, [state, room, callSid, setCallState, setWebrtcConnected, callCategory, remoteParticipants.length]);
 
   // Handle Microphone Lifecycle safely
   useEffect(() => {
@@ -233,18 +234,7 @@ function LiveKitManager({ setCallState, setWebrtcConnected, callSid, isMuted, ca
           isMuted: track.isMuted
         }));
         console.log('[INBOUND-AUDIO] remote_audio_subscribed | callId=' + callSid);
-        console.log('[INBOUND-AUDIO] remote_audio_playing | trackId=' + track.sid);
-
-        // Attach to DOM explicitly to guarantee audio
-        const audioElement = track.attach();
-        document.body.appendChild(audioElement);
-        audioElement.play().catch((e: any) => console.error("Audio play error", e));
-        
-        // Ensure cleanup on unsubscribe
-        track.once('unsubscribed', () => {
-          track.detach(audioElement);
-          audioElement.remove();
-        });
+        markConnectedAndRecord();
       }
     };
 
@@ -293,9 +283,9 @@ function CallControlsInner({
         <button 
           onClick={toggleSpeaker}
           aria-label={isSpeaker ? 'Disable speaker' : 'Enable speaker'}
-          disabled={connectionState !== 'CONNECTED'}
+          disabled={connectionState !== 'CONNECTED' && connectionState !== 'RINGING'}
           className={`w-12 h-12 rounded-full flex items-center justify-center transition-all ${
-            connectionState !== 'CONNECTED' ? 'bg-[#111] text-slate-600 cursor-not-allowed opacity-50' :
+            connectionState !== 'CONNECTED' && connectionState !== 'RINGING' ? 'bg-[#111] text-slate-600 cursor-not-allowed opacity-50' :
             !isSpeaker ? 'bg-white text-black hover:bg-slate-200' : 'bg-[#222] text-white hover:bg-[#333] border border-[#333]'
           }`}
           title="Speaker"
@@ -484,7 +474,8 @@ export function CallWidget() {
           roomName: activeCall.roomName,
           isCaller: activeCall.isCaller,
           category: activeCall.category,
-          agentId: agentId
+          agentId: agentId,
+          duration: duration || 1
         });
       }
       
@@ -599,11 +590,13 @@ export function CallWidget() {
                 audio={false} // Managed explicitly by LiveKitManager to prevent early publishing
                 video={false}
               >
+                <RoomAudioRenderer volume={1} muted={!isSpeaker} />
                 <LiveKitManager 
                   setCallState={updateActiveCallStatus} 
                   setWebrtcConnected={setWebrtcConnected} 
                   callSid={activeCall.callSid}
                   isMuted={isMuted}
+                  isSpeaker={isSpeaker}
                   callCategory={activeCall.category}
                   telephonySocket={telephonySocket}
                 />
