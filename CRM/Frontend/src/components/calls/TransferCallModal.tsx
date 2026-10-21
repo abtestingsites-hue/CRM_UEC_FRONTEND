@@ -6,19 +6,65 @@ import { X, Loader2, PhoneForwarded } from 'lucide-react';
 interface TransferCallModalProps {
   agentName: string;
   department: string;
+  targetUserId?: string;
+  targetAgentId?: string;
+  callSid?: string;
   onClose: () => void;
   onSuccess: () => void;
 }
 
-export function TransferCallModal({ agentName, department, onClose, onSuccess }: TransferCallModalProps) {
+export function TransferCallModal({ 
+  agentName, 
+  department, 
+  targetUserId, 
+  targetAgentId, 
+  callSid, 
+  onClose, 
+  onSuccess 
+}: TransferCallModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleTransfer = async () => {
     setIsSubmitting(true);
-    // Simulate network delay for transfer logic
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    setIsSubmitting(false);
-    onSuccess();
+    setError(null);
+    try {
+      let activeSid = callSid;
+      if (!activeSid) {
+        try {
+          const { useCallStore } = await import('@/store/useCallStore');
+          activeSid = useCallStore.getState().activeCall?.callSid;
+        } catch (e) {
+          console.warn('Could not read active call from store', e);
+        }
+      }
+
+      if (!activeSid) {
+        throw new Error('No active call session identified to transfer.');
+      }
+
+      const { apiFetch } = await import('@/lib/api');
+      const res = await apiFetch(`/api/v1/calls/${encodeURIComponent(activeSid)}/transfer`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          targetUserId: targetUserId || undefined,
+          targetAgentId: targetAgentId || undefined,
+          targetDepartment: department
+        })
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.message || data.error || `Transfer failed with HTTP status ${res.status}`);
+      }
+
+      onSuccess();
+    } catch (err: any) {
+      setError(err.message || 'Call transfer failed.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -34,6 +80,11 @@ export function TransferCallModal({ agentName, department, onClose, onSuccess }:
         </div>
         
         <div className="p-6">
+          {error && (
+            <div className="mb-4 text-xs text-rose-500 bg-rose-500/10 border border-rose-500/20 p-2.5 rounded-lg">
+              {error}
+            </div>
+          )}
           <p className="text-sm text-slate-300 mb-6 text-center leading-relaxed">
             Are you sure you want to transfer the current call to <strong className="text-white">{agentName}</strong> from the <span className="text-white">{department}</span> department?
           </p>

@@ -10,6 +10,7 @@ import { WidgetWrapper } from './WidgetWrapper';
 import { ChartWidget } from './ChartWidget';
 import { GeoWidget } from './GeoWidget';
 import { BuilderPanel } from './BuilderPanel';
+import { useSocket } from '@/providers/SocketProvider';
 
 export function DashboardLayout() {
   const { 
@@ -25,34 +26,80 @@ export function DashboardLayout() {
   const [scheduleCron, setScheduleCron] = useState('0 9 * * 1'); // Monday 9am
 
   // Real-time Event Stream state for Contact Center
-  const [liveEvents, setLiveEvents] = useState<any[]>([
-    { time: '11:42:05 PM', msg: 'Call from Customer care lines routed to Raghav', type: 'INFO' },
-    { time: '11:43:12 PM', msg: 'Outbound queue load check - SLA 98.4%', type: 'SUCCESS' },
-    { time: '11:44:02 PM', msg: 'Supervisor comment logged on Vipin Kumar profile', type: 'COMMENT' },
-  ]);
+  const { socket, telephonySocket } = useSocket();
+  const [liveEvents, setLiveEvents] = useState<any[]>([]);
 
   useEffect(() => {
     fetchMetrics();
-    // Simulate real-time websocket event log stream
-    const interval = setInterval(() => {
-      const msgs = [
-        'Call connected to extension 102',
-        'Incoming WhatsApp notification queued for sales review',
-        'Lead claimed by Raghav',
-        'IVR response completed for customer care caller',
-        'SLA warning resolved for queue #2',
-      ];
-      const types = ['INFO', 'SUCCESS', 'SUCCESS', 'INFO', 'WARN'];
-      const randomIdx = Math.floor(Math.random() * msgs.length);
-      const timeStr = new Date().toLocaleTimeString();
-      setLiveEvents(prev => [
-        { time: timeStr, msg: msgs[randomIdx], type: types[randomIdx] },
-        ...prev.slice(0, 5)
-      ]);
-    }, 6000);
 
-    return () => clearInterval(interval);
-  }, []);
+    const handleIncomingCall = (data: any) => {
+      const time = new Date().toLocaleTimeString();
+      const caller = data.caller || data.from || 'Caller';
+      setLiveEvents(prev => [
+        { time, msg: `Inbound call from ${caller} (${data.queueType || data.category || 'General'})`, type: 'INFO' },
+        ...prev.slice(0, 19)
+      ]);
+    };
+
+    const handleCallConnected = (data: any) => {
+      const time = new Date().toLocaleTimeString();
+      setLiveEvents(prev => [
+        { time, msg: `Call connected (SID: ${data?.callSid ? data.callSid.slice(0, 8) + '...' : 'active'})`, type: 'SUCCESS' },
+        ...prev.slice(0, 19)
+      ]);
+    };
+
+    const handleCallEnded = (data: any) => {
+      const time = new Date().toLocaleTimeString();
+      setLiveEvents(prev => [
+        { time, msg: `Call completed${data?.duration ? ` (${data.duration}s)` : ''}`, type: 'INFO' },
+        ...prev.slice(0, 19)
+      ]);
+    };
+
+    const handleNewMessage = (data: any) => {
+      const time = new Date().toLocaleTimeString();
+      const channel = data?.channel || (data?.message?.senderPhone ? 'WhatsApp' : 'Omnichannel');
+      setLiveEvents(prev => [
+        { time, msg: `New ${channel} message received`, type: 'INFO' },
+        ...prev.slice(0, 19)
+      ]);
+    };
+
+    const handleAgentStatus = (data: any) => {
+      const time = new Date().toLocaleTimeString();
+      setLiveEvents(prev => [
+        { time, msg: `Agent status: ${data?.status || 'AVAILABLE'}`, type: 'INFO' },
+        ...prev.slice(0, 19)
+      ]);
+    };
+
+    if (telephonySocket) {
+      telephonySocket.on('incoming_call', handleIncomingCall);
+      telephonySocket.on('callConnected', handleCallConnected);
+      telephonySocket.on('callEnded', handleCallEnded);
+      telephonySocket.on('agent_status_change', handleAgentStatus);
+    }
+    if (socket) {
+      socket.on('new_whatsapp_message', handleNewMessage);
+      socket.on('new_message', handleNewMessage);
+      socket.on('new_email_message', handleNewMessage);
+    }
+
+    return () => {
+      if (telephonySocket) {
+        telephonySocket.off('incoming_call', handleIncomingCall);
+        telephonySocket.off('callConnected', handleCallConnected);
+        telephonySocket.off('callEnded', handleCallEnded);
+        telephonySocket.off('agent_status_change', handleAgentStatus);
+      }
+      if (socket) {
+        socket.off('new_whatsapp_message', handleNewMessage);
+        socket.off('new_message', handleNewMessage);
+        socket.off('new_email_message', handleNewMessage);
+      }
+    };
+  }, [socket, telephonySocket]);
 
   const dashboards = [
     { type: 'executive', label: 'Executive Dashboard', icon: Briefcase },

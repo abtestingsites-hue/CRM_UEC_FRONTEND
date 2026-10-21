@@ -39,11 +39,11 @@ export function AgentDashboard({ metrics }: AgentDashboardProps) {
             </div>
           </div>
           <div className="mt-4 z-10">
-            <h2 className="text-4xl font-bold text-white tracking-tight">45</h2>
+            <h2 className="text-4xl font-bold text-white tracking-tight">{metrics?.callsConnected ?? metrics?.totalCalls ?? 0}</h2>
           </div>
           <div className="mt-2 flex items-center gap-1 text-white/80 text-[10px] font-medium z-10">
             <span className="bg-white/20 px-2 py-0.5 rounded text-white flex items-center gap-1">
-              ↗ Increased from last week
+              ↗ Total completed calls
             </span>
           </div>
           <div className="absolute -right-8 -bottom-8 w-32 h-32 bg-white/10 rounded-full blur-2xl group-hover:bg-white/20 transition-all"></div>
@@ -58,11 +58,11 @@ export function AgentDashboard({ metrics }: AgentDashboardProps) {
             </div>
           </div>
           <div className="mt-4">
-            <h2 className="text-4xl font-bold text-white tracking-tight">3</h2>
+            <h2 className="text-4xl font-bold text-white tracking-tight">{metrics?.queueCalls ?? metrics?.queuedCalls ?? 0}</h2>
           </div>
           <div className="mt-2 flex items-center gap-1 text-[10px] font-bold">
             <span className="bg-orange-500/10 text-orange-500 px-2 py-0.5 rounded flex items-center gap-1 border border-orange-500/20">
-              ↗ Monitor wait times
+              ↗ Live wait queue
             </span>
           </div>
         </div>
@@ -76,11 +76,11 @@ export function AgentDashboard({ metrics }: AgentDashboardProps) {
             </div>
           </div>
           <div className="mt-4">
-            <h2 className="text-4xl font-bold text-white tracking-tight">18</h2>
+            <h2 className="text-4xl font-bold text-white tracking-tight">{metrics?.ticketsRaised ?? metrics?.assignedTickets ?? 0}</h2>
           </div>
           <div className="mt-2 flex items-center gap-1 text-[10px] font-bold">
             <span className="bg-red-500/10 text-red-500 px-2 py-0.5 rounded flex items-center gap-1 border border-red-500/20">
-              ↗ Action required
+              ↗ Open support tickets
             </span>
           </div>
         </div>
@@ -94,7 +94,7 @@ export function AgentDashboard({ metrics }: AgentDashboardProps) {
             </div>
           </div>
           <div className="mt-4">
-            <h2 className="text-4xl font-bold text-white tracking-tight">12</h2>
+            <h2 className="text-4xl font-bold text-white tracking-tight">{metrics?.unreadMessages ?? 0}</h2>
           </div>
           <div className="mt-2 flex items-center gap-1 text-[10px] font-bold">
             <span className="bg-emerald-500/10 text-emerald-500 px-2 py-0.5 rounded flex items-center gap-1 border border-emerald-500/20">
@@ -126,15 +126,15 @@ export function AgentDashboard({ metrics }: AgentDashboardProps) {
 
           <div className="grid grid-cols-3 gap-3 md:gap-4">
             <div className="bg-[#111] border border-[#1e1e1e] rounded-2xl p-3 md:p-4 text-center shadow-none">
-              <div className="text-xl md:text-2xl font-bold text-emerald-500 mb-1">0%</div>
+              <div className="text-xl md:text-2xl font-bold text-emerald-500 mb-1">{metrics?.sentiment?.positive != null ? `${metrics.sentiment.positive}%` : '0%'}</div>
               <div className="text-[9px] md:text-[10px] text-slate-400 font-bold tracking-widest uppercase">Positive</div>
             </div>
             <div className="bg-[#111] border border-[#1e1e1e] rounded-2xl p-3 md:p-4 text-center shadow-none">
-              <div className="text-xl md:text-2xl font-bold text-orange-500 mb-1">100%</div>
+              <div className="text-xl md:text-2xl font-bold text-orange-500 mb-1">{metrics?.sentiment?.neutral != null ? `${metrics.sentiment.neutral}%` : '0%'}</div>
               <div className="text-[9px] md:text-[10px] text-slate-400 font-bold tracking-widest uppercase">Neutral</div>
             </div>
             <div className="bg-[#111] border border-[#1e1e1e] rounded-2xl p-3 md:p-4 text-center shadow-none">
-              <div className="text-xl md:text-2xl font-bold text-red-500 mb-1">0%</div>
+              <div className="text-xl md:text-2xl font-bold text-red-500 mb-1">{metrics?.sentiment?.negative != null ? `${metrics.sentiment.negative}%` : '0%'}</div>
               <div className="text-[9px] md:text-[10px] text-slate-400 font-bold tracking-widest uppercase">Negative</div>
             </div>
           </div>

@@ -33,25 +33,25 @@ export function OverallDashboard({ data }: { data?: any }) {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
             <div className="md:col-span-2 bg-[#050505] border border-[#222] rounded-xl p-3 h-[250px]">
-              <PerformanceHeatmap />
+              <PerformanceHeatmap data={data} />
             </div>
             <div className="bg-[#050505] border border-[#222] rounded-xl p-3 h-[250px]">
-              <OmnichannelTrends />
+              <OmnichannelTrends data={data} />
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
             <div className="md:col-span-2 bg-[#050505] border border-[#222] rounded-xl p-3">
-              <AgentLeaderboard />
+              <AgentLeaderboard data={data} />
             </div>
             <div className="bg-[#050505] border border-[#222] rounded-xl p-3 flex flex-col justify-between">
-              <SlaGauge />
+              <SlaGauge percentage={data?.metrics?.slaMet ? parseInt(data.metrics.slaMet, 10) : 100} />
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             <div className="md:col-span-2 bg-[#050505] border border-[#222] rounded-xl p-3">
-              <CallVolumeHeatmap />
+              <CallVolumeHeatmap data={data} />
             </div>
             <div className="bg-[#050505] border border-[#222] rounded-xl p-3">
               <SentimentTrend data={data} />

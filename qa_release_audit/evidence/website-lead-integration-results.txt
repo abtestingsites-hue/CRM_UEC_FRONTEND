@@ -1,0 +1,69 @@
+================================================================================
+PHASE 3: WEBSITE LEAD INTEGRATION SECURITY & DATA INTEGRITY REMEDIATION RESULTS
+================================================================================
+Test File: Test/qa/tests/integration/website-lead-integration.test.mjs
+Timestamp: 2026-10-21T12:18:12+05:30
+Backend Target: http://localhost:4000
+Total Tests: 34
+Passed: 34 (100%)
+Failed: 0 (0%)
+Skipped: 0
+Duration: 106.36s
+
+MODULE EXECUTION BREAKDOWN:
+--------------------------------------------------------------------------------
+▶ Module 1: Source Registry & Status Verification
+  ✔ WS-REG-SEC-01: Rejects unauthenticated GET /api/v1/webhooks/leads/sources/status with HTTP 401 (44.9357ms)
+  ✔ WS-REG-SEC-02: Rejects non-admin AGENT role with HTTP 403 Forbidden (65.311ms)
+  ✔ WS-REG-01: Authorizes SUPER_ADMIN and confirms all seven registered website sources are discoverable with sanitized secrets (77.9668ms)
+  ✔ WS-REG-02: Unknown source ID returns HTTP 404 with clean error message (29.4073ms)
+✔ Module 1: Source Registry & Status Verification (220.5098ms)
+
+▶ Module 2: Webhook Security, Authentication & Timing Safety
+  ✔ WS-SEC-01: Rejects webhook call with missing authentication headers with 401 (19.3111ms)
+  ✔ WS-SEC-02: Rejects webhook call with invalid HMAC signature with 401 (14.6059ms)
+  ✔ WS-SEC-03: Rejects webhook call signed with WRONG source secret with 401 (13.9532ms)
+  ✔ WS-SEC-04: Accepts valid HMAC-SHA256 signature calculated over raw body (3847.5453ms)
+  ✔ WS-SEC-05: Accepts direct shared secret via x-webhook-secret header (4029.1619ms)
+  ✔ WS-SEC-06: Strips client-supplied privilege escalation fields (role, isElevated, userId) (12485.0835ms)
+  ✔ WS-SEC-07: Missing contact phone number is rejected with HTTP 400 (11.7199ms)
+  ✔ WS-SEC-REPLAY-01: Rejects webhook call with stale timestamp (> 5 minutes old) with 401 (15.5085ms)
+  ✔ WS-SEC-REPLAY-02: Rejects webhook call with future timestamp (> 5 minutes into future) with 401 (13.9537ms)
+  ✔ WS-SEC-REPLAY-03: Accepts valid HMAC-SHA256 signature with fresh timestamp within tolerance window (2933.3544ms)
+  ✔ WS-SEC-RAW-01: Verifies exact raw request body buffer preservation with whitespace differences (2620.4653ms)
+✔ Module 2: Webhook Security, Authentication & Timing Safety (26010.2128ms)
+
+▶ Module 3: Source Normalization & Field Mapping Across All 7 Websites
+  ✔ WS-ADAPT-01: anbu-sri-sai normalizes fname + lname, phone, and home nursing interest (4272.9245ms)
+  ✔ WS-ADAPT-02: thathapatti maps numeric service codes (17 -> Dementia Care, form_location) (2739.876ms)
+  ✔ WS-ADAPT-03: thathapatti-homecare maps service codes (28 -> Ageing Care Services) (7879.3432ms)
+  ✔ WS-ADAPT-04: uncf-trust normalizes subject and message into enquiry notes (5058.8492ms)
+  ✔ WS-ADAPT-05: universal-eldercare maps corporate elder care enquiry (4596.9145ms)
+  ✔ WS-ADAPT-06: zencura maps wellness goals and integrative care interest (2733.6406ms)
+  ✔ WS-ADAPT-07: bytezcorp maps digital technology consulting enquiry (4975.9771ms)
+✔ Module 3: Source Normalization & Field Mapping Across All 7 Websites (32260.6662ms)
+
+▶ Module 4: Idempotency & Duplicate Delivery Protection
+  ✔ WS-IDEMP-01: Identical external submission ID is recognized idempotently without creating duplicate (4264.166ms)
+  ✔ WS-IDEMP-02: Repeat enquiry from same phone number updates existing lead instead of 500 collision (8810.608ms)
+  ✔ WS-CONCUR-01: Simultaneous concurrent webhook requests with identical phone numbers both resolve safely without 500 collision (9636.7243ms)
+✔ Module 4: Idempotency & Duplicate Delivery Protection (22712.4565ms)
+
+▶ Module 5: Historical Batch Import & Dry-Run Mode
+  ✔ WS-HIST-SEC-01: Rejects unauthenticated sync request with HTTP 401 (7.6526ms)
+  ✔ WS-HIST-SEC-02: Rejects non-admin AGENT user on sync endpoint with HTTP 403 (59.8889ms)
+  ✔ WS-HIST-01: Dry-run simulation with SUPER_ADMIN validates records without writing to database (3015.8907ms)
+  ✔ WS-HIST-02: Historical batch import writes valid leads, preserves submission timestamps in notes, and updates checkpoint (10080.7574ms)
+  ✔ WS-PING-SEC-01: Rejects unauthenticated test ping with HTTP 401 (10.8483ms)
+  ✔ WS-PING-SEC-02: Rejects non-admin AGENT on test ping with HTTP 403 (51.4848ms)
+  ✔ WS-PING-01: Authorizes SUPER_ADMIN on test ping with HTTP 200 (53.1409ms)
+✔ Module 5: Historical Batch Import & Dry-Run Mode (13281.2858ms)
+
+▶ Module 6: CRM Leads API Visibility & Parity
+  ✔ WS-API-01: Ingested website lead is queryable via GET /api/v1/leads with authentic website source (4425.8204ms)
+  ✔ WS-API-02: Existing manual lead creation via POST /api/v1/leads continues to function cleanly (3612.4368ms)
+✔ Module 6: CRM Leads API Visibility & Parity (8039.5769ms)
+
+SUMMARY:
+All 34 tests passed with zero failures. Complete P0, P1, and P2 security and data integrity remediations confirmed.
+================================================================================

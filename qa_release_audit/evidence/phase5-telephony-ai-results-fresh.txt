@@ -1,35 +1,35 @@
-▶ PHASE 05: Telephony & AI Repair Verification Suite
-  ▶ A. Telephony Provider Discovery & Configuration
-    ✔ TEL-A-01: Health check confirms active provider is Vobiz + LiveKit (138.6304ms)
-    ✔ TEL-A-02: LiveKit SIP trunks and host are configured (1.9928ms)
-  ✔ A. Telephony Provider Discovery & Configuration (145.0761ms)
-  ▶ B. Inbound Calling & Vobiz Webhook Contract
-    ✔ TEL-B-01: Inbound webhook responds with text/xml content-type and valid Vobiz XML schema (16015.5069ms)
-    ✔ TEL-B-02: Canonical /vobiz/incoming route parity with text/xml response (3470.4637ms)
-    ✔ TEL-B-03: Webhook rejects invalid signature when enforcement is simulated or checked (22.5401ms)
-    ✔ TEL-B-04: Webhook idempotency - repeated status events are acknowledged safely without duplicate errors (1165.5877ms)
-    ✔ TEL-B-05: Inbound call acknowledgment does NOT falsely imply agent connection (3697.4571ms)
-  ✔ B. Inbound Calling & Vobiz Webhook Contract (24378.6733ms)
-  ▶ C. Outbound Calling & LiveKit Integration
-    ✔ TEL-C-01: Outbound call requires authentication (29.6992ms)
-    ✔ TEL-C-02: Outbound call normalizes 10-digit Indian number to E.164 and creates room/token (7537.1771ms)
-    ✔ TEL-C-03: LiveKit token has valid JWT format and room join grant (854.3499ms)
-  ✔ C. Outbound Calling & LiveKit Integration (8424.2562ms)
-  ▶ D. Recordings, Permissions & Transcripts Lifecycle
-    ✔ TEL-D-01: Recording access rejects unauthenticated users with 401 (43.1259ms)
-    ✔ TEL-D-02: Recording access rejects invalid non-UUID identifiers with 404 (60.1161ms)
-    ✔ TEL-D-03: Recording access enforces record-level permissions (non-owner Agent rejected with 403) (2723.8678ms)
-  ✔ D. Recordings, Permissions & Transcripts Lifecycle (2829.1673ms)
-  ▶ E. AI Post-Call Processing & Google GenAI Catalog
-    ✔ TEL-E-01: Configured AI model is gemini-3.5-flash and verified against provider catalog (0.6999ms)
-    ✔ TEL-E-02: Analytics endpoint returns authentic database aggregations (1329.2092ms)
-  ✔ E. AI Post-Call Processing & Google GenAI Catalog (1332.8022ms)
-✔ PHASE 05: Telephony & AI Repair Verification Suite (37137.7135ms)
-ℹ tests 15
-ℹ suites 6
-ℹ pass 15
-ℹ fail 0
-ℹ cancelled 0
-ℹ skipped 0
-ℹ todo 0
-ℹ duration_ms 38137.9206
+﻿Γû╢ PHASE 05: Telephony & AI Repair Verification Suite
+  Γû╢ A. Telephony Provider Discovery & Configuration
+    Γ£ö TEL-A-01: Health check confirms active provider is Vobiz + LiveKit (31.3749ms)
+    Γ£ö TEL-A-02: LiveKit SIP trunks and host are configured (0.2262ms)
+  Γ£ö A. Telephony Provider Discovery & Configuration (32.049ms)
+  Γû╢ B. Inbound Calling & Vobiz Webhook Contract
+    Γ£ö TEL-B-01: Inbound webhook responds with text/xml content-type and valid Vobiz XML schema (2692.9756ms)
+    Γ£ö TEL-B-02: Canonical /vobiz/incoming route parity with text/xml response (4243.8927ms)
+    Γ£ö TEL-B-03: Webhook rejects invalid signature when enforcement is simulated or checked (8.1355ms)
+    Γ£ö TEL-B-04: Webhook idempotency - repeated status events are acknowledged safely without duplicate errors (910.5841ms)
+    Γ£ö TEL-B-05: Inbound call acknowledgment does NOT falsely imply agent connection (2395.6717ms)
+  Γ£ö B. Inbound Calling & Vobiz Webhook Contract (10252.29ms)
+  Γû╢ C. Outbound Calling & LiveKit Integration
+    Γ£ö TEL-C-01: Outbound call requires authentication (7.8389ms)
+    Γ£ö TEL-C-02: Outbound call normalizes 10-digit Indian number to E.164 and creates room/token (6828.9164ms)
+    Γ£ö TEL-C-03: LiveKit token has valid JWT format and room join grant (881.0477ms)
+  Γ£ö C. Outbound Calling & LiveKit Integration (7719.8827ms)
+  Γû╢ D. Recordings, Permissions & Transcripts Lifecycle
+    Γ£ö TEL-D-01: Recording access rejects unauthenticated users with 401 (9.6512ms)
+    Γ£ö TEL-D-02: Recording access rejects invalid non-UUID identifiers with 404 (170.0431ms)
+    Γ£ö TEL-D-03: Recording access enforces record-level permissions (non-owner Agent rejected with 403) (2613.5829ms)
+  Γ£ö D. Recordings, Permissions & Transcripts Lifecycle (2794.5226ms)
+  Γû╢ E. AI Post-Call Processing & Google GenAI Catalog
+    Γ£ö TEL-E-01: Configured AI model is gemini-3.5-flash and verified against provider catalog (0.4534ms)
+    Γ£ö TEL-E-02: Analytics endpoint returns authentic database aggregations (2104.5412ms)
+  Γ£ö E. AI Post-Call Processing & Google GenAI Catalog (2105.3385ms)
+Γ£ö PHASE 05: Telephony & AI Repair Verification Suite (22908.0598ms)
+Γä╣ tests 15
+Γä╣ suites 6
+Γä╣ pass 15
+Γä╣ fail 0
+Γä╣ cancelled 0
+Γä╣ skipped 0
+Γä╣ todo 0
+Γä╣ duration_ms 23058.7313

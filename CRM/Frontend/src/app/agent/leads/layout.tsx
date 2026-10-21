@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Users, KanbanSquare, CalendarClock } from 'lucide-react';
+import { Users, KanbanSquare, CalendarClock, Globe } from 'lucide-react';
 
 export default function AgentLeadsLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -12,6 +12,7 @@ export default function AgentLeadsLayout({ children }: { children: React.ReactNo
     { name: 'Lead Pool', href: '/agent/leads/pool', icon: Users },
     { name: 'Conversion Board', href: '/agent/leads/conversion', icon: KanbanSquare },
     { name: 'Follow-ups', href: '/agent/leads/follow-ups', icon: CalendarClock },
+    { name: 'Website Integrations', href: '/agent/leads/website-sync', icon: Globe },
   ];
 
   return (

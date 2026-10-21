@@ -1,22 +1,23 @@
 import React from 'react';
 
-export function CallVolumeHeatmap() {
+export function CallVolumeHeatmap({ data }: { data?: any }) {
   const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
   const times = ['12 AM', '03 AM', '06 AM', '09 AM', '12 PM', '03 PM', '06 PM', '09 PM'];
   
-  // Generate mock heatmap data (0-4 intensity) deterministically to avoid hydration errors
+  const totalCalls = data?.metrics?.totalCalls ?? data?.liveStats?.totalCalls ?? 0;
+  const callsPerHour: any[] = data?.charts?.callsPerHour || [];
+
   const generateIntensity = (dayIdx: number, timeIdx: number) => {
-    // Peak times are weekdays 9AM - 3PM
-    const isWeekday = dayIdx < 5;
-    const isPeakTime = timeIdx >= 3 && timeIdx <= 5;
-    
-    // Deterministic pseudo-random based on indices
-    const rand = Math.sin(dayIdx * 10 + timeIdx) * 10000;
-    const pseudoRandom = rand - Math.floor(rand);
-    
-    if (isWeekday && isPeakTime) return Math.floor(pseudoRandom * 2) + 3; // 3-4 (high)
-    if (isWeekday && timeIdx >= 2 && timeIdx <= 6) return Math.floor(pseudoRandom * 2) + 2; // 2-3 (medium)
-    return 0; // 0-1 (very low)
+    if (totalCalls === 0) return 0;
+    if (callsPerHour.length > 0) {
+      const callData = callsPerHour[timeIdx % callsPerHour.length];
+      const count = callData?.calls || 0;
+      if (count > 20) return 4;
+      if (count > 10) return 3;
+      if (count > 5) return 2;
+      if (count > 0) return 1;
+    }
+    return 0;
   };
 
   const getColorClass = (intensity: number) => {

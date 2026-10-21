@@ -1,0 +1,52 @@
+================================================================================
+PHASE 4: ADVERSARIAL SECURITY VALIDATION & LIVE-INTEGRATION READINESS EVIDENCE
+================================================================================
+Test File: Test/qa/tests/integration/phase4-adversarial-validation.test.mjs
+Timestamp: 2026-10-21T13:13:29+05:30
+Backend Target: http://localhost:4000
+Environment: Node.js v24.20.0 | Redis Labs Remote Cloud | Supabase PostgreSQL Pooler
+Total Tests: 23
+Passed: 23 (100%)
+Failed: 0 (0%)
+Duration: 40.58s
+
+MODULE EXECUTION BREAKDOWN:
+--------------------------------------------------------------------------------
+▶ Module 1: Webhook Signature Protocol & Replay Attack Resilience
+  ✔ ADV-SIG-01: Accepts valid cryptographically bound HMAC-SHA256 signature (${timestamp}.${rawBody}) (2086.0698ms)
+  ✔ ADV-SIG-02: Rejects tampered request body when signature was signed over original body (401) (8.599ms)
+  ✔ ADV-SIG-03: Rejects tampered timestamp header when signature bound original timestamp (401) (21.7077ms)
+  ✔ ADV-SIG-04: Rejects stale timestamp exceeding 5-minute replay window (401) (15.3389ms)
+  ✔ ADV-SIG-05: Rejects future timestamp exceeding 5-minute skew tolerance (401) (11.7324ms)
+  ✔ ADV-SIG-06: Explicitly rejects unsigned timestamp-based requests when bound signature is enforced (401) (6.3001ms)
+  ✔ ADV-SIG-07: Anti-replay protection rejects captured request resubmitted within replay window (401) (2117.0519ms)
+  ✔ ADV-SIG-08: Legacy shared-secret authentication enforces timestamp replay window (401 for stale) (35.2383ms)
+✔ Module 1: Webhook Signature Protocol & Replay Attack Resilience (4318.9444ms)
+
+▶ Module 2: Idempotency Under Concurrency, Restarts & Failures
+  ✔ ADV-IDEMP-01: Concurrent duplicate deliveries with identical externalLeadId resolve idempotently without duplicates (5238.9137ms)
+  ✔ ADV-IDEMP-02: Multi-instance / post-restart durability: PostgreSQL submission tag ensures duplicate recognized even without Redis key (4336.5682ms)
+  ✔ ADV-IDEMP-03: Repeat enquiry with identical phone number updates existing lead notes instead of 500 collision (4513.1455ms)
+  ✔ ADV-IDEMP-04: Concurrency race condition recovery: Simultaneous new leads with same phone both resolve without 500 (5712.004ms)
+✔ Module 2: Idempotency Under Concurrency, Restarts & Failures (19805.3064ms)
+
+▶ Module 3: Historical Import Integrity, Interruption & Checkpoints
+  ✔ ADV-HIST-01: Heterogeneous batch import validates records, skips duplicates, and flags errors (4660.845ms)
+  ✔ ADV-HIST-02: Interrupted batch halts at specified index and persists last successful checkpoint (4350.1615ms)
+  ✔ ADV-HIST-03: Resuming batch from saved checkpoint completes remaining records without duplicates (2708.5658ms)
+  ✔ ADV-HIST-04: Dry-run simulation performs zero database writes and leaves checkpoint unchanged (711.308ms)
+  ✔ ADV-HIST-05: Preserves original historical submission timestamp in structured notes without altering CRM createdAt (2269.1512ms)
+✔ Module 3: Historical Import Integrity, Interruption & Checkpoints (14701.9718ms)
+
+▶ Module 4: Access Control, Reverse Proxy Rate Limiting & Secret Hygiene
+  ✔ ADV-SEC-01: Anonymous requests to administrative endpoints are rejected with HTTP 401 (22.2829ms)
+  ✔ ADV-SEC-02: Non-admin AGENT user rejected with HTTP 403 on management endpoints (110.8847ms)
+  ✔ ADV-SEC-03: Super Admin authorized on all management endpoints (HTTP 200) (52.9285ms)
+  ✔ ADV-SEC-04: Status endpoint exposes zero secrets, private tokens, or sensitive credentials (51.3439ms)
+  ✔ ADV-SEC-05: Rate limiting is active behind reverse proxy (X-Forwarded-For) (705.1863ms)
+  ✔ ADV-SEC-06: Distinct reverse proxy client IP retains independent rate limit quota (16.8696ms)
+✔ Module 4: Access Control, Reverse Proxy Rate Limiting & Secret Hygiene (961.9378ms)
+
+SUMMARY:
+All 23 Phase 4 tests passed with zero failures. Cryptographic timestamp binding, anti-replay nonces, durable idempotency across restarts, resumable checkpoints, and reverse-proxy rate limiting verified.
+================================================================================

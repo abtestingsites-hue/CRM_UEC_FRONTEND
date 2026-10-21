@@ -1,0 +1,36 @@
+﻿Γû╢ Audit: Elimination of Production Simulations & Fake-Success Fallbacks
+  Γû╢ Module 1: Telephony Health & Dynamic Configuration Status
+    Γ£ö TEL-01: /telephony/health returns authentic configuration status (not hardcoded dummy) (43.9987ms)
+  Γ£ö Module 1: Telephony Health & Dynamic Configuration Status (44.5522ms)
+  Γû╢ Module 2: Approvals Negative & Positive Handling
+    Γ£ö APP-01: PUT /api/v1/approvals/:id/review returns 404 for non-existent approval ID (153.6961ms)
+    Γ£ö APP-02: GET /api/v1/approvals returns authentic list without fabricated records (41.6105ms)
+  Γ£ö Module 2: Approvals Negative & Positive Handling (195.7577ms)
+  Γû╢ Module 3: Call Transfer Real Persistence & Negative 404
+    Γ£ö XFER-01: POST /api/v1/calls/:sid/transfer returns 404 on non-existent call SID (1008.1426ms)
+    Γ£ö XFER-02: POST /api/v1/calls/:sid/transfer updates transferHistory in real Prisma DB (2527.7295ms)
+  Γ£ö Module 3: Call Transfer Real Persistence & Negative 404 (3536.3869ms)
+  Γû╢ Module 4: Post-Call CSAT & Customer Notes Real Persistence
+    Γ£ö CSAT-01: POST /api/v1/feedback returns 400 on invalid csatScore (42.8724ms)
+    Γ£ö CSAT-02: POST /api/v1/feedback returns 404 for missing call session (1417.1286ms)
+    Γ£ö CSAT-03: POST /api/v1/feedback persists CustomerNote and updates transferHistory.feedback (4285.8253ms)
+  Γ£ö Module 4: Post-Call CSAT & Customer Notes Real Persistence (5747.3443ms)
+  Γû╢ Module 5: Dashboard Analytics Authentic Aggregation
+    Γ£ö DASH-01: GET /dashboard/analytics returns real aggregated metrics without fake fallbacks (1982.7505ms)
+  Γ£ö Module 5: Dashboard Analytics Authentic Aggregation (1982.9601ms)
+  Γû╢ Module 6: AI Post-Call Pipeline Honest Failure Mode
+    Γ£ö AI-01: ai.js generateCallSummary returns honest failure mode instead of fake neutral sentiment (61.7584ms)
+  Γ£ö Module 6: AI Post-Call Pipeline Honest Failure Mode (61.8537ms)
+  Γû╢ Module 7: Carrier Webhook Input Validation & Dynamic Host Resolution
+    Γ£ö VOB-01: POST /vobiz/incoming rejects missing From caller number with 400 (5.4759ms)
+    Γ£ö VOB-02: POST /vobiz/incoming resolves host dynamically without hardcoded ngrok URL (52.5957ms)
+  Γ£ö Module 7: Carrier Webhook Input Validation & Dynamic Host Resolution (58.3429ms)
+Γ£ö Audit: Elimination of Production Simulations & Fake-Success Fallbacks (16817.1117ms)
+Γä╣ tests 12
+Γä╣ suites 8
+Γä╣ pass 12
+Γä╣ fail 0
+Γä╣ cancelled 0
+Γä╣ skipped 0
+Γä╣ todo 0
+Γä╣ duration_ms 17009.0677
