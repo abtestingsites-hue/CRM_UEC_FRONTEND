@@ -160,9 +160,18 @@ export default function AiRecordsPage() {
                         <h4 className="font-bold text-white mb-3 flex items-center gap-2">
                           <Mic className="w-4 h-4 text-primary" /> Audio Recording
                         </h4>
-                        {record.recordingUrl ? (
+                        {record.recordingStatus === 'READY' && record.recordingUrl ? (
                           <div className="bg-[#050505] border border-[#222] rounded-xl p-4">
                             <audio src={record.recordingUrl} controls preload="metadata" crossOrigin="anonymous" className="w-full h-10" />
+                          </div>
+                        ) : record.recordingStatus === 'PROCESSING' ? (
+                          <div className="bg-[#050505] border border-[#222] rounded-xl p-4 text-amber-500 font-medium text-xs flex items-center gap-2">
+                            <span className="w-2 h-2 rounded-full bg-amber-500 animate-ping" />
+                            Recording is being processed by LiveKit Egress...
+                          </div>
+                        ) : record.recordingStatus === 'FAILED' ? (
+                          <div className="bg-[#050505] border border-[#222] rounded-xl p-4 text-rose-500 font-medium text-xs">
+                            Recording capture or upload failed.
                           </div>
                         ) : (
                           <div className="bg-[#050505] border border-[#222] rounded-xl p-4 text-slate-500 italic text-xs">
