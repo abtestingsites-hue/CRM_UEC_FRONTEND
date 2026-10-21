@@ -164,7 +164,7 @@ function LiveKitManager({ setCallState, setWebrtcConnected, callSid, isMuted, is
     }
   }, [state, room, callSid, setCallState, setWebrtcConnected, callCategory, remoteParticipants.length]);
 
-  // Handle Microphone Lifecycle safely
+  // Handle Microphone Lifecycle safely without causing redundant renegotiation
   useEffect(() => {
     if (state !== 'connected' || !room || !localParticipant) return;
 
@@ -182,26 +182,29 @@ function LiveKitManager({ setCallState, setWebrtcConnected, callSid, isMuted, is
           return;
         }
 
-        console.log('[WEBRTC-DIAGNOSTIC]', JSON.stringify({
-          event: 'microphone_publish_start',
-          callId: callSid,
-          roomName: room.name,
-          connectionState: state,
-          participantIdentity: localParticipant.identity,
-          reason: 'Requesting permission and publishing'
-        }));
+        // Only toggle if microphone state differs from desired state
+        if (localParticipant.isMicrophoneEnabled === isMuted) {
+          console.log('[WEBRTC-DIAGNOSTIC]', JSON.stringify({
+            event: 'microphone_publish_start',
+            callId: callSid,
+            roomName: room.name,
+            connectionState: state,
+            participantIdentity: localParticipant.identity,
+            reason: `Syncing mic state: desired=${!isMuted}`
+          }));
 
-        await localParticipant.setMicrophoneEnabled(!isMuted);
+          await localParticipant.setMicrophoneEnabled(!isMuted);
 
-        console.log('[WEBRTC-DIAGNOSTIC]', JSON.stringify({
-          event: 'microphone_publish_success',
-          callId: callSid,
-          roomName: room.name,
-          connectionState: state,
-          participantIdentity: localParticipant.identity,
-          reason: `Microphone published successfully, muted: ${isMuted}`
-        }));
-        console.log('[INBOUND-AUDIO] local_microphone_published | muted=' + isMuted);
+          console.log('[WEBRTC-DIAGNOSTIC]', JSON.stringify({
+            event: 'microphone_publish_success',
+            callId: callSid,
+            roomName: room.name,
+            connectionState: state,
+            participantIdentity: localParticipant.identity,
+            reason: `Microphone synced successfully, muted: ${isMuted}`
+          }));
+          console.log('[INBOUND-AUDIO] local_microphone_published | muted=' + isMuted);
+        }
       } catch (err: any) {
         console.error('[WEBRTC-DIAGNOSTIC]', JSON.stringify({
           event: 'microphone_publish_failure',
@@ -223,6 +226,12 @@ function LiveKitManager({ setCallState, setWebrtcConnected, callSid, isMuted, is
 
     const handleTrackSubscribed = (track: any, publication: any, participant: any) => {
       if (track.kind === 'audio') {
+        if (typeof (room as any).startAudio === 'function') {
+          (room as any).startAudio().catch(() => {});
+        }
+        try {
+          track.attach();
+        } catch (_) {}
         console.log('[WEBRTC-DIAGNOSTIC]', JSON.stringify({
           event: 'remote_audio_subscribed',
           callId: callSid,
@@ -587,7 +596,7 @@ export function CallWidget() {
                 serverUrl={process.env.NEXT_PUBLIC_LIVEKIT_URL || 'wss://pbx-27wznvd6.livekit.cloud'}
                 token={activeCall.token}
                 connect={callState !== 'ENDED'}
-                audio={false} // Managed explicitly by LiveKitManager to prevent early publishing
+                audio={!isMuted} // Pre-warms and publishes audio on initial connection to avoid 2-5s delay
                 video={false}
               >
                 <RoomAudioRenderer volume={1} muted={!isSpeaker} />

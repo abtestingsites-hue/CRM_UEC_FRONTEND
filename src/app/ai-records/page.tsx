@@ -166,6 +166,7 @@ export default function AIRecordsPage() {
                             controls 
                             className="w-48 h-8 rounded-lg outline-none" 
                             preload="metadata"
+                            crossOrigin="anonymous"
                             onLoadStart={(e) => console.log(`[RECORDING-PLAYER] event=loadStart callId=${record.id} srcPresent=${!!e.currentTarget.src}`)}
                             onLoadedMetadata={(e) => console.log(`[RECORDING-PLAYER] event=loadedMetadata callId=${record.id} duration=${e.currentTarget.duration}`)}
                             onCanPlay={(e) => console.log(`[RECORDING-PLAYER] event=canPlay callId=${record.id} readyState=${e.currentTarget.readyState}`)}
