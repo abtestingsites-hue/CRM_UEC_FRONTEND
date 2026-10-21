@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Phone, Users, LayoutDashboard, MessageSquare, FileText, Settings, HeartPulse, Activity, LogOut, ChevronDown, Mic, Target, UploadCloud, Kanban, Calendar as CalendarIcon, Megaphone, Workflow, ClipboardCheck, CalendarCheck } from 'lucide-react';
+import { Phone, Users, LayoutDashboard, MessageSquare, FileText, Settings, HeartPulse, Activity, LogOut, ChevronDown, Mic, Target, UploadCloud, Kanban, Calendar as CalendarIcon, Megaphone, Workflow, ClipboardCheck, CalendarCheck, ShieldCheck } from 'lucide-react';
 import { useCallStore } from '@/store/useCallStore';
 import { useAuthStore } from '@/store/authStore';
 import { motion } from 'framer-motion';
@@ -66,6 +66,10 @@ export function Sidebar() {
   const canManageAppointments = userRole === 'ADMIN' || userRole === 'SUPER_ADMIN';
   if (canManageAppointments) {
     navItems.push({ icon: CalendarCheck, label: 'Appointments', href: '/appointments' });
+  }
+
+  if (userRole === 'SUPER_ADMIN') {
+    navItems.push({ icon: ShieldCheck, label: 'Super Admin Console', href: '/super-admin' });
   }
 
   const leadItems = [
