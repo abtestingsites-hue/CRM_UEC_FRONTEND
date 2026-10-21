@@ -14,7 +14,7 @@ export default function AICallSummaryPage() {
       apiFetch('/api/v1/analytics/summaries')
         .then(res => res.json())
       .then(data => {
-        setSummaries(data);
+        setSummaries(Array.isArray(data) ? data : []);
         setLoading(false);
       })
       .catch(err => {
