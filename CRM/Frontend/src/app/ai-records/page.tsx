@@ -159,7 +159,7 @@ export default function AIRecordsPage() {
                       {new Date(record.timestamp).toLocaleString()}
                     </td>
                     <td className="px-6 py-4 text-right">
-                      {record.recordingUrl ? (
+                      {record.recordingStatus === 'READY' && record.recordingUrl ? (
                         <div className="flex items-center justify-end gap-2">
                           <audio 
                             src={record.recordingUrl} 
@@ -173,6 +173,13 @@ export default function AIRecordsPage() {
                             onError={(e) => console.error(`[RECORDING-PLAYER] event=error callId=${record.id} networkState=${e.currentTarget.networkState} errorCode=${e.currentTarget.error?.code} errorMessage=${e.currentTarget.error?.message}`)}
                           />
                         </div>
+                      ) : record.recordingStatus === 'PROCESSING' ? (
+                        <span className="text-xs text-amber-500 font-medium inline-flex items-center gap-1.5">
+                          <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping" />
+                          Processing Recording...
+                        </span>
+                      ) : record.recordingStatus === 'FAILED' ? (
+                        <span className="text-xs text-rose-500 font-medium">Recording Failed</span>
                       ) : (
                         <span className="text-xs text-slate-500">No Recording</span>
                       )}
