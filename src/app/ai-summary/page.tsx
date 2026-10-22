@@ -1,8 +1,9 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import { Activity, Sparkles, Brain, FileText, Download, ChevronDown, ChevronUp, Clock, MessageSquare, CheckCircle, Languages } from 'lucide-react';
+import { Activity, Sparkles, Brain, FileText, Download, ChevronDown, ChevronUp, Clock, MessageSquare, CheckCircle, Languages, Mic } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { CallAudioPlayer } from '@/components/recordings/CallAudioPlayer';
 
 export default function AICallSummaryPage() {
   const [summaries, setSummaries] = useState<any[]>([]);
@@ -93,6 +94,8 @@ export default function AICallSummaryPage() {
             const customerName = item.callSession?.customer?.name || item.callSession?.customer?.phone || 'Unknown Caller';
             const agentName = item.callSession?.participants?.[0]?.agent?.name || 'Unassigned';
             const dateStr = new Date(item.createdAt).toLocaleString();
+            const callSessionId = item.callSessionId || item.callSession?.id || item.callId;
+            const recordingStatus = item.recordingStatus || item.callSession?.recordingStatus;
             
             return (
               <div key={item.id} className={`bg-[#0a0a0a] border ${isExpanded ? 'border-orange-500/30' : 'border-[#1e1e1e]'} p-5 rounded-xl transition-colors`}>
@@ -110,6 +113,16 @@ export default function AICallSummaryPage() {
                       {item.detectedLanguage && (
                         <span className="flex items-center gap-1 px-2 py-0.5 bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded text-[10px] font-bold uppercase tracking-wider">
                           <Languages className="w-3 h-3" /> {item.detectedLanguage}
+                        </span>
+                      )}
+                      {recordingStatus === 'READY' && (
+                        <span className="flex items-center gap-1 px-2 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded text-[10px] font-bold uppercase tracking-wider">
+                          <Mic className="w-3 h-3" /> Audio Available
+                        </span>
+                      )}
+                      {recordingStatus === 'PROCESSING' && (
+                        <span className="flex items-center gap-1 px-2 py-0.5 bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded text-[10px] font-bold uppercase tracking-wider">
+                          <Clock className="w-3 h-3 animate-spin" /> Processing Audio
                         </span>
                       )}
                     </div>
@@ -152,7 +165,17 @@ export default function AICallSummaryPage() {
                       exit={{ height: 0, opacity: 0 }}
                       className="overflow-hidden"
                     >
-                      <div className="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-6 pt-6 border-t border-[#1e1e1e]">
+                      <div className="mt-6 pt-6 border-t border-[#1e1e1e] flex flex-col gap-6">
+                        {/* Audio Recording Player */}
+                        <CallAudioPlayer
+                          callId={callSessionId}
+                          initialRecordingUrl={item.recordingUrl || item.callSession?.recordingUrl}
+                          initialStatus={recordingStatus}
+                          duration={item.recordingDuration || item.callSession?.recordingDuration || item.callSession?.duration}
+                          customerName={customerName}
+                        />
+
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         
                         {/* Left Column: Summary & Insights */}
                         <div className="flex flex-col gap-4">
@@ -220,9 +243,9 @@ export default function AICallSummaryPage() {
                             </div>
                           </div>
                         </div>
-
                       </div>
-                    </motion.div>
+                    </div>
+                  </motion.div>
                   )}
                 </AnimatePresence>
               </div>
