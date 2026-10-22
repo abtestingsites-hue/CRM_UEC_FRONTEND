@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { useConversationStore } from '@/store/conversationStore';
 import { apiFetch } from '@/lib/api';
+import { OmnichannelEnquiryPanel } from './OmnichannelEnquiryPanel';
 
 export function WhatsAppWorkspace({ platformDef, colors, onBack }: any) {
   const { 
@@ -257,50 +258,11 @@ export function WhatsAppWorkspace({ platformDef, colors, onBack }: any) {
         </div>
       </div>
 
-      {/* 2. CUSTOMER PROFILE / APPOINTMENT PANEL */}
-      <div className="w-80 border-l border-[#222d34] flex flex-col overflow-y-auto custom-scrollbar" style={{ backgroundColor: waBg }}>
-        <div className="h-16 flex items-center px-6 shrink-0 border-b border-[#222d34]" style={{ backgroundColor: waPanel }}>
-          <h3 className="text-[#e9edef] font-medium">Contact info</h3>
-        </div>
-        
-        <div className="flex flex-col items-center p-6 border-b border-[#222d34] bg-[#111b21]">
-          <div className="w-48 h-48 rounded-full bg-[#303f46] overflow-hidden flex items-center justify-center text-slate-300 font-bold text-5xl mb-4">
-            {activeConv.customerAvatar ? <img src={activeConv.customerAvatar} alt="avatar" className="w-full h-full object-cover" /> : activeConv.customerName.charAt(0).toUpperCase()}
-          </div>
-          <h2 className="text-xl text-[#e9edef] font-medium">{activeConv.customerName}</h2>
-          <p className="text-[#8696a0] text-sm mt-1">{activeConv.customerName || '+91 98765 43210'}</p>
-        </div>
-
-        <div className="p-4 border-b border-[#222d34] bg-[#111b21] mt-2">
-          <p className="text-[#8696a0] text-sm mb-2">About and phone number</p>
-          <p className="text-[#e9edef]">CRM Lead - {activeConv.priority.toUpperCase()}</p>
-        </div>
-
-        {/* BOOKING INTEGRATION */}
-        <div className="p-6 mt-2 bg-[#111b21]">
-          <div className="flex items-center justify-between mb-4">
-            <h4 className="text-sm font-medium text-[#e9edef]">Appointments</h4>
-            <span className="text-xs text-[#00a884]">View All</span>
-          </div>
-          <button className="w-full py-3 bg-[#00a884] hover:bg-[#008f6f] text-white rounded-lg font-bold flex items-center justify-center gap-2 transition-colors">
-            <Plus className="w-5 h-5" />
-            Book Appointment
-          </button>
-          
-          <div className="mt-4 p-3 rounded-lg border border-[#222d34] bg-[#0b141a]">
-            <p className="text-xs text-[#8696a0] mb-1">Last Appointment</p>
-            <p className="text-sm text-[#e9edef]">Dr. Smith - Gen Checkup</p>
-            <p className="text-[10px] text-[#8696a0] mt-1">12 Sept 2026</p>
-          </div>
-        </div>
-
-        <div className="p-6 mt-2 bg-[#111b21] flex-1">
-          <h4 className="text-sm font-medium text-[#e9edef] mb-3">AI Insights</h4>
-          <p className="text-xs text-[#8696a0] leading-relaxed">
-            Patient prefers evening appointments. High engagement on WhatsApp.
-          </p>
-        </div>
-      </div>
+      {/* 2. OMNICHANNEL ENQUIRY INTELLIGENCE PANEL */}
+      <OmnichannelEnquiryPanel
+        conversation={activeConv}
+        className="w-80 md:w-96"
+      />
     </div>
   );
 }
