@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { 
   Phone, Users, LayoutDashboard, MessageSquare, 
-  FileText, Activity, LogOut, Mic, UserRound, Target, ChevronDown, Calendar 
+  FileText, Activity, LogOut, Mic, UserRound, Target, ChevronDown, Calendar, CheckSquare
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -14,6 +14,7 @@ export function AgentSidebar() {
 
   const navItems = [
     { icon: LayoutDashboard, label: 'Dashboard', href: '/agent/dashboard' },
+    { icon: CheckSquare, label: 'SOP & Daily Ops', href: '/sop' },
     { icon: Phone, label: 'Call Center', href: '/agent/call-center' },
     { icon: MessageSquare, label: 'Omnichannel', href: '/agent/omnichannel' },
     { icon: FileText, label: 'Tickets', href: '/agent/tickets' },
