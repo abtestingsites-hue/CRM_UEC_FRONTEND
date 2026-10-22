@@ -1,11 +1,12 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Users, Phone, PhoneOutgoing, Video, ShieldCheck } from "lucide-react";
+import { Users, Phone, PhoneOutgoing, Video, ShieldCheck, Activity } from "lucide-react";
 import { useCallStore } from "@/store/useCallStore";
 import { useSocket } from "@/providers/SocketProvider";
 import { CallWidget } from "@/components/call-center/CallWidget";
 import { NumericKeypad } from "@/components/call-center/NumericKeypad";
+import { QueueOperationsView } from "@/components/call-center/QueueOperationsView";
 import { apiFetch } from '@/lib/api';
 
 interface Agent {
@@ -19,7 +20,7 @@ interface Agent {
 }
 
 export default function CallCenterPage() {
-  const [activeTab, setActiveTab] = useState<'inbound' | 'outbound' | 'internal'>('inbound');
+  const [activeTab, setActiveTab] = useState<'inbound' | 'outbound' | 'internal' | 'queue'>('inbound');
   const [dialNumber, setDialNumber] = useState('');
   const [isDialing, setIsDialing] = useState(false);
   const [agents, setAgents] = useState<Agent[]>([]);
@@ -194,6 +195,12 @@ export default function CallCenterPage() {
           >
             <Users className="w-4 h-4" /> Internal
           </button>
+          <button
+            onClick={() => setActiveTab('queue')}
+            className={`px-6 py-2 rounded-md text-sm font-bold flex items-center gap-2 transition-colors ${activeTab === 'queue' ? 'bg-[#222] text-white shadow-sm' : 'text-slate-500 hover:text-slate-300'}`}
+          >
+            <Activity className="w-4 h-4 text-emerald-400" /> Queue Engine
+          </button>
         </div>
       </header>
 
@@ -201,6 +208,10 @@ export default function CallCenterPage() {
 
         {/* Left Side: Dynamic Content based on Tab */}
         <div className="w-1/2 flex flex-col bg-[#050505] border border-[#222] rounded-2xl shadow-lg overflow-hidden">
+          {activeTab === 'queue' && (
+            <QueueOperationsView />
+          )}
+
           {activeTab === 'internal' && (
             <div className="flex flex-col h-full">
               <div className="p-5 border-b border-[#222] bg-[#0a0a0a]">
