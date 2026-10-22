@@ -59,7 +59,13 @@ export function AuthWrapper({ children }: { children: React.ReactNode }) {
       }
       
       const isAgentPortalPath = pathname === '/agent' || (pathname.startsWith('/agent/') && pathname !== '/agent/profile');
-      const isSharedPath = pathname.startsWith('/calendar') || pathname.startsWith('/targets') || pathname === '/agent/profile';
+      const isSharedPath = 
+        pathname.startsWith('/calendar') || 
+        pathname.startsWith('/targets') || 
+        pathname.startsWith('/call-logs') || 
+        pathname.startsWith('/call-history') || 
+        pathname.startsWith('/sop') ||
+        pathname === '/agent/profile';
       
       if (role === 'AGENT' && !isAgentPortalPath && !isSharedPath) {
         router.push('/agent/dashboard');

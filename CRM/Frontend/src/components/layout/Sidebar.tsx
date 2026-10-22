@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Phone, Users, LayoutDashboard, MessageSquare, FileText, Settings, HeartPulse, Activity, LogOut, ChevronDown, Mic, Target, UploadCloud, Kanban, Calendar as CalendarIcon, Megaphone, Workflow, ClipboardCheck, CalendarCheck, ShieldCheck, CheckSquare } from 'lucide-react';
+import { Phone, PhoneCall, History, Users, LayoutDashboard, MessageSquare, FileText, Settings, HeartPulse, Activity, LogOut, ChevronDown, Mic, Target, UploadCloud, Kanban, Calendar as CalendarIcon, Megaphone, Workflow, ClipboardCheck, CalendarCheck, ShieldCheck, CheckSquare } from 'lucide-react';
 import { useCallStore } from '@/store/useCallStore';
 import { useAuthStore } from '@/store/authStore';
 import { motion } from 'framer-motion';
@@ -45,6 +45,7 @@ export function Sidebar() {
   const navItems: NavItem[] = [
     { icon: LayoutDashboard, label: 'Dashboard', href: '/dashboard' },
     { icon: Phone, label: 'Call Center', href: '/call-center' },
+    { icon: PhoneCall, label: 'Call Logs', href: '/call-logs' },
     { icon: MessageSquare, label: 'Omnichannel', href: '/omnichannel' },
     { icon: FileText, label: 'Tickets', href: '/tickets' },
     { icon: Activity, label: 'AI Call Summary', href: '/ai-summary' },

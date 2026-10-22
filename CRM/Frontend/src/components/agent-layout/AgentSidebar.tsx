@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { 
-  Phone, Users, LayoutDashboard, MessageSquare, 
+  Phone, PhoneCall, History, Users, LayoutDashboard, MessageSquare, 
   FileText, Activity, LogOut, Mic, UserRound, Target, ChevronDown, Calendar, CheckSquare
 } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -16,6 +16,7 @@ export function AgentSidebar() {
     { icon: LayoutDashboard, label: 'Dashboard', href: '/agent/dashboard' },
     { icon: CheckSquare, label: 'SOP & Daily Ops', href: '/sop' },
     { icon: Phone, label: 'Call Center', href: '/agent/call-center' },
+    { icon: PhoneCall, label: 'Call Logs', href: '/call-logs' },
     { icon: MessageSquare, label: 'Omnichannel', href: '/agent/omnichannel' },
     { icon: FileText, label: 'Tickets', href: '/agent/tickets' },
     { icon: Activity, label: 'AI Call Summary', href: '/agent/ai-summary' },
