@@ -29,6 +29,14 @@ let globalSocket: Socket | null = null;
 let globalTelephonySocket: Socket | null = null;
 let globalMediaSocket: Socket | null = null;
 
+const getStoredToken = () => {
+  if (typeof window === 'undefined') return '';
+  return localStorage.getItem('paramantra_access_token') || 
+         localStorage.getItem('crm_token') || 
+         localStorage.getItem('token') || 
+         localStorage.getItem('access_token') || '';
+};
+
 export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
   const [socket, setSocket] = useState<Socket | null>(null);
   const [telephonySocket, setTelephonySocket] = useState<Socket | null>(null);
@@ -64,7 +72,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
         reconnectionDelay: 1000,
         auth: {
           agentId: user.id,
-          token: typeof window !== 'undefined' ? (localStorage.getItem('paramantra_access_token') || localStorage.getItem('token') || '') : '',
+          token: getStoredToken(),
         }
       });
     }
@@ -84,7 +92,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
           reconnectionDelay: 1000,
           auth: {
             agentId: user.id,
-            token: typeof window !== 'undefined' ? (localStorage.getItem('paramantra_access_token') || localStorage.getItem('token') || '') : '',
+            token: getStoredToken(),
           }
         });
       }
@@ -103,7 +111,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
           reconnection: true,
           auth: {
             agentId: user.id,
-            token: typeof window !== 'undefined' ? (localStorage.getItem('paramantra_access_token') || localStorage.getItem('token') || '') : '',
+            token: getStoredToken(),
           }
         });
       }
@@ -118,7 +126,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
       console.log('[AGENT-SOCKET]', 'connected globalSocket');
 
       const displayName = user.name || (user.email ? user.email.split('@')[0] : 'Agent');
-      const token = typeof window !== 'undefined' ? (localStorage.getItem('paramantra_access_token') || localStorage.getItem('token') || '') : '';
+      const token = getStoredToken();
 
       socketInstance.emit('agent_login', {
         agentId: user.agentId || user.id,
@@ -134,7 +142,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
       
       if (telephonySocketInstance !== socketInstance) {
         console.log('[AGENT-SOCKET]', 'connected globalTelephonySocket');
-        const token = typeof window !== 'undefined' ? (localStorage.getItem('paramantra_access_token') || localStorage.getItem('token') || '') : '';
+        const token = getStoredToken();
         telephonySocketInstance.emit('agent_login', {
           agentId: user.agentId || user.id,
           name: user.name || user.email,
@@ -147,7 +155,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     const handleMediaConnect = () => {
       if (mediaSocketInstance !== socketInstance) {
         console.log('[AGENT-SOCKET]', 'connected globalMediaSocket');
-        const token = typeof window !== 'undefined' ? (localStorage.getItem('paramantra_access_token') || localStorage.getItem('token') || '') : '';
+        const token = getStoredToken();
         mediaSocketInstance.emit('agent_login', {
           agentId: user.agentId || user.id,
           name: user.name || user.email,
@@ -183,7 +191,8 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
       socketInstance.emit('agent_login', {
         agentId: user.agentId || user.id,
         name: user.name || user.email,
-        department: user.department || 'General'
+        department: user.department || 'General',
+        token: getStoredToken(),
       });
     }
 
@@ -191,7 +200,8 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
       telephonySocketInstance.emit('agent_login', {
         agentId: user.agentId || user.id,
         name: user.name || user.email,
-        department: user.department || 'General'
+        department: user.department || 'General',
+        token: getStoredToken(),
       });
     }
 
@@ -199,7 +209,8 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
       mediaSocketInstance.emit('agent_login', {
         agentId: user.agentId || user.id,
         name: user.name || user.email,
-        department: user.department || 'General'
+        department: user.department || 'General',
+        token: getStoredToken(),
       });
     }
 
