@@ -20,6 +20,8 @@ export interface CallData {
   customerContext?: any;
   urgency?: string;
   direction?: string;
+  serverUrl?: string;
+  wsUrl?: string;
 }
 
 export interface CallState {
