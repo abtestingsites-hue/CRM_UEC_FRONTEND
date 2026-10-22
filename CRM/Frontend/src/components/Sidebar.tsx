@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import { Phone, Users, LayoutDashboard, MessageSquare, FileText, Settings, Shield, Activity, Calendar, LogOut } from 'lucide-react';
+import { Phone, Users, LayoutDashboard, MessageSquare, FileText, Settings, Shield, Activity, Calendar, LogOut, History, CopyCheck } from 'lucide-react';
 import { useCallStore } from '../store/useCallStore';
 import { useAuthStore } from '../store/authStore';
 import { motion } from 'framer-motion';
@@ -52,9 +52,11 @@ export function Sidebar() {
   const menuItems = [
     { icon: LayoutDashboard, label: 'Command Center', href: isAdmin ? '/dashboard' : '/agent/dashboard', visible: true },
     { icon: Phone, label: 'Call Center', href: '/call-center', visible: true },
+    { icon: History, label: 'Call Logs & History', href: '/call-history', visible: true },
     { icon: MessageSquare, label: 'Omnichannel', href: '/omnichannel', visible: true },
     { icon: Users, label: 'Customers', href: '/customers', visible: true },
     { icon: Shield, label: 'Lead Pool', href: '/leads/pool', visible: true },
+    { icon: CopyCheck, label: 'Duplicate Leads', href: '/leads/duplicates', visible: true },
     { icon: Calendar, label: 'Calendar Log', href: '/calendar', visible: true },
     { icon: FileText, label: 'Reports', href: '/reports', visible: isAdmin },
     { icon: Settings, label: 'Org Settings', href: '/settings', visible: isAdmin },
