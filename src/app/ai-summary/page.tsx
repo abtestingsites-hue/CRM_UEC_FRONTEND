@@ -1,50 +1,287 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
-import { Activity, Sparkles, Brain, FileText, Download, ChevronDown, ChevronUp, Clock, MessageSquare, CheckCircle, Languages, Mic } from 'lucide-react';
+import React, { useEffect, useState, useCallback } from 'react';
+import {
+  Activity,
+  Sparkles,
+  Brain,
+  FileText,
+  Download,
+  ChevronDown,
+  ChevronUp,
+  Clock,
+  MessageSquare,
+  CheckCircle,
+  Languages,
+  Cpu,
+  Coins,
+  RefreshCw,
+  AlertTriangle,
+  Zap,
+  Layers,
+  Wrench,
+  Check
+} from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CallAudioPlayer } from '@/components/recordings/CallAudioPlayer';
+import { HeaderAudioControl } from '@/components/recordings/HeaderAudioControl';
+import { apiFetch } from '@/lib/api';
 
 export default function AICallSummaryPage() {
   const [summaries, setSummaries] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
-  useEffect(() => {
-    import('@/lib/api').then(({ apiFetch }) => {
-      apiFetch('/api/v1/analytics/summaries')
-        .then(res => res.json())
-      .then(data => {
-        setSummaries(Array.isArray(data) ? data : []);
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error('Failed to fetch AI summaries', err);
-        setLoading(false);
-      });
-    });
+  // AI Usage KPI states
+  const [usagePeriod, setUsagePeriod] = useState<'today' | '7d' | '30d' | 'all'>('30d');
+  const [usageData, setUsageData] = useState<any | null>(null);
+  const [usageLoading, setUsageLoading] = useState<boolean>(true);
+  const [usageError, setUsageError] = useState<string | null>(null);
+  const [isRepairing, setIsRepairing] = useState<boolean>(false);
+  const [repairMsg, setRepairMsg] = useState<string | null>(null);
+
+  const fetchSummaries = useCallback(async () => {
+    try {
+      const res = await apiFetch('/api/v1/analytics/summaries');
+      const data = await res.json();
+      setSummaries(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error('Failed to fetch AI summaries', err);
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  const fetchAiUsage = useCallback(async (period: 'today' | '7d' | '30d' | 'all') => {
+    setUsageLoading(true);
+    setUsageError(null);
+    try {
+      const res = await apiFetch(`/api/v1/analytics/ai-usage?timeRange=${period}`);
+      if (!res.ok) {
+        throw new Error(`Server returned HTTP ${res.status}`);
+      }
+      const data = await res.json();
+      setUsageData(data);
+    } catch (err: any) {
+      console.error('Failed to fetch AI usage:', err);
+      setUsageError(err.message || 'Failed to load usage data');
+    } finally {
+      setUsageLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchSummaries();
+  }, [fetchSummaries]);
+
+  useEffect(() => {
+    fetchAiUsage(usagePeriod);
+  }, [usagePeriod, fetchAiUsage]);
+
+  const handleRunRepair = async () => {
+    setIsRepairing(true);
+    setRepairMsg(null);
+    try {
+      const res = await apiFetch('/api/v1/analytics/repair-pending', { method: 'POST' });
+      const data = await res.json();
+      if (data.success) {
+        setRepairMsg(`Successfully repaired ${data.repairedCount} call session(s).`);
+        await Promise.all([fetchSummaries(), fetchAiUsage(usagePeriod)]);
+      } else {
+        setRepairMsg(`Repair completed: ${data.message || 'No pending calls found.'}`);
+      }
+    } catch (err: any) {
+      setRepairMsg('Repair request failed. Please check backend connection.');
+    } finally {
+      setIsRepairing(false);
+      setTimeout(() => setRepairMsg(null), 6000);
+    }
+  };
 
   const toggleExpand = (id: string) => {
     if (expandedId === id) setExpandedId(null);
     else setExpandedId(id);
   };
 
+  const periodOptions: Array<{ id: 'today' | '7d' | '30d' | 'all'; label: string }> = [
+    { id: 'today', label: 'Today' },
+    { id: '7d', label: 'Last 7 Days' },
+    { id: '30d', label: 'Last 30 Days' },
+    { id: 'all', label: 'All Time' },
+  ];
+
   return (
     <div className="flex-1 p-6 h-full overflow-y-auto custom-scrollbar bg-[#050505]">
-      <header className="mb-8 flex justify-between items-end">
+      <header className="mb-8 flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
         <div>
           <h1 className="text-2xl font-bold text-white mb-1 flex items-center gap-2">
             <Sparkles className="text-primary w-6 h-6" /> AI Call Summaries
           </h1>
-          <p className="text-sm text-slate-500">Automated transcriptions and sentiment analysis from recent calls</p>
+          <p className="text-sm text-slate-500">Automated transcriptions, intelligence synthesis and sentiment analysis</p>
         </div>
-        <button className="flex items-center gap-2 px-4 py-2 bg-[#111] border border-[#333] text-white rounded-lg hover:bg-[#222] transition-colors text-sm font-medium">
-          <Download className="w-4 h-4" /> Export Report
-        </button>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={handleRunRepair}
+            disabled={isRepairing}
+            className="flex items-center gap-2 px-3 py-2 bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20 rounded-lg transition-colors text-xs font-bold"
+            title="Scan and synthesize summaries for any pending or completed calls"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${isRepairing ? 'animate-spin' : ''}`} />
+            {isRepairing ? 'Repairing Pending Calls...' : 'Repair / Sync AI Summaries'}
+          </button>
+          <button className="flex items-center gap-2 px-4 py-2 bg-[#111] border border-[#333] text-white rounded-lg hover:bg-[#222] transition-colors text-sm font-medium">
+            <Download className="w-4 h-4" /> Export Report
+          </button>
+        </div>
       </header>
 
-      {/* Overview Cards */}
+      {repairMsg && (
+        <div className="mb-6 p-3 bg-emerald-500/10 border border-emerald-500/30 rounded-xl text-emerald-400 text-xs flex items-center gap-2">
+          <Check className="w-4 h-4 shrink-0" />
+          <span>{repairMsg}</span>
+        </div>
+      )}
+
+      {/* ==================================================== */}
+      {/* SECTION 1: AI USAGE KPI SECTION (PHASE 6 REQUIREMENT) */}
+      {/* ==================================================== */}
+      <section className="mb-8 bg-[#0a0a0a] border border-[#1e1e1e] p-6 rounded-2xl shadow-sm">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+          <div>
+            <div className="flex items-center gap-2">
+              <Cpu className="w-5 h-5 text-cyan-400" />
+              <h2 className="text-base font-bold text-white">AI Engine & Gemini Usage Analytics</h2>
+              <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
+                Gemini 2026-v1
+              </span>
+            </div>
+            <p className="text-xs text-slate-500 mt-1">
+              Truthful provider-reported token metrics, model breakdown, and pricing schedule
+            </p>
+          </div>
+
+          {/* Time Range Filter Pills */}
+          <div className="flex bg-[#111] border border-[#222] rounded-lg p-1 text-xs">
+            {periodOptions.map((opt) => (
+              <button
+                key={opt.id}
+                onClick={() => setUsagePeriod(opt.id)}
+                className={`px-3 py-1 rounded-md transition-colors font-medium ${
+                  usagePeriod === opt.id
+                    ? 'bg-[#222] text-white font-bold shadow-sm'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {usageLoading ? (
+          <div className="flex justify-center items-center py-8 text-slate-500 text-xs">
+            <RefreshCw className="w-4 h-4 animate-spin mr-2 text-cyan-400" />
+            Loading AI usage telemetry...
+          </div>
+        ) : usageError ? (
+          <div className="p-4 bg-rose-500/10 border border-rose-500/20 rounded-xl text-rose-400 text-xs flex items-center gap-2">
+            <AlertTriangle className="w-4 h-4 shrink-0" />
+            <span>AI Usage Telemetry unavailable: {usageError}</span>
+          </div>
+        ) : usageData?.summary ? (
+          <div>
+            {/* 4 Metric Cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-5">
+              {/* Card 1: Total AI Requests */}
+              <div className="bg-[#111] border border-[#222] p-4 rounded-xl">
+                <div className="flex items-center justify-between text-slate-400 text-xs mb-2">
+                  <span>Total AI Invocations</span>
+                  <Zap className="w-4 h-4 text-primary" />
+                </div>
+                <div className="text-2xl font-bold text-white mb-1">
+                  {usageData.summary.totalRequests}
+                </div>
+                <div className="text-[10px] text-slate-500">
+                  {Object.entries(usageData.byFeature || {}).map(([feat, details]: [string, any]) => (
+                    <span key={feat} className="mr-2">
+                      {feat === 'metadata_call_summary' ? 'Summaries' : feat}: {details.requests}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              {/* Card 2: Token Volume */}
+              <div className="bg-[#111] border border-[#222] p-4 rounded-xl">
+                <div className="flex items-center justify-between text-slate-400 text-xs mb-2">
+                  <span>Tokens Processed</span>
+                  <Brain className="w-4 h-4 text-purple-400" />
+                </div>
+                <div className="text-2xl font-bold text-white mb-1">
+                  {usageData.summary.totalTokens.toLocaleString()}
+                </div>
+                <div className="text-[10px] text-slate-500 flex justify-between">
+                  <span>In: {usageData.summary.totalPromptTokens.toLocaleString()}</span>
+                  <span>Out: {usageData.summary.totalCandidateTokens.toLocaleString()}</span>
+                </div>
+              </div>
+
+              {/* Card 3: Audio Processed */}
+              <div className="bg-[#111] border border-[#222] p-4 rounded-xl">
+                <div className="flex items-center justify-between text-slate-400 text-xs mb-2">
+                  <span>Audio Ingested</span>
+                  <Activity className="w-4 h-4 text-emerald-400" />
+                </div>
+                <div className="text-2xl font-bold text-white mb-1">
+                  {usageData.summary.totalAudioMinutes} <span className="text-sm font-normal text-slate-400">min</span>
+                </div>
+                <div className="text-[10px] text-slate-500">
+                  Raw duration: {usageData.summary.totalAudioSeconds}s
+                </div>
+              </div>
+
+              {/* Card 4: Estimated Provider Cost */}
+              <div className="bg-[#111] border border-[#222] p-4 rounded-xl">
+                <div className="flex items-center justify-between text-slate-400 text-xs mb-2">
+                  <span>Estimated Cost</span>
+                  <Coins className="w-4 h-4 text-amber-400" />
+                </div>
+                <div className="text-2xl font-bold text-white mb-1">
+                  ${usageData.summary.estimatedCostUsd.toFixed(5)} <span className="text-xs font-normal text-slate-400">USD</span>
+                </div>
+                <div className="text-[10px] text-slate-500">
+                  Calculated from Gemini Flash schedule
+                </div>
+              </div>
+            </div>
+
+            {/* Model Breakdown & Live Credit Note */}
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 pt-3 border-t border-[#1e1e1e] text-[11px] text-slate-500">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="font-semibold text-slate-400">Active Models:</span>
+                {Object.entries(usageData.byModel || {}).map(([model, info]: [string, any]) => (
+                  <span
+                    key={model}
+                    className="px-2 py-0.5 bg-[#161616] border border-[#282828] rounded text-slate-300 font-mono text-[10px]"
+                  >
+                    {model} ({info.requests} reqs · {info.totalTokens.toLocaleString()} tok)
+                  </span>
+                ))}
+              </div>
+              <div className="text-slate-500 italic">
+                * Live remaining provider credits: <span className="text-slate-400">Unavailable without Google Cloud Billing API credentials</span> (never fabricated).
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="text-center py-6 text-slate-500 text-xs">
+            No AI usage recorded for this timeframe.
+          </div>
+        )}
+      </section>
+
+      {/* ==================================================== */}
+      {/* SECTION 2: CALL INSIGHT OVERVIEW CARDS */}
+      {/* ==================================================== */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <div className="bg-[#0a0a0a] border border-[#1e1e1e] p-5 rounded-xl shadow-sm">
           <div className="flex items-center gap-3 mb-2">
@@ -85,7 +322,7 @@ export default function AICallSummaryPage() {
         <div className="text-center py-16 bg-[#0a0a0a] rounded-xl border border-[#1e1e1e] text-slate-500">
           <Brain className="w-12 h-12 mx-auto mb-4 opacity-20" />
           <p>No processed calls found.</p>
-          <p className="text-xs mt-1">Make a call to trigger the AI Intelligence pipeline.</p>
+          <p className="text-xs mt-1">Make a call to trigger the AI Intelligence pipeline or click &quot;Repair / Sync AI Summaries&quot; above.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-4">
@@ -105,7 +342,7 @@ export default function AICallSummaryPage() {
                   onClick={() => toggleExpand(item.id)}
                 >
                   <div>
-                    <div className="flex items-center gap-3 mb-1">
+                    <div className="flex flex-wrap items-center gap-3 mb-1">
                       <h3 className="text-base font-bold text-white">{customerName}</h3>
                       <span className="px-2 py-0.5 bg-[#141414] text-slate-400 border border-[#222] rounded text-[10px] font-bold uppercase tracking-wider">
                         {item.customerIntent || 'General Inquiry'}
@@ -115,16 +352,14 @@ export default function AICallSummaryPage() {
                           <Languages className="w-3 h-3" /> {item.detectedLanguage}
                         </span>
                       )}
-                      {recordingStatus === 'READY' && (
-                        <span className="flex items-center gap-1 px-2 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded text-[10px] font-bold uppercase tracking-wider">
-                          <Mic className="w-3 h-3" /> Audio Available
-                        </span>
-                      )}
-                      {recordingStatus === 'PROCESSING' && (
-                        <span className="flex items-center gap-1 px-2 py-0.5 bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded text-[10px] font-bold uppercase tracking-wider">
-                          <Clock className="w-3 h-3 animate-spin" /> Processing Audio
-                        </span>
-                      )}
+
+                      {/* Accessible Audio Play Control directly beside Language Badge */}
+                      <HeaderAudioControl
+                        callId={callSessionId}
+                        initialRecordingUrl={item.recordingUrl || item.callSession?.recordingUrl}
+                        initialStatus={recordingStatus}
+                        duration={item.recordingDuration || item.callSession?.recordingDuration || item.callSession?.duration}
+                      />
                     </div>
                     <div className="flex items-center gap-3 text-xs text-slate-500">
                       <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" /> {dateStr}</span>

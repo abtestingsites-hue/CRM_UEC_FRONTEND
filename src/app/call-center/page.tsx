@@ -5,6 +5,7 @@ import { Users, Phone, PhoneOutgoing, Video, ShieldCheck } from "lucide-react";
 import { useCallStore } from "@/store/useCallStore";
 import { useSocket } from "@/providers/SocketProvider";
 import { CallWidget } from "@/components/call-center/CallWidget";
+import { NumericKeypad } from "@/components/call-center/NumericKeypad";
 import { apiFetch } from '@/lib/api';
 
 interface Agent {
@@ -327,26 +328,25 @@ export default function CallCenterPage() {
           )}
 
           {activeTab === 'outbound' && (
-            <div className="flex flex-col items-center justify-center h-full text-center p-8">
-              <PhoneOutgoing className="w-12 h-12 text-slate-600 mb-4" />
-              <h2 className="text-xl font-bold text-white mb-2">Outbound Dialer</h2>
-              <p className="text-sm text-slate-500 max-w-sm">Enter a customer phone number to initiate an outbound WebRTC SIP call.</p>
-              <div className="mt-8 flex gap-2 w-full max-w-xs">
-                <input aria-label="Phone number to dial" 
-                  type="text" 
-                  placeholder="+91..." 
-                  value={dialNumber}
-                  onChange={(e) => setDialNumber(e.target.value)}
-                  className="flex-1 bg-[#111] border border-[#333] rounded-lg px-4 py-2 text-white outline-none focus:border-primary" 
-                />
-                <button 
-                  onClick={handleOutboundDial}
-                  disabled={isDialing || !dialNumber}
-                  className="bg-primary text-white px-4 py-2 rounded-lg font-bold hover:bg-orange-600 transition-colors disabled:opacity-50"
-                >
-                  {isDialing ? 'Dialing...' : 'Dial'}
-                </button>
-              </div>
+            <div className="flex flex-col items-center justify-center h-full p-4 overflow-y-auto custom-scrollbar">
+              <NumericKeypad
+                onCallInitiated={(data) => {
+                  const finalRoomName = data.roomName || data.callSid || `room_${Date.now()}`;
+                  setActiveCall({
+                    callSid: finalRoomName,
+                    roomName: finalRoomName,
+                    customerName: 'Customer',
+                    phone: data.to || 'Customer',
+                    urgency: 'NORMAL',
+                    category: 'Outbound',
+                    direction: 'OUTBOUND',
+                    status: 'DIALING',
+                    isCaller: true,
+                    accepted: true,
+                    token: data.token
+                  });
+                }}
+              />
             </div>
           )}
         </div>
