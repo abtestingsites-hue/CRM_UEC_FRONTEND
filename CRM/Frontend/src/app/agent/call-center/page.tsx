@@ -220,7 +220,8 @@ export default function AgentCallCenter() {
                         status: 'DIALING',
                         isCaller: true,
                         accepted: true,
-                        token: data.token
+                        token: data.token,
+                        serverUrl: data.serverUrl || data.wsUrl
                       } as any);
                     }}
                   />

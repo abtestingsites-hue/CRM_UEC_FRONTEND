@@ -593,7 +593,7 @@ export function CallWidget() {
           {activeCall?.accepted && isLiveKit && (
             <div className="mt-4 w-full">
               <LiveKitRoom
-                serverUrl={process.env.NEXT_PUBLIC_LIVEKIT_URL || 'wss://pbx-27wznvd6.livekit.cloud'}
+                serverUrl={activeCall?.serverUrl || activeCall?.wsUrl || process.env.NEXT_PUBLIC_LIVEKIT_URL || 'wss://23jy3gv6xcs.livekit.cloud'}
                 token={activeCall.token}
                 connect={callState !== 'ENDED'}
                 audio={!isMuted} // Pre-warms and publishes audio on initial connection to avoid 2-5s delay

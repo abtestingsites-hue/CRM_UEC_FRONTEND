@@ -151,7 +151,8 @@ export default function CallCenterPage() {
           status: 'DIALING',
           isCaller: true,
           accepted: true,
-          token: data.token
+          token: data.token,
+          serverUrl: data.serverUrl || data.wsUrl
         });
       } else {
         console.error('Failed to dial outbound');
@@ -343,7 +344,8 @@ export default function CallCenterPage() {
                     status: 'DIALING',
                     isCaller: true,
                     accepted: true,
-                    token: data.token
+                    token: data.token,
+                    serverUrl: data.serverUrl || data.wsUrl
                   });
                 }}
               />
