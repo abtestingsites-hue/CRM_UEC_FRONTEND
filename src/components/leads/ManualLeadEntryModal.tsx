@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, User, Phone, Mail, FileText, Tag, Loader2 } from 'lucide-react';
+import { X, User, Phone, Mail, FileText, Tag, Loader2, AlertTriangle } from 'lucide-react';
 import { useLeadStore } from '@/store/useLeadStore';
+import { api } from '@/lib/api';
 
 interface ManualLeadEntryModalProps {
   isOpen: boolean;
@@ -22,6 +23,24 @@ export function ManualLeadEntryModal({ isOpen, onClose }: ManualLeadEntryModalPr
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [duplicateWarning, setDuplicateWarning] = useState<any | null>(null);
+
+  const checkDuplicateLead = async (phone: string, email: string) => {
+    if (!phone || phone.length < 8) {
+      setDuplicateWarning(null);
+      return;
+    }
+    try {
+      const res = await api.post('/leads/duplicates/check', { phoneNumber: phone, email });
+      if (res?.confidenceScore >= 70 && res.matches?.length > 0) {
+        setDuplicateWarning(res.matches[0]);
+      } else {
+        setDuplicateWarning(null);
+      }
+    } catch (_) {
+      setDuplicateWarning(null);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -99,8 +118,44 @@ export function ManualLeadEntryModal({ isOpen, onClose }: ManualLeadEntryModalPr
               </button>
             </div>
 
-            {/* Content */}
+              {/* Content */}
             <div className="p-6">
+              {duplicateWarning && (
+                <div className="mb-4 p-3.5 bg-amber-500/10 border border-amber-500/30 rounded-xl text-xs space-y-2">
+                  <div className="flex items-center justify-between text-amber-400 font-bold">
+                    <span className="flex items-center gap-1.5">
+                      <AlertTriangle className="w-4 h-4 shrink-0" />
+                      Possible Existing Lead Found
+                    </span>
+                    <span className="text-[10px] bg-amber-500/20 px-2 py-0.5 rounded-full font-bold">
+                      {duplicateWarning.score}% Match
+                    </span>
+                  </div>
+                  <p className="text-slate-300 text-[11px]">
+                    An existing lead record matches this contact: <strong>{duplicateWarning.lead.customerName}</strong> ({duplicateWarning.lead.phoneNumber}).
+                  </p>
+                  <div className="flex gap-2 pt-1">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onClose();
+                        window.location.href = `/leads/pool?search=${encodeURIComponent(duplicateWarning.lead.phoneNumber)}`;
+                      }}
+                      className="px-2.5 py-1 bg-amber-600 hover:bg-amber-500 text-white rounded-lg font-bold text-[10px] transition-all"
+                    >
+                      View Existing Lead
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setDuplicateWarning(null)}
+                      className="px-2.5 py-1 bg-[#1e1e1e] hover:bg-[#252525] text-slate-300 rounded-lg text-[10px] transition-all"
+                    >
+                      Create Separate Record
+                    </button>
+                  </div>
+                </div>
+              )}
+
               {error && (
                 <div className="mb-4 p-3 bg-rose-500/10 border border-rose-500/20 rounded-xl text-rose-500 text-sm flex items-center gap-2">
                   <span className="font-semibold">Error:</span> {error}
@@ -136,6 +191,7 @@ export function ManualLeadEntryModal({ isOpen, onClose }: ManualLeadEntryModalPr
                         required
                         value={formData.phoneNumber}
                         onChange={(e) => setFormData({...formData, phoneNumber: e.target.value})}
+                        onBlur={() => checkDuplicateLead(formData.phoneNumber, formData.email)}
                         className="w-full bg-[#111] border border-[#333] text-white text-sm rounded-xl pl-9 pr-4 py-2.5 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/50 transition-all placeholder:text-slate-600"
                       />
                     </div>

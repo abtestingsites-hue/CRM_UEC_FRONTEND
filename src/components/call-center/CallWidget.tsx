@@ -1,12 +1,13 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from 'react';
-import { Phone, PhoneOff, Mic, MicOff, Volume2, VolumeX, User, Clock, Loader2, Circle, Pause, ArrowRight, FileText } from 'lucide-react';
+import { Phone, PhoneOff, Mic, MicOff, Volume2, VolumeX, User, Clock, Loader2, Circle, Pause, ArrowRight, FileText, PhoneForwarded } from 'lucide-react';
 import { useCallStore } from '@/store/useCallStore';
 import { useSocket } from '@/providers/SocketProvider';
 import { PostCallFeedbackModal } from '@/components/call-center/PostCallFeedbackModal';
 import { LeadConversionModal } from '@/components/leads/LeadConversionModal';
 import { CallIntakeFormModal } from '@/components/call-center/CallIntakeFormModal';
+import { CallTransferModal } from '@/components/call-center/CallTransferModal';
 import { useMediasoup } from '@/hooks/useMediasoup';
 import { LiveKitRoom, RoomAudioRenderer, useConnectionState, useRoomContext, useLocalParticipant, useRemoteParticipants } from '@livekit/components-react';
 function LiveKitManager({ setCallState, setWebrtcConnected, callSid, isMuted, isSpeaker, callCategory, telephonySocket }: any) {
@@ -264,13 +265,15 @@ function CallControlsInner({
   endCall, 
   connectionState,
   isSpeaker,
-  toggleSpeaker
+  toggleSpeaker,
+  onTransferClick,
 }: { 
   duration: number; 
   endCall: () => void; 
   connectionState: string;
   isSpeaker: boolean;
   toggleSpeaker: () => void;
+  onTransferClick?: () => void;
 }) {
   const { isMuted, toggleMute } = useCallStore();
 
@@ -303,6 +306,21 @@ function CallControlsInner({
           {isSpeaker ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}
         </button>
 
+        {/* Live Call Transfer Button */}
+        <button 
+          onClick={onTransferClick}
+          aria-label="Transfer Call"
+          disabled={connectionState !== 'CONNECTED'}
+          className={`w-12 h-12 rounded-full flex items-center justify-center transition-all ${
+            connectionState !== 'CONNECTED' 
+              ? 'bg-[#111] text-slate-600 cursor-not-allowed opacity-50' 
+              : 'bg-[#1a232a] text-cyan-400 hover:bg-[#20303a] border border-cyan-500/40 hover:border-cyan-400 shadow-md shadow-cyan-500/10'
+          }`}
+          title="Transfer Call to Department or Agent"
+        >
+          <PhoneForwarded className="w-5 h-5" />
+        </button>
+
         <button 
           onClick={endCall}
           aria-label="End call"
@@ -327,6 +345,7 @@ export function CallWidget() {
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const [showConversionModal, setShowConversionModal] = useState(false);
   const [showIntakeModal, setShowIntakeModal] = useState(false);
+  const [showTransferModal, setShowTransferModal] = useState(false);
   
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   
@@ -618,6 +637,7 @@ export function CallWidget() {
                 connectionState={callState}
                 isSpeaker={isSpeaker}
                 toggleSpeaker={() => setIsSpeaker(!isSpeaker)}
+                onTransferClick={() => setShowTransferModal(true)}
               />
             </div>
           )}
@@ -631,6 +651,7 @@ export function CallWidget() {
                 connectionState={callState}
                 isSpeaker={isSpeaker}
                 toggleSpeaker={() => setIsSpeaker(!isSpeaker)}
+                onTransferClick={() => setShowTransferModal(true)}
               />
             </div>
           )}
@@ -658,6 +679,17 @@ export function CallWidget() {
           isOpen={showIntakeModal}
           onClose={() => setShowIntakeModal(false)}
           onSuccess={() => setShowIntakeModal(false)}
+        />
+      )}
+
+      {showTransferModal && (
+        <CallTransferModal
+          callSid={activeCall?.callSid || activeCall?.roomName || 'unknown'}
+          isOpen={showTransferModal}
+          onClose={() => setShowTransferModal(false)}
+          onSuccess={() => setShowTransferModal(false)}
+          callerName={customerData?.name || activeCall?.customerName}
+          callerPhone={customerData?.phone || activeCall?.phone}
         />
       )}
 

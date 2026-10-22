@@ -8,7 +8,7 @@ class APIClient {
            localStorage.getItem('crm_token');
   }
 
-  async request(endpoint: string, options: RequestInit = {}) {
+  async request<T = Response>(endpoint: string, options: RequestInit = {}): Promise<T> {
     const token = this.getToken();
     const headers = new Headers(options.headers || {});
     
@@ -31,7 +31,7 @@ class APIClient {
         signal: controller.signal
       });
       clearTimeout(timeoutId);
-      return res;
+      return res as unknown as T;
     } catch (error: any) {
       clearTimeout(timeoutId);
       if (error.name === 'AbortError') {
@@ -41,13 +41,13 @@ class APIClient {
     }
   }
 
-  async get(endpoint: string, options?: RequestInit) {
+  async get<T = any>(endpoint: string, options?: RequestInit): Promise<T> {
     const res = await this.request(endpoint, { ...options, method: 'GET' });
     if (!res.ok) throw new Error(`HTTP Error ${res.status}`);
     return res.json();
   }
 
-  async post(endpoint: string, body?: any, options?: RequestInit) {
+  async post<T = any>(endpoint: string, body?: any, options?: RequestInit): Promise<T> {
     const res = await this.request(endpoint, { 
       ...options, 
       method: 'POST', 
@@ -57,7 +57,7 @@ class APIClient {
     return res.json();
   }
 
-  async patch(endpoint: string, body?: any, options?: RequestInit) {
+  async patch<T = any>(endpoint: string, body?: any, options?: RequestInit): Promise<T> {
     const res = await this.request(endpoint, { 
       ...options, 
       method: 'PATCH', 
@@ -67,7 +67,7 @@ class APIClient {
     return res.json();
   }
 
-  async delete(endpoint: string, options?: RequestInit) {
+  async delete<T = any>(endpoint: string, options?: RequestInit): Promise<T> {
     const res = await this.request(endpoint, { ...options, method: 'DELETE' });
     if (!res.ok) throw new Error(`HTTP Error ${res.status}`);
     return res.json();
@@ -75,5 +75,5 @@ class APIClient {
 }
 
 export const api = new APIClient();
-export const apiFetch = api.request.bind(api);
+export const apiFetch = <T = Response>(endpoint: string, options?: RequestInit) => api.request<T>(endpoint, options);
 export const API_BASE_URL = BASE_URL;
