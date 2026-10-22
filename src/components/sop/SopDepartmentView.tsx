@@ -19,6 +19,7 @@ import { SopNav } from './SopNav';
 import { SopTaskModal } from './SopTaskModal';
 import { SopCreateTaskModal } from './SopCreateTaskModal';
 import { SopHandoffModal } from './SopHandoffModal';
+import { HrOperationsView, SalesOperationsView, CcrOperationsView } from './SopOperationalWorkflows';
 import { apiFetch, API_BASE_URL } from '@/lib/api';
 
 interface SopDepartmentViewProps {
@@ -44,6 +45,7 @@ export function SopDepartmentView({
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [handoffTask, setHandoffTask] = useState<any | null>(null);
   const [isHandoffModalOpen, setIsHandoffModalOpen] = useState(false);
+  const [activeViewMode, setActiveViewMode] = useState<'tasks' | 'operations'>('tasks');
 
   const fetchTasks = async () => {
     try {
@@ -129,6 +131,49 @@ export function SopDepartmentView({
           </div>
         </div>
 
+        {/* View Mode Switcher */}
+        <div className="flex items-center justify-between bg-[#0a0a0c] border border-[#222] p-1.5 rounded-xl">
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => setActiveViewMode('tasks')}
+              className={`px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-2 ${
+                activeViewMode === 'tasks'
+                  ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 shadow-sm'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <CheckCircle2 className="w-4 h-4" />
+              SOP Checklists & Tasks ({tasks.length})
+            </button>
+            <button
+              onClick={() => setActiveViewMode('operations')}
+              className={`px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-2 ${
+                activeViewMode === 'operations'
+                  ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 shadow-sm'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <ShieldCheck className="w-4 h-4" />
+              {department === 'HR' && 'HR Staffing & Verification Pipeline'}
+              {department === 'SALES' && 'Sales 11-Stage Pipeline & Targets'}
+              {department === 'CCR' && 'CCR Complaints & Caregiver Matching'}
+              {department === 'DATA_ENTRY' && 'Data Entry Verification & Staff Stock'}
+            </button>
+          </div>
+          <span className="text-[11px] text-slate-500 hidden sm:inline px-3 font-mono">
+            Operational View Mode: {activeViewMode === 'tasks' ? 'Checklists' : 'Live SOP Operations'}
+          </span>
+        </div>
+
+        {activeViewMode === 'operations' ? (
+          <div className="pt-2">
+            {department === 'HR' && <HrOperationsView />}
+            {department === 'SALES' && <SalesOperationsView />}
+            {department === 'CCR' && <CcrOperationsView />}
+            {department === 'DATA_ENTRY' && <HrOperationsView />}
+          </div>
+        ) : (
+          <>
         {/* Operational KPI Metric Cards */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           <div className="bg-[#0f0f11] border border-[#222] rounded-xl p-4 flex items-center justify-between">
@@ -368,6 +413,8 @@ export function SopDepartmentView({
             </div>
           )}
         </div>
+        </>
+      )}
       </div>
 
       {/* Task Execution Modal */}
