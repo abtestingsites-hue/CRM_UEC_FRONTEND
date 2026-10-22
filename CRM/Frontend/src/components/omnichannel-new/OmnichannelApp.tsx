@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { apiFetch } from '@/lib/api';
 import { WhatsAppWorkspace } from './WhatsAppWorkspace';
+import { OmnichannelEnquiryPanel } from './OmnichannelEnquiryPanel';
 
 // Platform Icons
 const WhatsAppLogo = (props: any) => (
@@ -235,44 +236,11 @@ export function OmnichannelApp() {
               </div>
             </div>
 
-            {/* Customer Panel Context */}
-            <div className="w-72 bg-[#050505] p-6 hidden lg:block overflow-y-auto custom-scrollbar">
-              <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-6">Patient Profile</h3>
-              <div className="flex flex-col items-center text-center mb-6">
-                <div className="w-20 h-20 rounded-full bg-[#1a1a1a] border border-[#333] mb-3 flex items-center justify-center text-2xl font-bold text-slate-300">
-                  {activeConv.customerAvatar ? <img src={activeConv.customerAvatar} alt="avatar" className="rounded-full w-full h-full object-cover" /> : activeConv.customerName.charAt(0)}
-                </div>
-                <h4 className="text-lg font-bold text-white">{activeConv.customerName}</h4>
-                <div className="flex items-center justify-center gap-2 mt-2">
-                  <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase ${colors.bg} ${colors.text} border ${colors.border}`}>
-                    {platformDef.name}
-                  </span>
-                  <span className="px-2 py-0.5 rounded-full text-[9px] font-bold uppercase bg-[#111] text-slate-400 border border-[#333]">
-                    Active
-                  </span>
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                <div className="bg-[#111] border border-[#222] rounded-xl p-4">
-                  <div className="text-xs text-slate-500 mb-1">Phone</div>
-                  <div className="text-sm text-slate-200">{activeConv.customerName || '+1 (555) 000-0000'}</div>
-                </div>
-                <div className="bg-[#111] border border-[#222] rounded-xl p-4">
-                  <div className="text-xs text-slate-500 mb-1">Email</div>
-                  <div className="text-sm text-slate-200">{activeConv.customerEmail || 'contact@example.com'}</div>
-                </div>
-                <div className="bg-orange-500/10 border border-orange-500/20 rounded-xl p-4">
-                  <div className="flex items-center gap-2 text-orange-400 mb-2">
-                    <Zap className="w-4 h-4" />
-                    <span className="text-xs font-bold uppercase tracking-wider">AI Insight</span>
-                  </div>
-                  <p className="text-xs text-orange-200/80 leading-relaxed">
-                    Customer prefers communication via {platformDef.name}. Last booked appointment was 2 weeks ago.
-                  </p>
-                </div>
-              </div>
-            </div>
+            {/* Omnichannel Enquiry Intelligence Panel */}
+            <OmnichannelEnquiryPanel
+              conversation={activeConv}
+              className="w-80 md:w-96 hidden lg:flex"
+            />
           </div>
         ) : (
           <div className="flex-1 flex flex-col items-center justify-center text-slate-500">

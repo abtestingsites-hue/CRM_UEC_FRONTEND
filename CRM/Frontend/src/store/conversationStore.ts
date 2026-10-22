@@ -53,14 +53,25 @@ export interface Conversation {
   id: string;
   customerId: string;
   customerName: string;
+  customerPhone?: string;
   customerEmail?: string;
   customerAvatar?: string;
   channel: ChannelType;
   lastMessage: string;
   unreadCount: number;
-  priority: 'low' | 'normal' | 'high' | 'emergency';
+  priority: 'low' | 'normal' | 'medium' | 'high' | 'emergency';
   status: 'open' | 'pending' | 'resolved';
   timestamp: string;
+  foundation?: string;
+  enquiryCategory?: string;
+  primaryService?: string;
+  subServices?: string[];
+  leadId?: string;
+  lead?: any;
+  classificationConfidence?: number;
+  isClassificationConfirmed?: boolean;
+  missingInfo?: string[];
+  intakeMetadata?: any;
 }
 
 interface ConversationState {
