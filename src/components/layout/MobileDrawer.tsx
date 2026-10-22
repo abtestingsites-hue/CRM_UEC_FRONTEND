@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import { 
   Phone, Users, LayoutDashboard, MessageSquare, FileText, Settings, 
   HeartPulse, Activity, LogOut, ChevronDown, Mic, Target, 
-  Calendar as CalendarIcon, Megaphone, X, Shield, UserRound
+  Calendar as CalendarIcon, Megaphone, X, Shield, UserRound, CheckSquare
 } from "lucide-react";
 import { useCallStore } from "@/store/useCallStore";
 import { useAuthStore } from "@/store/authStore";
@@ -23,6 +23,7 @@ export function MobileDrawer({ isOpen, onClose, shouldShowAgentShell }: MobileDr
   const { status, setStatus } = useCallStore();
   const user = useAuthStore((state) => state.user);
   const [isLeadsOpen, setIsLeadsOpen] = useState(false);
+  const [isSopOpen, setIsSopOpen] = useState(pathname.startsWith('/sop'));
 
   const getStatusColor = (s: string) => {
     switch(s) {
@@ -81,6 +82,18 @@ export function MobileDrawer({ isOpen, onClose, shouldShowAgentShell }: MobileDr
 
   const navItems = shouldShowAgentShell ? agentNavItems : adminNavItems;
   const leadItems = shouldShowAgentShell ? agentLeads : adminLeads;
+
+  const sopItems = [
+    { label: "SOP Overview", href: "/sop" },
+    { label: "Daily Operations", href: "/sop/daily-operations" },
+    { label: "HR SOP", href: "/sop/hr" },
+    { label: "CCR SOP", href: "/sop/ccr" },
+    { label: "Sales SOP", href: "/sop/sales" },
+    { label: "Data Entry SOP", href: "/sop/data-entry" },
+    { label: "SOP Builder", href: "/sop/builder" },
+    { label: "SOP Documents", href: "/sop/documents" },
+    { label: "Reports & Audit", href: "/sop/reports" },
+  ];
 
   const handleLogout = () => {
     localStorage.removeItem("crm_token");
@@ -185,6 +198,30 @@ export function MobileDrawer({ isOpen, onClose, shouldShowAgentShell }: MobileDr
                   </Link>
                 );
               })}
+
+              {/* SOP & Daily Operations Collapsible */}
+              <div className="pt-1.5">
+                <button 
+                  onClick={() => setIsSopOpen(!isSopOpen)}
+                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-150 ${pathname.startsWith('/sop') ? 'bg-emerald-500/10 text-emerald-400 font-bold' : 'text-slate-400 hover:bg-[#111] hover:text-white'}`}
+                >
+                  <CheckSquare className="w-4 h-4 shrink-0 text-emerald-400" />
+                  <span className="text-sm font-medium">SOP & Daily Ops</span>
+                  <ChevronDown className={`w-4 h-4 ml-auto transition-transform ${isSopOpen ? "rotate-180" : ""}`} />
+                </button>
+                
+                {isSopOpen && (
+                  <div className="pl-9 pr-3 py-1 space-y-1 bg-[#111]/50 rounded-xl mt-1">
+                    {sopItems.map((item, idx) => (
+                      <Link href={item.href} key={idx} onClick={onClose}>
+                        <div className={`text-xs py-2 transition-colors ${pathname === item.href ? "text-emerald-400 font-bold" : "text-slate-400 hover:text-white"}`}>
+                          {item.label}
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
 
               {/* Leads Module Collapsible */}
               <div className="pt-1.5">

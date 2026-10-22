@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Phone, Users, LayoutDashboard, MessageSquare, FileText, Settings, HeartPulse, Activity, LogOut, ChevronDown, Mic, Target, UploadCloud, Kanban, Calendar as CalendarIcon, Megaphone, Workflow, ClipboardCheck, CalendarCheck, ShieldCheck } from 'lucide-react';
+import { Phone, Users, LayoutDashboard, MessageSquare, FileText, Settings, HeartPulse, Activity, LogOut, ChevronDown, Mic, Target, UploadCloud, Kanban, Calendar as CalendarIcon, Megaphone, Workflow, ClipboardCheck, CalendarCheck, ShieldCheck, CheckSquare } from 'lucide-react';
 import { useCallStore } from '@/store/useCallStore';
 import { useAuthStore } from '@/store/authStore';
 import { motion } from 'framer-motion';
@@ -14,6 +14,7 @@ export function Sidebar() {
   const { user } = useAuthStore();
   const [isStatusDropdownOpen, setIsStatusDropdownOpen] = useState(false);
   const [isLeadsOpen, setIsLeadsOpen] = useState(false);
+  const [isSopOpen, setIsSopOpen] = useState(pathname.startsWith('/sop'));
   const [userRole, setUserRole] = useState<string>('');
 
   React.useEffect(() => {
@@ -79,6 +80,18 @@ export function Sidebar() {
     { label: 'Leads Timeline', href: '/customers' },
   ];
 
+  const sopItems = [
+    { label: 'SOP Overview', href: '/sop' },
+    { label: 'Daily Operations', href: '/sop/daily-operations' },
+    { label: 'HR SOP', href: '/sop/hr' },
+    { label: 'CCR SOP', href: '/sop/ccr' },
+    { label: 'Sales SOP', href: '/sop/sales' },
+    { label: 'Data Entry SOP', href: '/sop/data-entry' },
+    { label: 'SOP Builder', href: '/sop/builder' },
+    { label: 'SOP Documents', href: '/sop/documents' },
+    { label: 'Reports & Audit', href: '/sop/reports' },
+  ];
+
   const statuses = [
     { value: 'AVAILABLE', label: 'Available' },
     { value: 'BUSY', label: 'Busy' },
@@ -119,6 +132,34 @@ export function Sidebar() {
             </Link>
           );
         })}
+
+        {/* SOP & Daily Operations Collapsible */}
+        <div className="pt-2">
+          <button 
+            onClick={() => setIsSopOpen(!isSopOpen)}
+            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 group ${pathname.startsWith('/sop') ? 'bg-gradient-to-r from-emerald-500/20 to-transparent border-l-2 border-emerald-500 text-white' : 'text-slate-400 hover:bg-[#1a1a1a] hover:text-white'}`}
+          >
+            <CheckSquare className={`w-4 h-4 ${pathname.startsWith('/sop') ? 'text-emerald-400' : 'text-slate-500 group-hover:text-slate-300'}`} />
+            <span className="font-medium text-sm">SOP & Daily Ops</span>
+            <ChevronDown className={`w-3.5 h-3.5 ml-auto transition-transform ${isSopOpen ? 'rotate-180' : ''}`} />
+          </button>
+          
+          {isSopOpen && (
+            <motion.div 
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              className="pl-9 pr-3 py-1 space-y-1"
+            >
+              {sopItems.map((item, idx) => (
+                <Link href={item.href} key={idx}>
+                  <div className={`text-xs py-1.5 transition-colors ${pathname === item.href ? 'text-emerald-400 font-semibold' : 'text-slate-500 hover:text-slate-300'}`}>
+                    {item.label}
+                  </div>
+                </Link>
+              ))}
+            </motion.div>
+          )}
+        </div>
 
         {/* Leads Module Collapsible */}
         <div className="pt-2">
