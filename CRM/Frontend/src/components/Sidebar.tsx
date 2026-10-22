@@ -52,7 +52,7 @@ export function Sidebar() {
   const menuItems = [
     { icon: LayoutDashboard, label: 'Command Center', href: isAdmin ? '/dashboard' : '/agent/dashboard', visible: true },
     { icon: Phone, label: 'Call Center', href: '/call-center', visible: true },
-    { icon: History, label: 'Call Logs & History', href: '/call-history', visible: true },
+    { icon: History, label: 'Call Logs', href: '/call-logs', visible: true },
     { icon: MessageSquare, label: 'Omnichannel', href: '/omnichannel', visible: true },
     { icon: Users, label: 'Customers', href: '/customers', visible: true },
     { icon: Shield, label: 'Lead Pool', href: '/leads/pool', visible: true },
