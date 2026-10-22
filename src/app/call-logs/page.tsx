@@ -10,7 +10,7 @@ import {
   MessageSquare, Mail, Building, Sparkles, Check, AlertCircle,
   PhoneCall, CornerDownRight, Loader2, Volume2, ExternalLink
 } from 'lucide-react';
-import { api } from '@/lib/api';
+import { api, sanitizeRecordingUrl } from '@/lib/api';
 import { CallHistoryDrawer } from '@/components/call-center/CallHistoryDrawer';
 import { CustomerHistoryDrawer } from '@/components/call-center/CustomerHistoryDrawer';
 import { CrossUnitTransferModal } from '@/components/call-center/CrossUnitTransferModal';
@@ -156,7 +156,10 @@ function CallLogsContent() {
 
   // Handle inline audio play/pause
   const togglePlayAudio = (call: any) => {
-    if (!call.recordingUrl) return;
+    const rawUrl = call.recordingUrl;
+    if (!rawUrl) return;
+    const cleanUrl = sanitizeRecordingUrl(rawUrl);
+    if (!cleanUrl) return;
 
     if (playingCallId === call.id) {
       if (audioPlayerRef.current) {
@@ -167,7 +170,7 @@ function CallLogsContent() {
       if (audioPlayerRef.current) {
         audioPlayerRef.current.pause();
       }
-      const audio = new Audio(call.recordingUrl);
+      const audio = new Audio(cleanUrl);
       audio.onended = () => setPlayingCallId(null);
       audio.onerror = () => setPlayingCallId(null);
       audio.play().catch((e) => console.warn('Audio play prevented:', e));

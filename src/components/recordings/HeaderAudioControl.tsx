@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { Play, Pause, Volume2, Mic, Clock, ShieldAlert, AlertCircle, RefreshCw, VolumeX } from 'lucide-react';
-import { apiFetch } from '@/lib/api';
+import { apiFetch, sanitizeRecordingUrl } from '@/lib/api';
 
 interface HeaderAudioControlProps {
   callId?: string;
@@ -18,7 +18,7 @@ export function HeaderAudioControl({
   duration = 0,
 }: HeaderAudioControlProps) {
   const [status, setStatus] = useState<string>(initialStatus || (initialRecordingUrl ? 'READY' : 'NOT_AVAILABLE'));
-  const [recordingUrl, setRecordingUrl] = useState<string | null>(initialRecordingUrl || null);
+  const [recordingUrl, setRecordingUrl] = useState<string | null>(sanitizeRecordingUrl(initialRecordingUrl) || null);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [currentTime, setCurrentTime] = useState<number>(0);
   const [audioDuration, setAudioDuration] = useState<number>(duration || 0);
@@ -27,8 +27,9 @@ export function HeaderAudioControl({
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
-    if (initialRecordingUrl && initialRecordingUrl !== recordingUrl) {
-      setRecordingUrl(initialRecordingUrl);
+    const cleanUrl = sanitizeRecordingUrl(initialRecordingUrl);
+    if (cleanUrl && cleanUrl !== recordingUrl) {
+      setRecordingUrl(cleanUrl);
       setStatus('READY');
     } else if (initialStatus && initialStatus !== status) {
       setStatus(initialStatus);
@@ -59,10 +60,11 @@ export function HeaderAudioControl({
       const res = await apiFetch(`/telephony/calls/${callId}/playback-url`);
       const data = await res.json();
       if (data.success && data.recordingUrl) {
-        setRecordingUrl(data.recordingUrl);
+        const clean = sanitizeRecordingUrl(data.recordingUrl);
+        setRecordingUrl(clean);
         setStatus('READY');
         if (data.duration) setAudioDuration(data.duration);
-        return data.recordingUrl;
+        return clean;
       } else if (data.recordingStatus) {
         setStatus(data.recordingStatus);
       }

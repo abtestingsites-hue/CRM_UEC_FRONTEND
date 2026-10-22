@@ -5,7 +5,7 @@ import {
   X, Phone, PhoneIncoming, PhoneOutgoing, Clock, User, Shield, 
   Building, MessageSquare, Play, Calendar, CheckCircle2, AlertTriangle, 
   ArrowRight, FileText, Sparkles, AlertCircle, Share2, CornerDownRight, 
-  ExternalLink, Loader2, RefreshCw
+  ExternalLink, Loader2, RefreshCw, History
 } from 'lucide-react';
 import { api } from '@/lib/api';
 import { CrossUnitTransferModal } from '@/components/call-center/CrossUnitTransferModal';
@@ -33,10 +33,16 @@ export function CustomerHistoryDrawer({
 
   // Load customer intelligence data
   const loadCustomerIntelligence = (idVal: string) => {
+    if (!idVal || !idVal.trim()) return;
     setLoading(true);
     setError(null);
 
-    api.get(`/telephony/customer-history/${encodeURIComponent(idVal)}`)
+    let clean = idVal.trim();
+    try {
+      clean = decodeURIComponent(clean);
+    } catch (_) {}
+
+    api.get(`/telephony/customer-history/${encodeURIComponent(clean)}`)
       .then((res) => {
         setData(res);
       })
@@ -130,12 +136,35 @@ export function CustomerHistoryDrawer({
               )}
 
               {error && (
-                <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs flex items-center gap-3">
-                  <AlertCircle className="w-5 h-5 shrink-0" />
-                  <div>
-                    <p className="font-semibold">Failed to load customer profile</p>
-                    <p className="opacity-90">{error}</p>
+                <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <AlertCircle className="w-5 h-5 shrink-0" />
+                    <div>
+                      <p className="font-semibold">Failed to load customer profile</p>
+                      <p className="opacity-90">{error}</p>
+                    </div>
                   </div>
+                  <button
+                    type="button"
+                    onClick={() => identifier && loadCustomerIntelligence(identifier)}
+                    className="px-3 py-1.5 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 font-semibold flex items-center gap-1.5 transition-colors shrink-0"
+                  >
+                    <RefreshCw className="w-3.5 h-3.5" />
+                    <span>Retry</span>
+                  </button>
+                </div>
+              )}
+
+              {!loading && !error && data && timeline.length === 0 && !resolved?.leadId && (
+                <div className="p-6 rounded-2xl bg-[#111] border border-[#222] text-center space-y-3">
+                  <div className="w-12 h-12 rounded-full bg-slate-800/60 border border-slate-700/50 flex items-center justify-center text-slate-400 mx-auto">
+                    <History className="w-6 h-6" />
+                  </div>
+                  <h4 className="text-sm font-semibold text-white">No Prior History Records</h4>
+                  <p className="text-xs text-slate-400 max-w-sm mx-auto">
+                    No previous calls, transfers, or omnichannel enquiries are currently on record for{' '}
+                    <span className="font-mono text-orange-400">{resolved?.phone || identifier}</span>.
+                  </p>
                 </div>
               )}
 

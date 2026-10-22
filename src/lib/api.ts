@@ -1,5 +1,30 @@
-const hostname = typeof window !== 'undefined' ? window.location.hostname : 'localhost';
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || `http://${hostname}:4000`;
+export const getApiBaseUrl = (): string => {
+  if (process.env.NEXT_PUBLIC_API_URL && process.env.NEXT_PUBLIC_API_URL.startsWith('http')) {
+    return process.env.NEXT_PUBLIC_API_URL.replace(/\/$/, '');
+  }
+  if (typeof window !== 'undefined') {
+    const host = window.location.hostname;
+    if (host !== 'localhost' && host !== '127.0.0.1') {
+      return 'https://crm-uec-backend.onrender.com';
+    }
+    return `http://${host}:4000`;
+  }
+  return 'https://crm-uec-backend.onrender.com';
+};
+
+export const sanitizeRecordingUrl = (url: string | null | undefined): string | null => {
+  if (!url) return null;
+  const baseUrl = getApiBaseUrl();
+  if (url.includes('localhost:4000') || url.includes('127.0.0.1:4000')) {
+    return url.replace(/http:\/\/(localhost|127\.0\.0\.1):4000/g, baseUrl);
+  }
+  if (url.startsWith('/')) {
+    return `${baseUrl}${url}`;
+  }
+  return url;
+};
+
+const BASE_URL = getApiBaseUrl();
 class APIClient {
   private getToken() {
     if (typeof window === 'undefined') return null;
@@ -24,7 +49,8 @@ class APIClient {
     const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 seconds timeout
 
     try {
-      const url = endpoint.startsWith('http') ? endpoint : `${BASE_URL}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
+      const activeBaseUrl = getApiBaseUrl();
+      const url = endpoint.startsWith('http') ? endpoint : `${activeBaseUrl}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
       const res = await fetch(url, {
         ...options,
         headers,
