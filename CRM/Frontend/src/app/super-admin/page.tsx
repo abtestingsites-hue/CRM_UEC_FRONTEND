@@ -22,12 +22,16 @@ import {
   Eye,
   EyeOff,
   Zap,
+  ArrowLeftRight,
+  Search,
+  UserCheck,
+  Check,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { apiFetch } from '@/lib/api';
 
 export default function SuperAdminConsolePage() {
-  const [activeTab, setActiveTab] = useState<'overview' | 'database' | 'integrations' | 'units' | 'audit'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'database' | 'integrations' | 'units' | 'transfers' | 'audit'>('overview');
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [isLoadingAuth, setIsLoadingAuth] = useState(true);
 
@@ -38,6 +42,23 @@ export default function SuperAdminConsolePage() {
   const [units, setUnits] = useState<any[]>([]);
   const [auditLogs, setAuditLogs] = useState<any[]>([]);
   const [isRefreshing, setIsRefreshing] = useState(false);
+
+  // Lead Transfer States (Phase 1 & 2)
+  const [sourceUnitId, setSourceUnitId] = useState<string>('');
+  const [targetUnitId, setTargetUnitId] = useState<string>('');
+  const [leadSearchQuery, setLeadSearchQuery] = useState<string>('');
+  const [leadSearchResults, setLeadSearchResults] = useState<any[]>([]);
+  const [searchingLeads, setSearchingLeads] = useState<boolean>(false);
+  const [selectedLead, setSelectedLead] = useState<any | null>(null);
+  const [transferPreview, setTransferPreview] = useState<any | null>(null);
+  const [previewLoading, setPreviewLoading] = useState<boolean>(false);
+  const [previewError, setPreviewError] = useState<string | null>(null);
+  const [transferReason, setTransferReason] = useState<string>('');
+  const [isTransferring, setIsTransferring] = useState<boolean>(false);
+  const [transferSuccessMsg, setTransferSuccessMsg] = useState<string | null>(null);
+  const [transferErrorMsg, setTransferErrorMsg] = useState<string | null>(null);
+  const [transferAuditLogs, setTransferAuditLogs] = useState<any[]>([]);
+  const [loadingTransfersList, setLoadingTransfersList] = useState<boolean>(false);
 
   // Testing integration states
   const [testingProvider, setTestingProvider] = useState<string | null>(null);
@@ -116,6 +137,126 @@ export default function SuperAdminConsolePage() {
       fetchAllData();
     }
   }, [isSuperAdmin]);
+
+  const fetchTransfers = async () => {
+    setLoadingTransfersList(true);
+    try {
+      const headers = getHeaders();
+      const res = await apiFetch('/api/v1/super-admin/leads/transfers', { headers });
+      if (res.ok) {
+        const data = await res.json();
+        setTransferAuditLogs(Array.isArray(data) ? data : []);
+      }
+    } catch (e) {
+      console.warn('[fetchTransfers error]:', e);
+    } finally {
+      setLoadingTransfersList(false);
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === 'transfers') {
+      fetchTransfers();
+    }
+  }, [activeTab]);
+
+  const handleSearchLeads = async (q: string) => {
+    if (!q || q.trim().length < 2) return;
+    setSearchingLeads(true);
+    setLeadSearchResults([]);
+    setSelectedLead(null);
+    setTransferPreview(null);
+    try {
+      const headers = getHeaders();
+      const url = `/api/v1/super-admin/leads/search?q=${encodeURIComponent(q.trim())}${sourceUnitId ? `&unitId=${sourceUnitId}` : ''}`;
+      const res = await apiFetch(url, { headers });
+      if (res.ok) {
+        const data = await res.json();
+        setLeadSearchResults(Array.isArray(data) ? data : []);
+      }
+    } catch (e) {
+      console.error('[handleSearchLeads]:', e);
+    } finally {
+      setSearchingLeads(false);
+    }
+  };
+
+  const handlePreviewTransfer = async (lead: any) => {
+    setSelectedLead(lead);
+    setPreviewLoading(true);
+    setPreviewError(null);
+    setTransferPreview(null);
+    setTransferSuccessMsg(null);
+    setTransferErrorMsg(null);
+
+    if (!targetUnitId) {
+      setPreviewError('Please select a destination business unit first.');
+      setPreviewLoading(false);
+      return;
+    }
+
+    try {
+      const headers = getHeaders();
+      const res = await apiFetch('/api/v1/super-admin/leads/transfer/preview', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          leadId: lead.id,
+          sourceUnitId: sourceUnitId || lead.unitId || undefined,
+          destinationUnitId: targetUnitId,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok || data.error) {
+        setPreviewError(data.error || 'Failed to preview lead transfer');
+      } else {
+        setTransferPreview(data);
+      }
+    } catch (e: any) {
+      setPreviewError(e.message || 'Network error during preview');
+    } finally {
+      setPreviewLoading(false);
+    }
+  };
+
+  const handleExecuteTransfer = async () => {
+    if (!selectedLead || !targetUnitId) return;
+    setIsTransferring(true);
+    setTransferSuccessMsg(null);
+    setTransferErrorMsg(null);
+
+    try {
+      const headers = getHeaders();
+      const res = await apiFetch('/api/v1/super-admin/leads/transfer', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          leadId: selectedLead.id,
+          sourceUnitId: sourceUnitId || selectedLead.unitId || undefined,
+          destinationUnitId: targetUnitId,
+          reason: transferReason.trim() || 'Super Admin cross-unit reassignment',
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        setTransferErrorMsg(data.error || 'Transfer failed');
+      } else {
+        setTransferSuccessMsg(`Lead "${selectedLead.customerName}" successfully transferred to ${data.audit?.destinationUnit?.name || 'destination unit'}!`);
+        setSelectedLead(null);
+        setTransferPreview(null);
+        setTransferReason('');
+        fetchTransfers();
+        if (leadSearchQuery) {
+          handleSearchLeads(leadSearchQuery);
+        }
+      }
+    } catch (e: any) {
+      setTransferErrorMsg(e.message || 'Transfer request failed');
+    } finally {
+      setIsTransferring(false);
+    }
+  };
 
   // Run Integration Health Test
   const handleTestIntegration = async (provider: string) => {
@@ -278,6 +419,7 @@ export default function SuperAdminConsolePage() {
           { key: 'database', label: 'Database Health', icon: Database },
           { key: 'integrations', label: 'Integrations & Credentials', icon: Server },
           { key: 'units', label: 'Multi-Unit Governance', icon: Layers },
+          { key: 'transfers', label: 'Cross-Unit Lead Transfer', icon: ArrowLeftRight },
           { key: 'audit', label: 'Audit Trail', icon: FileText },
         ].map((tab) => {
           const Icon = tab.icon;
@@ -747,6 +889,343 @@ export default function SuperAdminConsolePage() {
                   ))}
                 </tbody>
               </table>
+            </div>
+          </div>
+        )}
+
+        {/* ==================================================== */}
+        {/* TAB 5: CROSS-UNIT LEAD TRANSFER (PHASE 1 & 2)       */}
+        {/* ==================================================== */}
+        {activeTab === 'transfers' && (
+          <div className="space-y-8 max-w-6xl">
+            <div>
+              <h2 className="text-sm font-bold text-white flex items-center gap-2">
+                <ArrowLeftRight className="w-4 h-4 text-primary" /> Cross-Unit Lead Transfer Workspace
+              </h2>
+              <p className="text-xs text-slate-400 mt-1">
+                Authorized Super Admin governance to reassign leads across business units with transactional validation, duplicate checking, and historical attribution preservation.
+              </p>
+            </div>
+
+            {/* Notification Banners */}
+            {transferSuccessMsg && (
+              <div className="p-3 bg-emerald-500/10 border border-emerald-500/30 rounded-xl text-emerald-400 text-xs flex items-center gap-2">
+                <Check className="w-4 h-4 shrink-0" />
+                <span>{transferSuccessMsg}</span>
+              </div>
+            )}
+            {transferErrorMsg && (
+              <div className="p-3 bg-rose-500/10 border border-rose-500/30 rounded-xl text-rose-400 text-xs flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 shrink-0" />
+                <span>{transferErrorMsg}</span>
+              </div>
+            )}
+
+            {/* Configuration & Search Bar */}
+            <div className="bg-[#080808] border border-[#222] rounded-xl p-5 space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Source Unit */}
+                <div>
+                  <label className="block text-xs font-semibold text-slate-400 mb-1">
+                    Source Business Unit (Optional Filter)
+                  </label>
+                  <select
+                    value={sourceUnitId}
+                    onChange={(e) => setSourceUnitId(e.target.value)}
+                    className="w-full bg-[#121212] border border-[#282828] rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-primary"
+                  >
+                    <option value="">Any / Unassigned</option>
+                    {units.map((u) => (
+                      <option key={u.id} value={u.id}>
+                        {u.name} ({u.code})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Destination Unit */}
+                <div>
+                  <label className="block text-xs font-semibold text-slate-400 mb-1">
+                    Destination Business Unit <span className="text-rose-400">*</span>
+                  </label>
+                  <select
+                    value={targetUnitId}
+                    onChange={(e) => {
+                      setTargetUnitId(e.target.value);
+                      if (selectedLead) {
+                        handlePreviewTransfer(selectedLead);
+                      }
+                    }}
+                    className="w-full bg-[#121212] border border-[#282828] rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-primary"
+                  >
+                    <option value="">Select Destination Unit...</option>
+                    {units.map((u) => (
+                      <option key={u.id} value={u.id} disabled={sourceUnitId === u.id}>
+                        {u.name} ({u.code}) {sourceUnitId === u.id ? '(Source)' : ''}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* Lead Search Input */}
+              <div className="pt-2">
+                <label className="block text-xs font-semibold text-slate-400 mb-1">
+                  Search Lead (Name, Phone, or City)
+                </label>
+                <div className="flex gap-2">
+                  <div className="relative flex-1">
+                    <Search className="w-4 h-4 absolute left-3 top-2.5 text-slate-500" />
+                    <input
+                      type="text"
+                      value={leadSearchQuery}
+                      onChange={(e) => setLeadSearchQuery(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && handleSearchLeads(leadSearchQuery)}
+                      placeholder="e.g. Ramesh, 9876543210, Chennai..."
+                      className="w-full bg-[#121212] border border-[#282828] rounded-lg pl-9 pr-3 py-2 text-xs text-white outline-none focus:border-primary"
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleSearchLeads(leadSearchQuery)}
+                    disabled={searchingLeads || !leadSearchQuery.trim()}
+                    className="px-4 py-2 bg-primary hover:bg-orange-600 disabled:opacity-50 text-white rounded-lg text-xs font-bold flex items-center gap-2 transition-colors shrink-0"
+                  >
+                    {searchingLeads ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Search className="w-3.5 h-3.5" />}
+                    Search
+                  </button>
+                </div>
+              </div>
+
+              {/* Search Results */}
+              {leadSearchResults.length > 0 && (
+                <div className="pt-3 border-t border-[#1c1c1c]">
+                  <h4 className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">
+                    Matching Leads ({leadSearchResults.length})
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-56 overflow-y-auto custom-scrollbar">
+                    {leadSearchResults.map((lead) => (
+                      <div
+                        key={lead.id}
+                        onClick={() => handlePreviewTransfer(lead)}
+                        className={`p-3 rounded-lg border transition-all cursor-pointer flex justify-between items-center ${
+                          selectedLead?.id === lead.id
+                            ? 'bg-primary/10 border-primary text-white'
+                            : 'bg-[#121212] border-[#252525] hover:border-[#444] text-slate-300'
+                        }`}
+                      >
+                        <div>
+                          <div className="font-bold text-xs text-white flex items-center gap-2">
+                            {lead.customerName}
+                            <span className="text-[10px] font-normal px-1.5 py-0.5 rounded bg-[#1e1e1e] text-slate-400">
+                              {lead.status}
+                            </span>
+                          </div>
+                          <div className="text-[11px] text-slate-400 mt-0.5">
+                            {lead.phoneNumber} · {lead.city || 'No City'}
+                          </div>
+                          <div className="text-[10px] text-cyan-400 mt-1 font-mono">
+                            Unit: {lead.unit?.name || 'Unassigned'}
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          className="px-2.5 py-1 text-[11px] rounded bg-[#222] hover:bg-[#333] text-white font-medium"
+                        >
+                          Select
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Transfer Preview Panel */}
+            {selectedLead && (
+              <div className="bg-[#080808] border border-[#222] rounded-xl p-5 space-y-4">
+                <div className="flex items-center justify-between pb-3 border-b border-[#1c1c1c]">
+                  <div>
+                    <h3 className="text-xs font-bold text-white flex items-center gap-2">
+                      <UserCheck className="w-4 h-4 text-emerald-400" /> Transfer Validation & Preview
+                    </h3>
+                    <p className="text-[11px] text-slate-400">
+                      Review duplicate checks and associated records before committing the transfer.
+                    </p>
+                  </div>
+                  <span className="text-xs font-mono text-slate-400">Lead ID: {selectedLead.id.slice(0, 8)}...</span>
+                </div>
+
+                {previewLoading ? (
+                  <div className="flex items-center justify-center py-6 text-slate-500 text-xs">
+                    <RefreshCw className="w-4 h-4 animate-spin mr-2 text-primary" />
+                    Validating destination unit and duplicate rules...
+                  </div>
+                ) : previewError ? (
+                  <div className="p-3 bg-rose-500/10 border border-rose-500/30 rounded-lg text-rose-400 text-xs flex items-center gap-2">
+                    <AlertTriangle className="w-4 h-4 shrink-0" />
+                    <span>{previewError}</span>
+                  </div>
+                ) : transferPreview ? (
+                  <div className="space-y-4">
+                    {/* Validation Badges */}
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      <div className="bg-[#121212] border border-[#252525] p-3 rounded-lg">
+                        <div className="text-[10px] text-slate-400 uppercase font-semibold">Validation Status</div>
+                        <div className="text-xs font-bold text-emerald-400 mt-1 flex items-center gap-1.5">
+                          <CheckCircle2 className="w-3.5 h-3.5" /> Ready for Transfer
+                        </div>
+                      </div>
+
+                      <div className="bg-[#121212] border border-[#252525] p-3 rounded-lg">
+                        <div className="text-[10px] text-slate-400 uppercase font-semibold">Duplicate Check</div>
+                        <div className={`text-xs font-bold mt-1 flex items-center gap-1.5 ${
+                          transferPreview.duplicateWarning ? 'text-amber-400' : 'text-emerald-400'
+                        }`}>
+                          {transferPreview.duplicateWarning ? (
+                            <>
+                              <AlertTriangle className="w-3.5 h-3.5" /> Duplicate Phone Found
+                            </>
+                          ) : (
+                            <>
+                              <CheckCircle2 className="w-3.5 h-3.5" /> No Conflicts in Target Unit
+                            </>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="bg-[#121212] border border-[#252525] p-3 rounded-lg">
+                        <div className="text-[10px] text-slate-400 uppercase font-semibold">Associated Records</div>
+                        <div className="text-xs font-bold text-white mt-1">
+                          {transferPreview.associatedRecords?.appointmentsCount || 0} Appts · {transferPreview.associatedRecords?.followupsCount || 0} Follow-ups
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Historical Attribution Note */}
+                    <div className="p-3 bg-[#111] border border-[#222] rounded-lg text-[11px] text-slate-400 flex items-start gap-2">
+                      <ShieldCheck className="w-4 h-4 text-cyan-400 shrink-0 mt-0.5" />
+                      <div>
+                        <strong className="text-white">Historical Data Integrity:</strong> All existing call logs, recordings, transcripts, and AI summaries remain attributed to their originating business unit. The destination unit gains operational access without mutating audit logs.
+                      </div>
+                    </div>
+
+                    {/* Reason input */}
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-400 mb-1">
+                        Transfer Reason / Business Justification <span className="text-rose-400">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={transferReason}
+                        onChange={(e) => setTransferReason(e.target.value)}
+                        placeholder="e.g. Reassigned due to patient location in Coimbatore..."
+                        className="w-full bg-[#121212] border border-[#282828] rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-primary"
+                      />
+                    </div>
+
+                    {/* Execute Action */}
+                    <div className="flex justify-end gap-3 pt-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSelectedLead(null);
+                          setTransferPreview(null);
+                        }}
+                        className="px-4 py-2 bg-[#1a1a1a] hover:bg-[#252525] text-slate-300 rounded-lg text-xs font-medium"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleExecuteTransfer}
+                        disabled={isTransferring}
+                        className="px-5 py-2 bg-primary hover:bg-orange-600 disabled:opacity-50 text-white rounded-lg text-xs font-bold flex items-center gap-2 shadow-lg shadow-primary/20"
+                      >
+                        {isTransferring && <RefreshCw className="w-3.5 h-3.5 animate-spin" />}
+                        {isTransferring ? 'Executing Transfer...' : 'Confirm & Execute Transfer'}
+                      </button>
+                    </div>
+                  </div>
+                ) : null}
+              </div>
+            )}
+
+            {/* Recent Transfer Audit Logs */}
+            <div className="bg-[#080808] border border-[#222] rounded-xl p-5 space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-xs font-bold text-white flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-cyan-400" /> Recent Cross-Unit Transfer Audits
+                  </h3>
+                  <p className="text-[11px] text-slate-400 mt-0.5">
+                    Immutable log of all cross-unit reassignments performed by Super Admins.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={fetchTransfers}
+                  disabled={loadingTransfersList}
+                  className="px-3 py-1 bg-[#161616] border border-[#282828] rounded text-[11px] text-slate-300 hover:text-white"
+                >
+                  <RefreshCw className={`w-3 h-3 ${loadingTransfersList ? 'animate-spin' : ''}`} />
+                </button>
+              </div>
+
+              {loadingTransfersList ? (
+                <div className="py-8 text-center text-slate-500 text-xs">
+                  Loading transfer audit records...
+                </div>
+              ) : transferAuditLogs.length === 0 ? (
+                <div className="py-8 text-center text-slate-500 text-xs">
+                  No cross-unit lead transfers recorded yet.
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs">
+                    <thead className="bg-[#121212] text-slate-400 text-[10px] uppercase tracking-wider border-b border-[#222]">
+                      <tr>
+                        <th className="px-4 py-2.5 font-semibold">Timestamp</th>
+                        <th className="px-4 py-2.5 font-semibold">Lead Name</th>
+                        <th className="px-4 py-2.5 font-semibold">Phone</th>
+                        <th className="px-4 py-2.5 font-semibold">Source Unit</th>
+                        <th className="px-4 py-2.5 font-semibold">Destination Unit</th>
+                        <th className="px-4 py-2.5 font-semibold">Reason</th>
+                        <th className="px-4 py-2.5 font-semibold">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-[#1c1c1c]">
+                      {transferAuditLogs.map((item) => (
+                        <tr key={item.id} className="hover:bg-[#121212] transition-colors">
+                          <td className="px-4 py-2.5 text-slate-400 font-mono text-[10px]">
+                            {new Date(item.createdAt).toLocaleString()}
+                          </td>
+                          <td className="px-4 py-2.5 font-medium text-white">
+                            {item.lead?.customerName || item.metadata?.customerName || 'Lead'}
+                          </td>
+                          <td className="px-4 py-2.5 text-slate-400 font-mono text-[11px]">
+                            {item.lead?.phoneNumber || item.metadata?.phoneNumber || '—'}
+                          </td>
+                          <td className="px-4 py-2.5 text-slate-300">
+                            {item.sourceUnit?.name || 'Unassigned'}
+                          </td>
+                          <td className="px-4 py-2.5 text-cyan-400 font-medium">
+                            {item.destinationUnit?.name || 'Assigned'}
+                          </td>
+                          <td className="px-4 py-2.5 text-slate-400 max-w-xs truncate">
+                            {item.reason || 'Super Admin reassignment'}
+                          </td>
+                          <td className="px-4 py-2.5">
+                            <span className="text-[9px] font-semibold px-2 py-0.5 rounded-full bg-emerald-950/40 text-emerald-400 border border-emerald-500/30">
+                              {item.status || 'COMPLETED'}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
           </div>
         )}

@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { Users, Phone, PhoneOutgoing, Video, ShieldCheck, PhoneCall, PhoneOff } from "lucide-react";
 import { useCallStore } from "@/store/useCallStore";
 import { CallWidget } from "@/components/call-center/CallWidget";
+import { NumericKeypad } from "@/components/call-center/NumericKeypad";
 
 import { SocketContext } from '@/providers/SocketProvider';
 import { apiFetch } from '@/lib/api';
@@ -204,51 +205,25 @@ export default function AgentCallCenter() {
             ) : (
               <div className="flex flex-col h-full bg-[#0a0a0a]">
                 {/* Dialer Section */}
-                <div className="p-5 border-b border-[#222]">
-                  <h2 className="text-lg font-bold text-white flex items-center gap-2 mb-4">
-                    <PhoneOutgoing className="w-5 h-5 text-primary" /> Outbound Dialer
-                  </h2>
-                  <div className="flex flex-col sm:flex-row gap-2 w-full">
-                    <input id="outbound-phone" aria-label="Enter customer phone number"
-                      type="text"
-                      placeholder="Enter customer phone number (+91...)"
-                      className="flex-1 bg-[#111] border border-[#333] rounded-lg px-4 py-2 text-white outline-none focus:border-primary text-sm"
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') {
-                          const phone = e.currentTarget.value;
-                          if (phone) {
-                            setActiveCall({
-                              callSid: `outbound_${Date.now()}`,
-                              customerName: 'Customer',
-                              phone: phone,
-                              urgency: 'NORMAL',
-                              category: 'Outbound',
-                              isCaller: true,
-                              targetAgentId: 'customer'
-                            } as any);
-                          }
-                        }
-                      }}
-                    />
-                    <button
-                      onClick={() => {
-                        const phone = (document.getElementById('outbound-phone') as HTMLInputElement)?.value;
-                        if (phone) {
-                          setActiveCall({
-                            callSid: `outbound_${Date.now()}`,
-                            customerName: 'Customer',
-                            phone: phone,
-                            urgency: 'NORMAL',
-                            category: 'Outbound',
-                            isCaller: true,
-                            targetAgentId: 'customer'
-                          } as any);
-                        }
-                      }}
-                      className="bg-primary text-white px-6 py-2 rounded-lg font-bold hover:bg-orange-600 transition-colors text-sm shrink-0">
-                      Dial
-                    </button>
-                  </div>
+                <div className="p-4 border-b border-[#222]">
+                  <NumericKeypad
+                    onCallInitiated={(data) => {
+                      const finalRoomName = data.roomName || data.callSid || `room_${Date.now()}`;
+                      setActiveCall({
+                        callSid: finalRoomName,
+                        roomName: finalRoomName,
+                        customerName: 'Customer',
+                        phone: data.to || 'Customer',
+                        urgency: 'NORMAL',
+                        category: 'Outbound',
+                        direction: 'OUTBOUND',
+                        status: 'DIALING',
+                        isCaller: true,
+                        accepted: true,
+                        token: data.token
+                      } as any);
+                    }}
+                  />
                 </div>
 
                 {/* Lists Section */}
