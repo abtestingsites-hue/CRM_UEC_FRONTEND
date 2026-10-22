@@ -22,6 +22,11 @@ export interface CallData {
   direction?: string;
   serverUrl?: string;
   wsUrl?: string;
+  isInternal?: boolean;
+  callCategory?: string;
+  type?: string;
+  caller?: string;
+  callerName?: string;
 }
 
 export interface CallState {

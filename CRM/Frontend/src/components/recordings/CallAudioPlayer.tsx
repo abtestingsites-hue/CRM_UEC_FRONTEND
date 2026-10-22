@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { Play, Pause, RotateCcw, Volume2, VolumeX, AlertCircle, RefreshCw, Mic, MicOff, Clock, ShieldAlert } from 'lucide-react';
-import { apiFetch } from '@/lib/api';
+import { apiFetch, sanitizeRecordingUrl } from '@/lib/api';
 
 interface CallAudioPlayerProps {
   callId?: string;
@@ -20,7 +20,7 @@ export function CallAudioPlayer({
   customerName,
 }: CallAudioPlayerProps) {
   const [status, setStatus] = useState<string>(initialStatus || (initialRecordingUrl ? 'READY' : 'NOT_AVAILABLE'));
-  const [recordingUrl, setRecordingUrl] = useState<string | null>(initialRecordingUrl || null);
+  const [recordingUrl, setRecordingUrl] = useState<string | null>(sanitizeRecordingUrl(initialRecordingUrl) || null);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [currentTime, setCurrentTime] = useState<number>(0);
   const [audioDuration, setAudioDuration] = useState<number>(duration || 0);
@@ -33,8 +33,9 @@ export function CallAudioPlayer({
 
   // Sync state if initial props change
   useEffect(() => {
-    if (initialRecordingUrl && initialRecordingUrl !== recordingUrl) {
-      setRecordingUrl(initialRecordingUrl);
+    const cleanUrl = sanitizeRecordingUrl(initialRecordingUrl);
+    if (cleanUrl && cleanUrl !== recordingUrl) {
+      setRecordingUrl(cleanUrl);
       setStatus('READY');
     } else if (initialStatus && initialStatus !== status) {
       setStatus(initialStatus);
@@ -65,7 +66,7 @@ export function CallAudioPlayer({
       const data = await res.json();
 
       if (data.success && data.recordingUrl) {
-        setRecordingUrl(data.recordingUrl);
+        setRecordingUrl(sanitizeRecordingUrl(data.recordingUrl));
         setStatus('READY');
         if (data.duration) {
           setAudioDuration(data.duration);

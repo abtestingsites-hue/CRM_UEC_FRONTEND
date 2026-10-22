@@ -34,10 +34,10 @@ export function CallIntakeFormModal({
   const [isLoadingCatalog, setIsLoadingCatalog] = useState(true);
 
   // Form Fields
-  const [enquirerName, setEnquirerName] = useState(customerName);
-  const [phone, setPhone] = useState(phoneNumber);
+  const [enquirerName, setEnquirerName] = useState(customerName || '');
+  const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
-  const [selectedFoundation, setSelectedFoundation] = useState('UEC');
+  const [selectedCategory, setSelectedCategory] = useState('');
   const [enquiryCategory, setEnquiryCategory] = useState('SERVICE_ENQUIRY');
   const [primaryService, setPrimaryService] = useState('');
   const [selectedSubServices, setSelectedSubServices] = useState<string[]>([]);
@@ -54,14 +54,6 @@ export function CallIntakeFormModal({
   const [careDuration, setCareDuration] = useState('7 days');
   const [careSchedule, setCareSchedule] = useState('12-hour care (Day shift: 8 AM - 8 PM)');
 
-  // Location / Ambulance
-  const isAmbulance = selectedFoundation === 'AMBULANCE' || primaryService.toLowerCase().includes('ambulance');
-  const [serviceAddress, setServiceAddress] = useState('');
-  const [cityDistrict, setCityDistrict] = useState('Chennai');
-  const [postalCode, setPostalCode] = useState('');
-  const [pickupLocation, setPickupLocation] = useState('');
-  const [destinationLocation, setDestinationLocation] = useState('');
-
   // Live Notes Auto-Save
   const [liveNotesText, setLiveNotesText] = useState('');
   const [saveStatus, setSaveStatus] = useState<'IDLE' | 'SAVING' | 'SAVED' | 'FAILED'>('IDLE');
@@ -73,6 +65,13 @@ export function CallIntakeFormModal({
   const [followupDate, setFollowupDate] = useState('');
   const [callbackRequired, setCallbackRequired] = useState(false);
   const [callbackPriority, setCallbackPriority] = useState('NORMAL');
+
+  // Location / Ambulance
+  const [serviceAddress, setServiceAddress] = useState('');
+  const [cityDistrict, setCityDistrict] = useState('Chennai');
+  const [postalCode, setPostalCode] = useState('');
+  const [pickupLocation, setPickupLocation] = useState('');
+  const [destinationLocation, setDestinationLocation] = useState('');
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -98,11 +97,106 @@ export function CallIntakeFormModal({
     if (isOpen) fetchCatalog();
   }, [isOpen]);
 
-  // Pre-fill phone and name if provided
+  // E.164 phone normalization helper
+  const normalizePhoneNumber = (raw?: string | null): string => {
+    if (!raw) return '';
+    let clean = raw.trim();
+    try { clean = decodeURIComponent(clean); } catch (_) {}
+    const lower = clean.toLowerCase();
+    if (['unknown', 'anonymous', 'withheld', 'internal', 'private', 'none'].includes(lower)) {
+      return '';
+    }
+    let digits = clean.replace(/[^\d+]/g, '');
+    if (digits.startsWith('00')) digits = '+' + digits.substring(2);
+    else if (digits.startsWith('0') && digits.length === 11) digits = '+91' + digits.substring(1);
+    else if (!digits.startsWith('+') && digits.length === 10) digits = '+91' + digits;
+    else if (!digits.startsWith('+') && digits.startsWith('91') && digits.length === 12) digits = '+' + digits;
+    return digits.length >= 7 ? digits : '';
+  };
+
+  // Synchronize customer phone and name whenever callSid or props change (preventing stale state)
   useEffect(() => {
-    if (customerName && !enquirerName) setEnquirerName(customerName);
-    if (phoneNumber && !phone) setPhone(phoneNumber);
-  }, [customerName, phoneNumber]);
+    const normalized = normalizePhoneNumber(phoneNumber);
+    setPhone(normalized);
+    if (customerName && customerName !== 'Customer' && customerName !== 'Unknown Caller') {
+      setEnquirerName(customerName);
+    } else {
+      setEnquirerName('');
+    }
+  }, [callSid, phoneNumber, customerName]);
+
+  // Dynamically compute canonical service categories from foundations & catalogItems
+  const categories = React.useMemo(() => {
+    const map = new Map<string, { id: string; name: string; foundationKey: string; foundationName: string }>();
+
+    // Add categories from foundations
+    foundations.forEach((f) => {
+      const catId = f.category || f.name;
+      if (!map.has(catId)) {
+        map.set(catId, {
+          id: catId,
+          name: f.name ? `${f.name} — ${f.category || ''}`.replace(/ — $/, '') : catId,
+          foundationKey: f.key,
+          foundationName: f.name,
+        });
+      }
+    });
+
+    // Add any remaining categories from catalogItems
+    catalogItems.forEach((item) => {
+      const catId = item.category || item.foundationName || item.foundationKey;
+      if (catId && !map.has(catId)) {
+        map.set(catId, {
+          id: catId,
+          name: item.foundationName ? `${item.foundationName} — ${item.category}` : catId,
+          foundationKey: item.foundationKey,
+          foundationName: item.foundationName || catId,
+        });
+      }
+    });
+
+    return Array.from(map.values());
+  }, [foundations, catalogItems]);
+
+  // Set default category once categories load if not yet selected
+  useEffect(() => {
+    if (categories.length > 0 && !selectedCategory) {
+      setSelectedCategory(categories[0].id);
+    }
+  }, [categories, selectedCategory]);
+
+  const currentCategoryObj = categories.find((c) => c.id === selectedCategory);
+
+  // Filter available services for chosen category and deduplicate identical labels
+  const availableServices = React.useMemo(() => {
+    if (!selectedCategory) return [];
+    const catObj = categories.find((c) => c.id === selectedCategory);
+    const matching = catalogItems.filter(
+      (item) => item.category === selectedCategory || (catObj && item.foundationKey === catObj.foundationKey)
+    );
+
+    const seen = new Set<string>();
+    const deduped: any[] = [];
+    for (const s of matching) {
+      const key = (s.code || s.name).trim().toLowerCase();
+      if (!seen.has(key)) {
+        seen.add(key);
+        deduped.push(s);
+      }
+    }
+    return deduped;
+  }, [selectedCategory, categories, catalogItems]);
+
+  const selectedServiceObj = availableServices.find((s) => s.name === primaryService);
+
+  // Check emergency state
+  const isAmbulance = Boolean(
+    (currentCategoryObj && currentCategoryObj.foundationKey === 'AMBULANCE') ||
+    selectedCategory.toLowerCase().includes('ambulance') ||
+    selectedCategory.toLowerCase().includes('emergency') ||
+    primaryService.toLowerCase().includes('ambulance') ||
+    selectedSubServices.some((s) => s.toLowerCase().includes('ambulance'))
+  );
 
   // Live notes debounced auto-save
   useEffect(() => {
@@ -138,15 +232,18 @@ export function CallIntakeFormModal({
 
   if (!isOpen) return null;
 
-  // Filter services for chosen foundation
-  const currentFoundationObj = foundations.find(f => f.key === selectedFoundation);
-  const foundationServices = currentFoundationObj?.services || catalogItems.filter(i => i.foundationKey === selectedFoundation);
-
   // Submit complete call intake
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     setErrorMessage(null);
+
+    // Validate category and service compatibility
+    if (primaryService && !availableServices.some((s) => s.name === primaryService)) {
+      setErrorMessage('Please select a valid service belonging to the selected category.');
+      setIsSubmitting(false);
+      return;
+    }
 
     try {
       const payload = {
@@ -154,7 +251,8 @@ export function CallIntakeFormModal({
         enquirerName,
         phone,
         email: email || undefined,
-        foundation: selectedFoundation,
+        serviceCategory: selectedCategory,
+        foundation: currentCategoryObj?.foundationKey || undefined,
         enquiryCategory,
         primaryService,
         subServices: selectedSubServices,
@@ -243,10 +341,10 @@ export function CallIntakeFormModal({
             </div>
           )}
 
-          {/* 1. CONTACT & FOUNDATION DETAILS */}
+          {/* 1. CONTACT & SERVICE CATEGORY DETAILS */}
           <div className="space-y-3">
             <h4 className="text-[11px] font-bold uppercase tracking-wider text-slate-400 border-b border-[#1b2631] pb-1">
-              1. Contact & Foundation Information
+              1. Contact & Service Category Information
             </h4>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -288,18 +386,18 @@ export function CallIntakeFormModal({
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div>
-                <label className="text-[10px] font-bold uppercase text-slate-400 block mb-1">Foundation / Service Provider</label>
+                <label className="text-[10px] font-bold uppercase text-slate-400 block mb-1">Service Category</label>
                 <select
-                  value={selectedFoundation}
+                  value={selectedCategory}
                   onChange={(e) => {
-                    setSelectedFoundation(e.target.value);
+                    setSelectedCategory(e.target.value);
                     setPrimaryService('');
                     setSelectedSubServices([]);
                   }}
                   className="w-full bg-[#121b24] border border-[#233342] rounded-lg px-3 py-1.5 text-xs text-white font-medium outline-none focus:border-emerald-500"
                 >
-                  {foundations.map((f) => (
-                    <option key={f.key} value={f.key}>{f.name}</option>
+                  {categories.map((c) => (
+                    <option key={c.id} value={c.id}>{c.name}</option>
                   ))}
                 </select>
               </div>
@@ -325,43 +423,88 @@ export function CallIntakeFormModal({
           {/* 2. SERVICE CATALOG SELECTION */}
           <div className="space-y-3">
             <h4 className="text-[11px] font-bold uppercase tracking-wider text-slate-400 border-b border-[#1b2631] pb-1">
-              2. Requested Services ({selectedFoundation})
+              2. Requested Services ({currentCategoryObj?.name || selectedCategory || 'Category'})
             </h4>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-48 overflow-y-auto custom-scrollbar p-1.5 bg-[#0e161d] border border-[#1c2936] rounded-xl">
-              {foundationServices.map((service: any) => {
-                const isSelected = primaryService === service.name;
-                return (
-                  <div
-                    key={service.id || service.name}
-                    onClick={() => {
-                      if (primaryService === service.name) {
-                        setPrimaryService('');
-                        setSelectedSubServices([]);
-                      } else {
-                        setPrimaryService(service.name);
-                        if (service.subServices) setSelectedSubServices(service.subServices);
-                      }
-                    }}
-                    className={`p-2.5 rounded-lg cursor-pointer flex items-center justify-between border transition-all ${
-                      isSelected
-                        ? 'bg-emerald-500/15 border-emerald-500/50 text-emerald-300'
-                        : 'bg-[#121b24] border-transparent hover:border-[#27394a] text-slate-300'
-                    }`}
-                  >
-                    <div className="flex items-center gap-2">
-                      {isSelected ? <CheckSquare className="w-4 h-4 text-emerald-400" /> : <Square className="w-4 h-4 text-slate-600" />}
-                      <span className="font-semibold text-xs">{service.name}</span>
+              {availableServices.length > 0 ? (
+                availableServices.map((service: any) => {
+                  const isSelected = primaryService === service.name;
+                  return (
+                    <div
+                      key={service.id || service.code || service.name}
+                      onClick={() => {
+                        if (primaryService === service.name) {
+                          setPrimaryService('');
+                          setSelectedSubServices([]);
+                        } else {
+                          setPrimaryService(service.name);
+                          if (service.subServices && Array.isArray(service.subServices)) {
+                            setSelectedSubServices(service.subServices);
+                          } else {
+                            setSelectedSubServices([]);
+                          }
+                        }
+                      }}
+                      className={`p-2.5 rounded-lg cursor-pointer flex items-center justify-between border transition-all ${
+                        isSelected
+                          ? 'bg-emerald-500/15 border-emerald-500/50 text-emerald-300'
+                          : 'bg-[#121b24] border-transparent hover:border-[#27394a] text-slate-300'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        {isSelected ? <CheckSquare className="w-4 h-4 text-emerald-400" /> : <Square className="w-4 h-4 text-slate-600" />}
+                        <span className="font-semibold text-xs">{service.name}</span>
+                      </div>
+                      {service.isEmergency && (
+                        <span className="px-1.5 py-0.2 rounded bg-rose-500/20 text-rose-400 text-[9px] font-bold border border-rose-500/30">
+                          EMERGENCY
+                        </span>
+                      )}
                     </div>
-                    {service.isEmergency && (
-                      <span className="px-1.5 py-0.2 rounded bg-rose-500/20 text-rose-400 text-[9px] font-bold border border-rose-500/30">
-                        EMERGENCY
-                      </span>
-                    )}
-                  </div>
-                );
-              })}
+                  );
+                })
+              ) : (
+                <div className="col-span-2 py-6 text-center text-slate-500 text-xs">
+                  {isLoadingCatalog ? 'Loading service catalog...' : 'No services available for this category.'}
+                </div>
+              )}
             </div>
+
+            {/* Included Sub-Services Scope Toggle */}
+            {selectedServiceObj && selectedServiceObj.subServices && selectedServiceObj.subServices.length > 0 && (
+              <div className="p-2.5 bg-[#0e161d] border border-[#1c2936] rounded-xl space-y-1.5">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">
+                  Included Sub-Services / Scope for {selectedServiceObj.name}:
+                </span>
+                <div className="flex flex-wrap gap-1.5">
+                  {selectedServiceObj.subServices.map((sub: string) => {
+                    const isSubSelected = selectedSubServices.includes(sub);
+                    return (
+                      <button
+                        type="button"
+                        key={sub}
+                        onClick={() => {
+                          if (isSubSelected) {
+                            setSelectedSubServices(selectedSubServices.filter((s) => s !== sub));
+                          } else {
+                            setSelectedSubServices([...selectedSubServices, sub]);
+                          }
+                        }}
+                        className={`px-2.5 py-1 rounded-lg text-[11px] font-medium border transition-colors flex items-center gap-1.5 ${
+                          isSubSelected
+                            ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-300'
+                            : 'bg-[#121b24] border-[#223342] text-slate-400 hover:text-white'
+                        }`}
+                      >
+                        {isSubSelected ? <Check className="w-3 h-3 text-emerald-400" /> : <Square className="w-3 h-3 text-slate-500" />}
+                        <span>{sub}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* 3. PATIENT / ELDER & CLINICAL REQUIREMENTS */}

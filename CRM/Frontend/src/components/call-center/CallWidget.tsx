@@ -354,6 +354,48 @@ export function CallWidget() {
   // Prevent duplicate endCall requests
   const endCallRequestedRef = useRef(false);
 
+  // Track sessions where Call Intake was already opened to prevent duplicate auto-openings on rerenders/reconnects
+  const autoOpenedSessionsRef = useRef<Set<string>>(new Set());
+
+  // Canonical customer phone number resolution (Inbound caller ID vs Outbound dialed destination)
+  const resolvedCustomerPhone = React.useMemo(() => {
+    if (!activeCall) return '';
+    // Outbound calls: use the customer destination number that the agent dialed
+    if (activeCall.isCaller || activeCall.direction === 'OUTBOUND') {
+      return activeCall.phone || '';
+    }
+    // Inbound calls: use the provider's actual caller ID rather than agent answering trunk/DID
+    return (activeCall as any).caller || (activeCall as any).from || activeCall.phone || '';
+  }, [activeCall]);
+
+  const resolvedCustomerName = React.useMemo(() => {
+    if (!activeCall) return '';
+    if (activeCall.customerName && activeCall.customerName !== 'Customer' && activeCall.customerName !== 'Unknown Caller') {
+      return activeCall.customerName;
+    }
+    return (activeCall as any).callerName || activeCall.customerName || '';
+  }, [activeCall]);
+
+  // Automatically open Call Intake modal when a real call is answered/connected with valid session ID
+  useEffect(() => {
+    const currentSessionId = activeCall?.callSid || activeCall?.roomName;
+    if (callState === 'CONNECTED' && currentSessionId) {
+      // Avoid opening intake modal for internal directory calls
+      const isInternal = Boolean(
+        activeCall?.isInternal || 
+        activeCall?.callCategory === 'INTERNAL' ||
+        activeCall?.type === 'INTERNAL' ||
+        (activeCall?.phone && activeCall.phone.toLowerCase() === 'internal') ||
+        (activeCall?.phone && activeCall.phone.startsWith('ext_'))
+      );
+
+      if (!isInternal && !autoOpenedSessionsRef.current.has(currentSessionId)) {
+        autoOpenedSessionsRef.current.add(currentSessionId);
+        setShowIntakeModal(true);
+      }
+    }
+  }, [callState, activeCall?.callSid, activeCall?.roomName, activeCall?.isInternal, activeCall?.callCategory, activeCall?.type, activeCall?.phone]);
+
   useEffect(() => {
     // Reset guard when activeCall changes
     endCallRequestedRef.current = false;
@@ -687,8 +729,8 @@ export function CallWidget() {
       {showIntakeModal && (
         <CallIntakeFormModal
           callSid={activeCall?.callSid || activeCall?.roomName || 'unknown'}
-          customerName={customerData?.name || activeCall?.customerName}
-          phoneNumber={customerData?.phone || activeCall?.phone}
+          customerName={resolvedCustomerName}
+          phoneNumber={resolvedCustomerPhone}
           leadId={activeCall?.leadId}
           isOpen={showIntakeModal}
           onClose={() => setShowIntakeModal(false)}
@@ -702,8 +744,8 @@ export function CallWidget() {
           isOpen={showTransferModal}
           onClose={() => setShowTransferModal(false)}
           onSuccess={() => setShowTransferModal(false)}
-          callerName={customerData?.name || activeCall?.customerName}
-          callerPhone={customerData?.phone || activeCall?.phone}
+          callerName={resolvedCustomerName}
+          callerPhone={resolvedCustomerPhone}
         />
       )}
 
@@ -725,7 +767,7 @@ export function CallWidget() {
 
       {showCustomerHistory && (
         <CustomerHistoryDrawer
-          identifier={customerData?.phone || activeCall?.phone || customerData?.name || activeCall?.customerName || ''}
+          identifier={resolvedCustomerPhone || resolvedCustomerName || ''}
           isOpen={showCustomerHistory}
           onClose={() => setShowCustomerHistory(false)}
         />
