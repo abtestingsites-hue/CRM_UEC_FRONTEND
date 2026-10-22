@@ -1,13 +1,14 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from 'react';
-import { Phone, PhoneOff, Mic, MicOff, Volume2, VolumeX, User, Clock, Loader2, Circle, Pause, ArrowRight, FileText, PhoneForwarded } from 'lucide-react';
+import { Phone, PhoneOff, Mic, MicOff, Volume2, VolumeX, User, Clock, Loader2, Circle, Pause, ArrowRight, FileText, PhoneForwarded, History } from 'lucide-react';
 import { useCallStore } from '@/store/useCallStore';
 import { useSocket } from '@/providers/SocketProvider';
 import { PostCallFeedbackModal } from '@/components/call-center/PostCallFeedbackModal';
 import { LeadConversionModal } from '@/components/leads/LeadConversionModal';
 import { CallIntakeFormModal } from '@/components/call-center/CallIntakeFormModal';
 import { CallTransferModal } from '@/components/call-center/CallTransferModal';
+import { CustomerHistoryDrawer } from '@/components/call-center/CustomerHistoryDrawer';
 import { useMediasoup } from '@/hooks/useMediasoup';
 import { LiveKitRoom, RoomAudioRenderer, useConnectionState, useRoomContext, useLocalParticipant, useRemoteParticipants } from '@livekit/components-react';
 function LiveKitManager({ setCallState, setWebrtcConnected, callSid, isMuted, isSpeaker, callCategory, telephonySocket }: any) {
@@ -346,6 +347,7 @@ export function CallWidget() {
   const [showConversionModal, setShowConversionModal] = useState(false);
   const [showIntakeModal, setShowIntakeModal] = useState(false);
   const [showTransferModal, setShowTransferModal] = useState(false);
+  const [showCustomerHistory, setShowCustomerHistory] = useState(false);
   
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   
@@ -655,16 +657,28 @@ export function CallWidget() {
               />
             </div>
           )}
-          {/* Call Intake Form & Live Notes Trigger Button */}
+          {/* Action triggers: Pre-Call/Active-Call Customer History & Intake */}
           {activeCall && (
-            <button
-              type="button"
-              onClick={() => setShowIntakeModal(true)}
-              className="mt-4 w-full py-2.5 px-3 rounded-xl bg-[#141e26] hover:bg-[#1b2934] border border-emerald-500/40 text-emerald-400 font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-md active:scale-95"
-            >
-              <FileText className="w-4 h-4 text-emerald-400" />
-              <span>Call Intake Form & Notes</span>
-            </button>
+            <div className="w-full flex gap-2 mt-4">
+              <button
+                type="button"
+                onClick={() => setShowCustomerHistory(true)}
+                className="flex-1 py-2 px-2.5 rounded-xl bg-orange-950/40 hover:bg-orange-900/50 border border-orange-500/40 text-orange-400 font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-md active:scale-95"
+                title="View customer cross-unit interaction history, previous enquiries and recordings"
+              >
+                <History className="w-4 h-4 text-orange-400" />
+                <span>Customer History</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setShowIntakeModal(true)}
+                className="flex-1 py-2 px-2.5 rounded-xl bg-[#141e26] hover:bg-[#1b2934] border border-emerald-500/40 text-emerald-400 font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-md active:scale-95"
+              >
+                <FileText className="w-4 h-4 text-emerald-400" />
+                <span>Intake & Notes</span>
+              </button>
+            </div>
           )}
           </div>
         </div>
@@ -706,6 +720,14 @@ export function CallWidget() {
           leadId={activeCall?.leadId || ''} 
           onClose={handleFeedbackComplete} 
           onSubmit={handleFeedbackComplete} 
+        />
+      )}
+
+      {showCustomerHistory && (
+        <CustomerHistoryDrawer
+          identifier={customerData?.phone || activeCall?.phone || customerData?.name || activeCall?.customerName || ''}
+          isOpen={showCustomerHistory}
+          onClose={() => setShowCustomerHistory(false)}
         />
       )}
     </>

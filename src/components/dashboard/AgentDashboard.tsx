@@ -190,11 +190,11 @@ export function AgentDashboard({ metrics: initialMetrics }: AgentDashboardProps)
           </button>
 
           <button
-            onClick={() => router.push('/call-history')}
+            onClick={() => router.push('/call-logs')}
             className="px-4 py-2.5 rounded-xl bg-orange-600 hover:bg-orange-500 text-xs font-bold text-white flex items-center gap-2 transition-all shadow-lg shadow-orange-600/20 active:scale-95"
           >
             <Layers className="w-4 h-4" />
-            <span>Call History</span>
+            <span>Call Logs</span>
           </button>
         </div>
 
@@ -206,7 +206,7 @@ export function AgentDashboard({ metrics: initialMetrics }: AgentDashboardProps)
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
         {/* 1. Total Calls Connected */}
         <div 
-          onClick={() => router.push('/call-history?status=CONNECTED&group=today')}
+          onClick={() => router.push('/call-logs?status=CONNECTED&group=today')}
           className="p-4 rounded-2xl bg-gradient-to-br from-[#0c1811] to-[#0e2417] border border-emerald-500/30 hover:border-emerald-500/60 shadow-lg cursor-pointer transition-all hover:-translate-y-0.5 group flex flex-col justify-between h-[130px]"
         >
           <div className="flex justify-between items-start">
@@ -226,7 +226,7 @@ export function AgentDashboard({ metrics: initialMetrics }: AgentDashboardProps)
 
         {/* 2. Total Calls Missed */}
         <div 
-          onClick={() => router.push('/call-history?status=MISSED&group=today')}
+          onClick={() => router.push('/call-logs?status=MISSED&group=today')}
           className="p-4 rounded-2xl bg-gradient-to-br from-[#18110c] to-[#24170e] border border-amber-500/30 hover:border-amber-500/60 shadow-lg cursor-pointer transition-all hover:-translate-y-0.5 group flex flex-col justify-between h-[130px]"
         >
           <div className="flex justify-between items-start">
@@ -344,7 +344,7 @@ export function AgentDashboard({ metrics: initialMetrics }: AgentDashboardProps)
               <p className="text-xs text-slate-400">Distribution of today&apos;s call volume across outcome categories</p>
             </div>
             <button
-              onClick={() => router.push('/call-history')}
+              onClick={() => router.push('/call-logs')}
               className="text-xs text-orange-400 hover:text-orange-300 font-semibold flex items-center gap-1 self-start sm:self-auto"
             >
               <span>Full History</span>
@@ -413,7 +413,7 @@ export function AgentDashboard({ metrics: initialMetrics }: AgentDashboardProps)
                 <div 
                   key={i} 
                   className="flex-1 flex flex-col items-center gap-1 group relative cursor-pointer"
-                  onClick={() => router.push(`/call-history?group=today`)}
+                  onClick={() => router.push(`/call-logs?group=today`)}
                 >
                   {/* Tooltip */}
                   <div className="absolute -top-7 opacity-0 group-hover:opacity-100 bg-[#1e1e1e] border border-[#333] px-2 py-0.5 rounded text-[9px] font-mono text-white pointer-events-none transition-opacity whitespace-nowrap z-20">
@@ -520,7 +520,7 @@ export function AgentDashboard({ metrics: initialMetrics }: AgentDashboardProps)
           </div>
 
           <button
-            onClick={() => router.push('/call-history?transferStatus=TRANSFERRED')}
+            onClick={() => router.push('/call-logs?transferStatus=TRANSFERRED')}
             className="w-full py-2 bg-[#141414] hover:bg-[#1f1f1f] border border-[#262626] rounded-xl text-xs font-bold text-slate-300 hover:text-white transition-all text-center"
           >
             View Complete Transfer Logs
