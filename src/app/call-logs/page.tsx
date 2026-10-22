@@ -11,7 +11,6 @@ import {
   PhoneCall, CornerDownRight, Loader2, Volume2, ExternalLink
 } from 'lucide-react';
 import { api } from '@/lib/api';
-import { Sidebar } from '@/components/Sidebar';
 import { CallHistoryDrawer } from '@/components/call-center/CallHistoryDrawer';
 import { CustomerHistoryDrawer } from '@/components/call-center/CustomerHistoryDrawer';
 import { CrossUnitTransferModal } from '@/components/call-center/CrossUnitTransferModal';
@@ -323,12 +322,9 @@ function CallLogsContent() {
   };
 
   return (
-    <div className="flex h-screen bg-[#050505] text-white overflow-hidden">
-      <Sidebar />
-
-      <main className="flex-1 flex flex-col h-full overflow-hidden bg-[#070707]">
-        {/* Top Header */}
-        <header className="px-6 py-4 border-b border-[#1a1a1a] bg-[#090909] flex flex-col sm:flex-row sm:items-center justify-between gap-4 shrink-0">
+    <div className="flex flex-col h-full overflow-hidden bg-[#070707] text-white">
+      {/* Top Header */}
+      <header className="px-6 py-4 border-b border-[#1a1a1a] bg-[#090909] flex flex-col sm:flex-row sm:items-center justify-between gap-4 shrink-0">
           <div>
             <h1 className="text-xl font-bold text-white flex items-center gap-2">
               <PhoneCall className="w-5 h-5 text-orange-500" />
@@ -952,7 +948,6 @@ function CallLogsContent() {
             </div>
           </div>
         </div>
-      </main>
 
       {/* 5-Tab Comprehensive Call Record Drawer */}
       <CallHistoryDrawer
