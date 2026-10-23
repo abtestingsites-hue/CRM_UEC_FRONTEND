@@ -276,7 +276,7 @@ export default function AutomationPage() {
         if (item.id === activeSetting) return { group: group.group, label: item.label, desc: item.desc };
       }
     }
-    return { group: 'Omnichannel Admin', label: 'Dashboard', desc: 'Overview' };
+    return { group: 'Messaging Hub Admin', label: 'Dashboard', desc: 'Overview' };
   };
 
   const activeInfo = getActiveSettingInfo();
@@ -525,7 +525,7 @@ export default function AutomationPage() {
           <EnterpriseFormWorkspace saveText="Deploy Bot Configuration" testText="Test in Sandbox">
             <div className="flex items-center justify-between border-b border-[#1e1e1e] pb-6 mb-6">
               <div>
-                <h3 className="text-lg font-bold text-white flex items-center gap-2"><Bot className="w-5 h-5 text-orange-500"/> Omnichannel Chatbot Brain</h3>
+                <h3 className="text-lg font-bold text-white flex items-center gap-2"><Bot className="w-5 h-5 text-orange-500"/> Messaging Hub Chatbot Brain</h3>
                 <p className="text-xs text-slate-500 mt-1">Configure AI intent mapping, welcome flows, and human escalation rules for all text channels.</p>
               </div>
               <div className="px-3 py-1 bg-orange-500/10 border border-orange-500/30 rounded-lg">
@@ -626,7 +626,7 @@ export default function AutomationPage() {
         <div className="w-[280px] bg-[#0c0c0c] border-r border-[#1e1e1e] flex flex-col shrink-0">
           <div className="p-4 border-b border-[#1e1e1e]">
             <h1 className="text-base font-black text-white flex items-center gap-2 tracking-wide">
-              <Workflow className="text-orange-500 w-5 h-5" /> OMNICHANNEL ADMIN
+              <Workflow className="text-orange-500 w-5 h-5" /> MESSAGING HUB ADMIN
             </h1>
             <div className="relative mt-4">
               <Search className="w-3.5 h-3.5 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
@@ -697,7 +697,7 @@ export default function AutomationPage() {
           <div className="h-20 border-b border-[#1e1e1e] p-6 shrink-0 flex items-center justify-between bg-[#0a0a0a]">
             <div>
               <div className="flex items-center gap-2 text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">
-                <span>Omnichannel Admin</span>
+                <span>Messaging Hub Admin</span>
                 <ChevronRight className="w-3 h-3" />
                 <span>{activeInfo.group}</span>
               </div>

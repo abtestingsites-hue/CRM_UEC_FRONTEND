@@ -54,7 +54,7 @@ export function OmnichannelEnquiriesChart() {
       <div className="flex justify-between items-center mb-3">
         <div className="flex items-center gap-2">
           <MessageSquare className="w-4 h-4 text-primary" />
-          <h3 className="text-sm font-bold text-white">Total Omnichannel Enquiries</h3>
+          <h3 className="text-sm font-bold text-white">Total Messaging Hub Enquiries</h3>
           {data && typeof data.totalEnquiries === 'number' && (
             <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-primary/20 text-primary border border-primary/30">
               {data.totalEnquiries} Total

@@ -37,7 +37,7 @@ export function DashboardSwitcher({
     { type: 'executive', label: 'Executive Dashboard' },
     { type: 'sales_lead', label: 'Sales & Lead Dashboard' },
     { type: 'agent_performance', label: 'Agent Performance' },
-    { type: 'omnichannel', label: 'Omnichannel Dashboard' },
+    { type: 'omnichannel', label: 'Messaging Hub Dashboard' },
     { type: 'contact_center', label: 'Contact Center Live' },
     { type: 'customer_experience', label: 'Customer Experience' },
     { type: 'ai_insights', label: 'AI Insights' },

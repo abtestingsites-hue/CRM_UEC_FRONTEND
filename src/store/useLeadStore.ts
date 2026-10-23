@@ -15,6 +15,25 @@ interface Lead {
   assignedAgentId: string | null;
   createdAt: string;
   nextFollowup?: string | null;
+  foundation?: string | null;
+  enquiryCategory?: string | null;
+  primaryService?: string | null;
+  subServices?: string[];
+  patientName?: string | null;
+  patientAge?: number | null;
+  patientConditions?: string | null;
+  patientMobility?: string | null;
+  engagementType?: string | null;
+  careDurationCategory?: string | null;
+  careDuration?: string | null;
+  careSchedule?: string | null;
+  serviceAddress?: string | null;
+  cityDistrict?: string | null;
+  postalCode?: string | null;
+  notes?: string | null;
+  isAmbulanceEmergency?: boolean;
+  enquirySummary?: string | null;
+  lastCall?: any;
 }
 
 interface LeadStore {

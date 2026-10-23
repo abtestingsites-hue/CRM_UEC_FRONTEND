@@ -105,7 +105,7 @@ export function DashboardLayout() {
     { type: 'executive', label: 'Executive Dashboard', icon: Briefcase },
     { type: 'sales_lead', label: 'Sales & Lead Dashboard', icon: DollarSign },
     { type: 'agent_performance', label: 'Agent Performance', icon: Users },
-    { type: 'omnichannel', label: 'Omnichannel Dashboard', icon: MessageSquare },
+    { type: 'omnichannel', label: 'Messaging Hub Dashboard', icon: MessageSquare },
     { type: 'contact_center', label: 'Contact Center Live', icon: Phone },
     { type: 'customer_experience', label: 'Customer Experience', icon: Heart },
     { type: 'ai_insights', label: 'AI Insights Dashboard', icon: Cpu },
