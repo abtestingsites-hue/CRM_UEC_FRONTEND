@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useEffect, useState } from 'react';
 import { Users, Target, Activity, CheckCircle2, TrendingUp } from 'lucide-react';
@@ -91,7 +91,7 @@ export default function LeadAnalyticsPage() {
           <div className="bg-[#111] border border-[#222] p-6 rounded-xl">
             <h3 className="text-lg font-semibold mb-6">Service Interest Breakdown</h3>
             <div className="h-[300px]">
-              <ResponsiveContainer width="100%" height="100%">
+              <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
                 <BarChart data={data.services}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#222" vertical={false} />
                   <XAxis dataKey="service" stroke="#666" fontSize={12} tickLine={false} axisLine={false} />

@@ -48,11 +48,9 @@ export function Navbar() {
 
     const fetchActiveCount = async () => {
       try {
-        const token = localStorage.getItem('paramantra_access_token');
+        const token = localStorage.getItem('access_token') || localStorage.getItem('paramantra_access_token') || localStorage.getItem('crm_token');
         if (!token) return;
-        const res = await apiFetch('/api/v1/super-admin/active-agents', {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        const res = await apiFetch('/api/v1/super-admin/active-agents');
         if (res.ok && isMounted) {
           const data = await res.json();
           if (data && typeof data.count === 'number') {

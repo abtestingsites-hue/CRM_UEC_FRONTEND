@@ -1,4 +1,4 @@
-﻿import { create } from 'zustand';
+import { create } from 'zustand';
 import { apiFetch, API_BASE_URL } from '@/lib/api';
 
 export interface WidgetConfig {
@@ -62,9 +62,13 @@ export const useDashboardStore = create<DashboardState>((set, get) => ({
   fetchMetrics: async () => {
     set({ isLoading: true });
     try {
-      const { activeType, startDate, endDate, department, team, agentId } = get();
-      const token = localStorage.getItem('paramantra_access_token') || '';
+      const token = localStorage.getItem('access_token') || localStorage.getItem('paramantra_access_token') || localStorage.getItem('crm_token');
+      if (!token) {
+        set({ isLoading: false });
+        return;
+      }
 
+      const { activeType, startDate, endDate, department, team, agentId } = get();
       let url = `${API_BASE_URL}/dashboard/analytics?type=${activeType}`;
       if (startDate) url += `&startDate=${startDate}T00:00:00Z`;
       if (endDate) url += `&endDate=${endDate}T23:59:59Z`;
@@ -72,9 +76,7 @@ export const useDashboardStore = create<DashboardState>((set, get) => ({
       if (team && team !== 'All') url += `&team=${team}`;
       if (agentId && agentId !== 'All') url += `&agentId=${agentId}`;
 
-      const res = await apiFetch(url, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await apiFetch(url);
 
       if (res.ok) {
         const data = await res.json();

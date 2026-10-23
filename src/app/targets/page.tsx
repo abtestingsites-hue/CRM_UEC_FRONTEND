@@ -363,7 +363,7 @@ export default function TargetManagementPage() {
                 </div>
 
                 <div className="h-[280px]">
-                  <ResponsiveContainer width="100%" height="100%">
+                  <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
                     {forecastChartType === 'bar' ? (
                       <BarChart data={baseForecastChartData} margin={{ top: 5, right: 10, left: -20, bottom: 5 }}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#1c1c1c" />
@@ -420,7 +420,7 @@ export default function TargetManagementPage() {
                 </div>
 
                 <div className="h-[280px] flex items-center justify-center">
-                  <ResponsiveContainer width="100%" height="100%">
+                  <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
                     {sourceChartType === 'pie' ? (
                       <PieChart>
                         <Pie
@@ -472,7 +472,7 @@ export default function TargetManagementPage() {
               </div>
 
               <div className="h-[360px]">
-                <ResponsiveContainer width="100%" height="100%">
+                <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
                   {comparisonChartType === 'line' ? (
                     <LineChart data={agentTargets} margin={{ top: 5, right: 10, left: -20, bottom: 5 }}>
                       <CartesianGrid strokeDasharray="3 3" stroke="#1c1c1c" />
