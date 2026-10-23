@@ -365,6 +365,8 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
 
     const pollInterval = setInterval(async () => {
       const { status, incomingCall, setIncomingCall } = useCallStore.getState();
+      const token = typeof window !== 'undefined' ? (localStorage.getItem('access_token') || localStorage.getItem('paramantra_access_token') || localStorage.getItem('crm_token')) : null;
+      if (!token) return;
       if (status === 'AVAILABLE' && !incomingCall && user?.id) {
         try {
           let baseUrl = process.env.NEXT_PUBLIC_API_URL || `${API_BASE_URL}`;

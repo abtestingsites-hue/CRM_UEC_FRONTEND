@@ -564,7 +564,7 @@ export default function ReportsPage() {
 
                 <div className="h-[280px]">
                   {chartType === 'line' ? (
-                    <ResponsiveContainer width="100%" height="100%">
+                    <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
                       <RechartsLineChart data={generatedData.chartData} margin={{ top: 5, right: 10, left: -20, bottom: 5 }}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#1c1c1c" />
                         <XAxis dataKey="name" stroke="#555" fontSize={10} tickLine={false} />
@@ -574,7 +574,7 @@ export default function ReportsPage() {
                       </RechartsLineChart>
                     </ResponsiveContainer>
                   ) : chartType === 'pie' ? (
-                    <ResponsiveContainer width="100%" height="100%">
+                    <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
                       <RechartsPieChart>
                         <Pie
                           data={generatedData.chartData}
@@ -594,7 +594,7 @@ export default function ReportsPage() {
                       </RechartsPieChart>
                     </ResponsiveContainer>
                   ) : (
-                    <ResponsiveContainer width="100%" height="100%">
+                    <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
                       <BarChart data={generatedData.chartData} margin={{ top: 5, right: 10, left: -20, bottom: 5 }}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#1c1c1c" />
                         <XAxis dataKey="name" stroke="#555" fontSize={10} tickLine={false} />

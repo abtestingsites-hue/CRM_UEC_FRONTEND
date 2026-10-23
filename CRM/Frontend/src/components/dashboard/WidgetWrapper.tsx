@@ -65,7 +65,7 @@ export function WidgetWrapper({ title, children, dataForExport }: WidgetWrapperP
         </div>
 
         {/* Content */}
-        <div className="flex-1 min-h-0 relative text-white">
+        <div className="flex-1 min-h-[220px] w-full relative text-white">
           {children}
         </div>
       </div>

@@ -26,11 +26,77 @@ export const sanitizeRecordingUrl = (url: string | null | undefined): string | n
 
 const BASE_URL = getApiBaseUrl();
 class APIClient {
+  private refreshPromise: Promise<string | null> | null = null;
+
   private getToken() {
     if (typeof window === 'undefined') return null;
     return localStorage.getItem('access_token') || 
            localStorage.getItem('paramantra_access_token') || 
            localStorage.getItem('crm_token');
+  }
+
+  private getRefreshToken() {
+    if (typeof window === 'undefined') return null;
+    return localStorage.getItem('paramantra_refresh_token') || 
+           localStorage.getItem('refresh_token');
+  }
+
+  private clearSessionAndRedirect() {
+    if (typeof window === 'undefined') return;
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('paramantra_access_token');
+    localStorage.removeItem('paramantra_refresh_token');
+    localStorage.removeItem('crm_token');
+    localStorage.removeItem('crm_user');
+    localStorage.removeItem('paramantra_user');
+    if (window.location.pathname !== '/login') {
+      window.location.href = '/login';
+    }
+  }
+
+  async refreshAccessToken(): Promise<string | null> {
+    if (this.refreshPromise) return this.refreshPromise;
+
+    this.refreshPromise = (async () => {
+      const refreshToken = this.getRefreshToken();
+      if (!refreshToken) {
+        this.clearSessionAndRedirect();
+        return null;
+      }
+
+      try {
+        const activeBaseUrl = getApiBaseUrl();
+        const res = await fetch(`${activeBaseUrl}/api/v1/auth/refresh`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ refreshToken })
+        });
+
+        if (!res.ok) {
+          this.clearSessionAndRedirect();
+          return null;
+        }
+
+        const data = await res.json();
+        if (data.accessToken) {
+          localStorage.setItem('paramantra_access_token', data.accessToken);
+          localStorage.setItem('crm_token', data.accessToken);
+          if (data.refreshToken) {
+            localStorage.setItem('paramantra_refresh_token', data.refreshToken);
+          }
+          return data.accessToken;
+        }
+        this.clearSessionAndRedirect();
+        return null;
+      } catch (err) {
+        this.clearSessionAndRedirect();
+        return null;
+      } finally {
+        this.refreshPromise = null;
+      }
+    })();
+
+    return this.refreshPromise;
   }
 
   async request<T = Response>(endpoint: string, options: RequestInit = {}): Promise<T> {
@@ -51,12 +117,27 @@ class APIClient {
     try {
       const activeBaseUrl = getApiBaseUrl();
       const url = endpoint.startsWith('http') ? endpoint : `${activeBaseUrl}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
-      const res = await fetch(url, {
+      let res = await fetch(url, {
         ...options,
         headers,
         signal: controller.signal
       });
       clearTimeout(timeoutId);
+
+      // Handle 401 Unauthorized: attempt refresh if token expired
+      const isAuthEndpoint = endpoint.includes('/auth/login') || endpoint.includes('/auth/refresh');
+      if (res.status === 401 && !isAuthEndpoint && typeof window !== 'undefined') {
+        const newToken = await this.refreshAccessToken();
+        if (newToken) {
+          headers.set('Authorization', `Bearer ${newToken}`);
+          const retryRes = await fetch(url, {
+            ...options,
+            headers
+          });
+          return retryRes as unknown as T;
+        }
+      }
+
       return res as unknown as T;
     } catch (error: any) {
       clearTimeout(timeoutId);

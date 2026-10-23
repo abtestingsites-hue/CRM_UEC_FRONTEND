@@ -22,10 +22,12 @@ export function OmnichannelEnquiriesChart() {
   const fetchEnquiries = async (selectedPeriod = period) => {
     setIsLoading(true);
     try {
-      const token = localStorage.getItem('paramantra_access_token');
-      const res = await apiFetch(`/api/v1/super-admin/omnichannel-enquiries?period=${selectedPeriod}`, {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      });
+      const token = localStorage.getItem('access_token') || localStorage.getItem('paramantra_access_token') || localStorage.getItem('crm_token');
+      if (!token) {
+        setIsLoading(false);
+        return;
+      }
+      const res = await apiFetch(`/api/v1/super-admin/omnichannel-enquiries?period=${selectedPeriod}`);
       if (res.ok) {
         const payload = await res.json();
         setData(payload);
