@@ -331,7 +331,7 @@ function CallLogsContent() {
           <div>
             <h1 className="text-xl font-bold text-white flex items-center gap-2">
               <PhoneCall className="w-5 h-5 text-orange-500" />
-              Call Logs & Omnichannel Communication
+              Call Logs & Messaging Hub Communication
             </h1>
             <p className="text-xs text-slate-400 mt-0.5">
               Live contact-center call logs, recordings, AI summaries, direct multichannel responses, and cross-unit history.
@@ -633,24 +633,24 @@ function CallLogsContent() {
               <table className="w-full text-left border-collapse min-w-[1300px]">
                 <thead>
                   <tr className="border-b border-[#1c1c1c] bg-[#0e0e0e] text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                    {/* 1. Caller Name */}
-                    <th className="py-3 px-4 w-[160px]">1. Caller Name</th>
-                    {/* 2. Handled By */}
-                    <th className="py-3 px-4 w-[150px]">2. Handled By</th>
-                    {/* 3. Call Record */}
-                    <th className="py-3 px-4 w-[140px]">3. Call Record</th>
-                    {/* 4. Call Summary */}
-                    <th className="py-3 px-4 w-[240px]">4. Call Summary</th>
-                    {/* 5. Required Service */}
-                    <th className="py-3 px-4 w-[130px]">5. Required Service</th>
-                    {/* 6. Source */}
-                    <th className="py-3 px-4 w-[100px]">6. Source</th>
-                    {/* 7. Omnichannel to Communicate */}
-                    <th className="py-3 px-4 w-[140px]">7. Omnichannel</th>
-                    {/* 8. Response Message */}
-                    <th className="py-3 px-4 w-[220px]">8. Response Message</th>
-                    {/* 9. Send Button */}
-                    <th className="py-3 px-4 w-[100px] text-right">9. Action</th>
+                    {/* Caller Name */}
+                    <th className="py-3 px-4 w-[160px]">Caller Name</th>
+                    {/* Handled By */}
+                    <th className="py-3 px-4 w-[150px]">Handled By</th>
+                    {/* Call Record */}
+                    <th className="py-3 px-4 w-[140px]">Call Record</th>
+                    {/* Call Summary */}
+                    <th className="py-3 px-4 w-[240px]">Call Summary</th>
+                    {/* Required Service */}
+                    <th className="py-3 px-4 w-[130px]">Required Service</th>
+                    {/* Source */}
+                    <th className="py-3 px-4 w-[100px]">Source</th>
+                    {/* Messaging Hub */}
+                    <th className="py-3 px-4 w-[140px]">Messaging Hub</th>
+                    {/* Response Message */}
+                    <th className="py-3 px-4 w-[220px]">Response Message</th>
+                    {/* Actions */}
+                    <th className="py-3 px-4 w-[100px] text-right">Actions</th>
                   </tr>
                 </thead>
 
@@ -659,7 +659,7 @@ function CallLogsContent() {
                     <tr>
                       <td colSpan={9} className="py-20 text-center text-slate-500">
                         <Loader2 className="w-6 h-6 animate-spin mx-auto text-orange-500 mb-2" />
-                        <span>Loading call records & omnichannel channels...</span>
+                        <span>Loading call records & messaging channels...</span>
                       </td>
                     </tr>
                   ) : error ? (
@@ -894,7 +894,7 @@ function CallLogsContent() {
                                 onClick={() => handleSendMessage(call)}
                                 disabled={curMsg.isSending || !(curMsg.message || '').trim()}
                                 className="px-3 py-1.5 rounded-xl bg-orange-500 hover:bg-orange-600 disabled:opacity-40 text-white font-semibold text-xs flex items-center gap-1.5 transition-all shadow-md shadow-orange-500/20"
-                                title="Send Omnichannel Response"
+                                title="Send Messaging Hub Response"
                               >
                                 {curMsg.isSending ? (
                                   <Loader2 className="w-3.5 h-3.5 animate-spin" />

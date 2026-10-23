@@ -341,7 +341,7 @@ export function CallIntakeFormModal({
         {/* HEADER */}
         <div className="p-4 px-6 border-b border-[#1e2933] bg-[#0f171f] flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+            <div className="w-9 h-9 rounded-xl bg-orange-500/10 border border-orange-500/30 flex items-center justify-center text-orange-400">
               <Phone className="w-5 h-5" />
             </div>
             <div>
@@ -382,10 +382,10 @@ export function CallIntakeFormModal({
             </div>
           )}
 
-          {/* 1. CONTACT & SERVICE CATEGORY DETAILS */}
+          {/* CONTACT & SERVICE CATEGORY DETAILS */}
           <div className="space-y-3">
             <h4 className="text-[11px] font-bold uppercase tracking-wider text-slate-400 border-b border-[#1b2631] pb-1">
-              1. Contact & Service Category Information
+              Contact & Service Category Information
             </h4>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -397,7 +397,7 @@ export function CallIntakeFormModal({
                   placeholder="Caller or contact name"
                   value={enquirerName}
                   onChange={(e) => setEnquirerName(e.target.value)}
-                  className="w-full bg-[#121b24] border border-[#233342] rounded-lg px-3 py-1.5 text-xs text-white outline-none focus:border-emerald-500"
+                  className="w-full bg-[#121b24] border border-[#233342] rounded-lg px-3 py-1.5 text-xs text-white outline-none focus:border-orange-500"
                 />
               </div>
 
@@ -409,7 +409,7 @@ export function CallIntakeFormModal({
                   placeholder="+91..."
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
-                  className="w-full bg-[#121b24] border border-[#233342] rounded-lg px-3 py-1.5 text-xs text-white outline-none focus:border-emerald-500 font-mono"
+                  className="w-full bg-[#121b24] border border-[#233342] rounded-lg px-3 py-1.5 text-xs text-white outline-none focus:border-orange-500 font-mono"
                 />
               </div>
 
@@ -420,7 +420,7 @@ export function CallIntakeFormModal({
                   placeholder="contact@domain.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full bg-[#121b24] border border-[#233342] rounded-lg px-3 py-1.5 text-xs text-white outline-none focus:border-emerald-500"
+                  className="w-full bg-[#121b24] border border-[#233342] rounded-lg px-3 py-1.5 text-xs text-white outline-none focus:border-orange-500"
                 />
               </div>
             </div>
@@ -435,7 +435,7 @@ export function CallIntakeFormModal({
                     setPrimaryService('');
                     setSelectedSubServices([]);
                   }}
-                  className="w-full bg-[#121b24] border border-[#233342] rounded-lg px-3 py-1.5 text-xs text-white font-medium outline-none focus:border-emerald-500"
+                  className="w-full bg-[#121b24] border border-[#233342] rounded-lg px-3 py-1.5 text-xs text-white font-medium outline-none focus:border-orange-500"
                 >
                   {categories.map((c) => (
                     <option key={c.id} value={c.id}>{c.name}</option>
@@ -448,7 +448,7 @@ export function CallIntakeFormModal({
                 <select
                   value={enquiryCategory}
                   onChange={(e) => setEnquiryCategory(e.target.value)}
-                  className="w-full bg-[#121b24] border border-[#233342] rounded-lg px-3 py-1.5 text-xs text-white font-medium outline-none focus:border-emerald-500"
+                  className="w-full bg-[#121b24] border border-[#233342] rounded-lg px-3 py-1.5 text-xs text-white font-medium outline-none focus:border-orange-500"
                 >
                   <option value="SERVICE_ENQUIRY">Service Enquiry</option>
                   <option value="JOB_ENQUIRY">Job Enquiry / Careers</option>
@@ -461,10 +461,10 @@ export function CallIntakeFormModal({
             </div>
           </div>
 
-          {/* 2. SERVICE CATALOG SELECTION */}
+          {/* SERVICE CATALOG SELECTION */}
           <div className="space-y-3">
             <h4 className="text-[11px] font-bold uppercase tracking-wider text-slate-400 border-b border-[#1b2631] pb-1">
-              2. Requested Services ({currentCategoryObj?.name || selectedCategory || 'Category'})
+              Requested Services ({currentCategoryObj?.name || selectedCategory || 'Category'})
             </h4>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-48 overflow-y-auto custom-scrollbar p-1.5 bg-[#0e161d] border border-[#1c2936] rounded-xl">
@@ -489,12 +489,12 @@ export function CallIntakeFormModal({
                       }}
                       className={`p-2.5 rounded-lg cursor-pointer flex items-center justify-between border transition-all ${
                         isSelected
-                          ? 'bg-emerald-500/15 border-emerald-500/50 text-emerald-300'
+                          ? 'bg-orange-500/15 border-orange-500/50 text-orange-300'
                           : 'bg-[#121b24] border-transparent hover:border-[#27394a] text-slate-300'
                       }`}
                     >
                       <div className="flex items-center gap-2">
-                        {isSelected ? <CheckSquare className="w-4 h-4 text-emerald-400" /> : <Square className="w-4 h-4 text-slate-600" />}
+                        {isSelected ? <CheckSquare className="w-4 h-4 text-orange-400" /> : <Square className="w-4 h-4 text-slate-600" />}
                         <span className="font-semibold text-xs">{service.name}</span>
                       </div>
                       {service.isEmergency && (
@@ -534,11 +534,11 @@ export function CallIntakeFormModal({
                         }}
                         className={`px-2.5 py-1 rounded-lg text-[11px] font-medium border transition-colors flex items-center gap-1.5 ${
                           isSubSelected
-                            ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-300'
+                            ? 'bg-orange-500/20 border-orange-500/40 text-orange-300'
                             : 'bg-[#121b24] border-[#223342] text-slate-400 hover:text-white'
                         }`}
                       >
-                        {isSubSelected ? <Check className="w-3 h-3 text-emerald-400" /> : <Square className="w-3 h-3 text-slate-500" />}
+                        {isSubSelected ? <Check className="w-3 h-3 text-orange-400" /> : <Square className="w-3 h-3 text-slate-500" />}
                         <span>{sub}</span>
                       </button>
                     );
@@ -548,10 +548,10 @@ export function CallIntakeFormModal({
             )}
           </div>
 
-          {/* 3. PATIENT / ELDER & CLINICAL REQUIREMENTS */}
+          {/* PATIENT / ELDER & CLINICAL REQUIREMENTS */}
           <div className="space-y-3">
             <h4 className="text-[11px] font-bold uppercase tracking-wider text-slate-400 border-b border-[#1b2631] pb-1">
-              3. Patient / Elder Details
+              Patient / Elder Details
             </h4>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -562,7 +562,7 @@ export function CallIntakeFormModal({
                   placeholder="e.g. Meenakshi Ammal"
                   value={patientName}
                   onChange={(e) => setPatientName(e.target.value)}
-                  className="w-full bg-[#121b24] border border-[#233342] rounded-lg px-3 py-1.5 text-xs text-white outline-none focus:border-emerald-500"
+                  className="w-full bg-[#121b24] border border-[#233342] rounded-lg px-3 py-1.5 text-xs text-white outline-none focus:border-orange-500"
                 />
               </div>
 
@@ -573,7 +573,7 @@ export function CallIntakeFormModal({
                   placeholder="e.g. 74"
                   value={patientAge}
                   onChange={(e) => setPatientAge(e.target.value)}
-                  className="w-full bg-[#121b24] border border-[#233342] rounded-lg px-3 py-1.5 text-xs text-white outline-none focus:border-emerald-500"
+                  className="w-full bg-[#121b24] border border-[#233342] rounded-lg px-3 py-1.5 text-xs text-white outline-none focus:border-orange-500"
                 />
               </div>
             </div>
@@ -653,10 +653,10 @@ export function CallIntakeFormModal({
             </div>
           </div>
 
-          {/* 4. LOCATION DETAILS (HOME CARE vs AMBULANCE) */}
+          {/* LOCATION DETAILS (HOME CARE vs AMBULANCE) */}
           <div className="space-y-3">
             <h4 className="text-[11px] font-bold uppercase tracking-wider text-slate-400 border-b border-[#1b2631] pb-1">
-              4. Service Location
+              Service Location
             </h4>
 
             {isAmbulance ? (
@@ -714,7 +714,7 @@ export function CallIntakeFormModal({
             <div className="flex items-center justify-between">
               <h4 className="text-[11px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
                 <FileText className="w-3.5 h-3.5 text-slate-500" />
-                5. Live Call Notes (Incremental Auto-Save)
+                Live Call Notes (Incremental Auto-Save)
               </h4>
               <div className="text-[10px]">
                 {saveStatus === 'SAVING' && <span className="text-amber-400 animate-pulse flex items-center gap-1"><RefreshCw className="w-3 h-3 animate-spin" /> Auto-saving...</span>}
@@ -728,14 +728,14 @@ export function CallIntakeFormModal({
               value={liveNotesText}
               onChange={(e) => setLiveNotesText(e.target.value)}
               placeholder="Record live notes while speaking with customer... Notes are streamed to the call session record."
-              className="w-full bg-[#121b24] border border-[#233342] rounded-xl p-3 text-xs text-white placeholder-slate-500 outline-none focus:border-emerald-500"
+              className="w-full bg-[#121b24] border border-[#233342] rounded-xl p-3 text-xs text-white placeholder-slate-500 outline-none focus:border-orange-500"
             />
           </div>
 
-          {/* 6. DISPOSITION & FOLLOW-UP */}
+          {/* DISPOSITION & FOLLOW-UP */}
           <div className="space-y-3">
             <h4 className="text-[11px] font-bold uppercase tracking-wider text-slate-400 border-b border-[#1b2631] pb-1">
-              6. Call Outcome & Scheduled Follow-up
+              Call Outcome & Scheduled Follow-up
             </h4>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -779,7 +779,7 @@ export function CallIntakeFormModal({
             <button
               type="submit"
               disabled={isSubmitting}
-              className="px-6 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-2 shadow-lg shadow-emerald-900/40 transition-all disabled:opacity-50"
+              className="px-6 py-2 rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-bold text-xs flex items-center gap-2 shadow-lg shadow-orange-900/40 transition-all disabled:opacity-50"
             >
               {isSubmitting ? (
                 <>

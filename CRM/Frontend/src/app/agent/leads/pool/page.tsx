@@ -184,7 +184,7 @@ export default function AgentLeadsPage() {
         
         {/* Toast Notification */}
         {toastMessage && (
-          <div className="p-3 px-4 bg-emerald-500/10 border border-emerald-500/30 rounded-xl text-emerald-400 text-xs flex items-center gap-2 shadow-lg animate-in fade-in">
+          <div className="p-3 px-4 bg-orange-500/10 border border-orange-500/30 rounded-xl text-orange-400 text-xs flex items-center gap-2 shadow-lg animate-in fade-in">
             <CheckCircle2 className="w-4 h-4 shrink-0" />
             <span>{toastMessage}</span>
           </div>
@@ -194,7 +194,7 @@ export default function AgentLeadsPage() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#222]">
           <div>
             <div className="flex items-center gap-2.5">
-              <span className="px-2.5 py-0.5 rounded text-xs font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+              <span className="px-2.5 py-0.5 rounded text-xs font-bold uppercase tracking-wider bg-orange-500/10 text-orange-400 border border-orange-500/20">
                 Agent Lead Pool
               </span>
               <h1 className="text-2xl font-bold tracking-tight text-white">Lead Data</h1>
@@ -210,11 +210,11 @@ export default function AgentLeadsPage() {
               className="p-2.5 bg-[#141416] hover:bg-[#1e1e22] text-slate-400 hover:text-white border border-[#222] rounded-xl transition-colors"
               title="Refresh Leads"
             >
-              <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin text-emerald-400' : ''}`} />
+              <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin text-orange-400' : ''}`} />
             </button>
             <button 
               onClick={handleOpenManualEntry}
-              className="flex items-center justify-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-emerald-600/20"
+              className="flex items-center justify-center gap-2 px-4 py-2 bg-orange-600 hover:bg-orange-500 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-orange-600/20"
             >
               <Plus className="w-4 h-4" />
               Manual Enquiry Entry
@@ -230,7 +230,7 @@ export default function AgentLeadsPage() {
               aria-label="Search leads by name, phone, or service" 
               type="text"
               placeholder="Search enquiries by customer name, phone, service, or patient details..."
-              className="w-full bg-[#141416] border border-[#222] rounded-xl py-2 pl-9 pr-4 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition-colors"
+              className="w-full bg-[#141416] border border-[#222] rounded-xl py-2 pl-9 pr-4 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-orange-500 transition-colors"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -242,7 +242,7 @@ export default function AgentLeadsPage() {
               aria-label="Status filter"
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="bg-[#141416] border border-[#222] text-xs text-slate-300 rounded-xl px-3 py-2 outline-none focus:border-emerald-500"
+              className="bg-[#141416] border border-[#222] text-xs text-slate-300 rounded-xl px-3 py-2 outline-none focus:border-orange-500"
             >
               <option value="ALL">All Statuses ({leads.length})</option>
               <option value="NEW">New</option>
@@ -260,19 +260,19 @@ export default function AgentLeadsPage() {
           <table aria-label="Lead Data Table" className="w-full text-left text-xs">
             <thead className="bg-[#141416] border-b border-[#222] text-slate-400 uppercase font-semibold">
               <tr>
-                <th scope="col" className="px-5 py-3.5">1. Enquiry Name</th>
-                <th scope="col" className="px-5 py-3.5">2. What Are They Looking For?</th>
-                <th scope="col" className="px-5 py-3.5">3. Contact</th>
-                <th scope="col" className="px-5 py-3.5">4. Source</th>
-                <th scope="col" className="px-5 py-3.5">5. Status</th>
-                <th scope="col" className="px-5 py-3.5 text-right">6. Actions</th>
+                <th scope="col" className="px-5 py-3.5">Enquiry Name</th>
+                <th scope="col" className="px-5 py-3.5">What Are They Looking For?</th>
+                <th scope="col" className="px-5 py-3.5">Contact</th>
+                <th scope="col" className="px-5 py-3.5">Source</th>
+                <th scope="col" className="px-5 py-3.5">Status</th>
+                <th scope="col" className="px-5 py-3.5 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#1e1e22]">
               {isLoading ? (
                 <tr>
                   <td colSpan={6} className="px-6 py-16 text-center text-slate-500">
-                    <div className="w-6 h-6 border-2 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin mx-auto mb-2" />
+                    <div className="w-6 h-6 border-2 border-orange-500/20 border-t-orange-500 rounded-full animate-spin mx-auto mb-2" />
                     Loading structured lead records...
                   </td>
                 </tr>
@@ -291,10 +291,10 @@ export default function AgentLeadsPage() {
 
                 return (
                   <tr key={lead.id} className="hover:bg-[#141416]/80 transition-colors group">
-                    {/* 1. Enquiry Name */}
+                    {/* Enquiry Name */}
                     <td className="px-5 py-4">
                       <div className="flex flex-col">
-                        <span className="font-bold text-white text-sm group-hover:text-emerald-400 transition-colors">
+                        <span className="font-bold text-white text-sm group-hover:text-orange-400 transition-colors">
                           {lead.customerName || 'Unknown Contact'}
                         </span>
                         {lead.patientName && (
@@ -310,7 +310,7 @@ export default function AgentLeadsPage() {
                       </div>
                     </td>
 
-                    {/* 2. What Are They Looking For? */}
+                    {/* What Are They Looking For? */}
                     <td className="px-5 py-4 max-w-md">
                       {summaryText === 'Details not recorded' ? (
                         <span className="text-slate-500 italic text-xs">Details not recorded</span>
@@ -318,17 +318,17 @@ export default function AgentLeadsPage() {
                         <div className="space-y-1.5">
                           <div className="flex flex-wrap items-center gap-1.5">
                             {serviceLabel && (
-                              <span className="px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400 text-[11px] font-semibold border border-emerald-500/20">
+                              <span className="px-2.5 py-0.5 rounded-md bg-orange-950/40 text-orange-400 text-[11px] font-semibold border border-orange-500/30">
                                 {serviceLabel}
                               </span>
                             )}
                             {lead.careDurationCategory && (
-                              <span className="px-2 py-0.5 rounded-md bg-purple-500/10 text-purple-300 text-[10px] font-medium border border-purple-500/20">
+                              <span className="px-2 py-0.5 rounded-md bg-purple-950/40 text-purple-300 text-[10px] font-medium border border-purple-500/30">
                                 {lead.careDurationCategory}
                               </span>
                             )}
                             {lead.careSchedule && (
-                              <span className="px-2 py-0.5 rounded-md bg-blue-500/10 text-blue-300 text-[10px] font-medium border border-blue-500/20">
+                              <span className="px-2 py-0.5 rounded-md bg-blue-950/40 text-blue-300 text-[10px] font-medium border border-blue-500/30">
                                 {lead.careSchedule}
                               </span>
                             )}
@@ -349,7 +349,7 @@ export default function AgentLeadsPage() {
                       )}
                     </td>
 
-                    {/* 3. Contact */}
+                    {/* Contact */}
                     <td className="px-5 py-4 font-mono">
                       <div className="flex flex-col">
                         <span className="text-slate-200 font-semibold">{lead.phoneNumber}</span>
@@ -362,7 +362,7 @@ export default function AgentLeadsPage() {
                       </div>
                     </td>
 
-                    {/* 4. Source */}
+                    {/* Source */}
                     <td className="px-5 py-4">
                       <div className="flex items-center gap-1.5">
                         {getSourceIcon(lead.source)}
@@ -370,28 +370,28 @@ export default function AgentLeadsPage() {
                       </div>
                     </td>
 
-                    {/* 5. Status */}
+                    {/* Status */}
                     <td className="px-5 py-4">
                       {getStatusBadge(lead.status)}
                     </td>
 
-                    {/* 6. Actions */}
+                    {/* Actions */}
                     <td className="px-5 py-4 text-right">
                       <div className="flex items-center justify-end gap-1.5">
                         {/* View/Edit Structured Intake */}
                         <button
                           onClick={() => handleOpenEditIntake(lead)}
-                          className="p-1.5 rounded-lg bg-[#18181b] hover:bg-[#222] text-slate-300 hover:text-white border border-[#2a2a2d] transition-colors"
+                          className="p-1.5 rounded-lg bg-[#18181b] hover:bg-[#222] text-slate-300 hover:text-white border border-[#2a2a2d] hover:border-orange-500/40 transition-colors"
                           title="View / Edit Enquiry Details"
                         >
-                          <FileText className="w-3.5 h-3.5 text-emerald-400" />
+                          <FileText className="w-3.5 h-3.5 text-orange-400" />
                         </button>
 
                         {/* Customer History Drawer */}
                         <button
                           onClick={() => handleOpenCustomerHistory(lead.phoneNumber)}
-                          className="p-1.5 rounded-lg bg-[#18181b] hover:bg-[#222] text-slate-300 hover:text-white border border-[#2a2a2d] transition-colors"
-                          title="Customer Call History & Omnichannel Timeline"
+                          className="p-1.5 rounded-lg bg-[#18181b] hover:bg-[#222] text-slate-300 hover:text-white border border-[#2a2a2d] hover:border-blue-500/40 transition-colors"
+                          title="Customer Call History & Messaging Timeline"
                         >
                           <History className="w-3.5 h-3.5 text-blue-400" />
                         </button>
@@ -400,7 +400,7 @@ export default function AgentLeadsPage() {
                         {lead.status === 'NEW' ? (
                           <button
                             onClick={() => handleClaim(lead.id)}
-                            className="px-2.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold flex items-center gap-1 transition-colors shadow-sm"
+                            className="px-2.5 py-1.5 rounded-lg bg-orange-600 hover:bg-orange-500 text-white text-xs font-semibold flex items-center gap-1 transition-colors shadow-sm shadow-orange-600/20"
                             title="Claim and Call"
                           >
                             <Phone className="w-3 h-3" />
@@ -428,7 +428,7 @@ export default function AgentLeadsPage() {
         <div className="block md:hidden space-y-3">
           {isLoading ? (
             <div className="text-center py-12 bg-[#111] border border-[#222] rounded-2xl text-slate-500">
-              <div className="w-5 h-5 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto mb-2" />
+              <div className="w-5 h-5 border-2 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto mb-2" />
               <p className="text-xs">Loading leads...</p>
             </div>
           ) : filteredLeads.length === 0 ? (
@@ -468,13 +468,13 @@ export default function AgentLeadsPage() {
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => handleOpenEditIntake(lead)}
-                      className="px-2.5 py-1 rounded-lg bg-[#18181b] border border-[#333] text-xs text-slate-200"
+                      className="px-2.5 py-1 rounded-lg bg-[#18181b] border border-[#333] hover:border-orange-500/40 text-xs text-slate-200"
                     >
                       Edit
                     </button>
                     <button
                       onClick={() => handleCallLead(lead)}
-                      className="px-3 py-1 rounded-lg bg-emerald-600 text-white text-xs font-semibold flex items-center gap-1"
+                      className="px-3 py-1 rounded-lg bg-orange-600 hover:bg-orange-500 text-white text-xs font-semibold flex items-center gap-1"
                     >
                       <Phone className="w-3 h-3" /> Call
                     </button>
