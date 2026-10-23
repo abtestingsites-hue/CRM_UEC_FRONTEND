@@ -732,10 +732,22 @@ function CallLogsContent() {
                                 {call.department || 'General'}
                               </span>
                               {call.isTransferred && (
-                                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 text-[9px] font-semibold border border-amber-500/20">
-                                  <CornerDownRight className="w-2.5 h-2.5" />
-                                  Transferred ({call.transferCount})
-                                </span>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setSelectedCallIdForDrawer(call.id);
+                                    setIsCallDrawerOpen(true);
+                                  }}
+                                  className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 text-[9px] font-semibold border border-amber-500/30 transition-all text-left"
+                                  title="View complete transfer transmission chain and audio handover details"
+                                >
+                                  <CornerDownRight className="w-2.5 h-2.5 shrink-0" />
+                                  <span className="truncate max-w-[125px]">
+                                    {call.transferredFrom && call.transferredTo 
+                                      ? `${call.transferredFrom} ➔ ${call.transferredTo}`
+                                      : `Transferred (${call.transferCount})`}
+                                  </span>
+                                </button>
                               )}
                             </div>
                           </td>

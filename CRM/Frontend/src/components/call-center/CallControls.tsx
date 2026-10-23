@@ -5,13 +5,19 @@ import { Mic, MicOff, Pause, Play, FileText, Share2, PhoneOff } from 'lucide-rea
 import { useCallStore } from '@/store/useCallStore';
 import { useSocket } from '@/providers/SocketProvider';
 
-export const CallControls: React.FC = () => {
+interface CallControlsProps {
+  onTransferClick?: () => void;
+  onNotesClick?: () => void;
+}
+
+export const CallControls: React.FC<CallControlsProps> = ({ onTransferClick, onNotesClick }) => {
   const { activeCall, setActiveCall, setStatus, isMuted, toggleMute, isHold, toggleHold } = useCallStore();
-  const { socket } = useSocket();
+  const { socket, telephonySocket } = useSocket();
 
   const handleEndCall = () => {
-    if (activeCall && socket) {
-      socket.emit('endCall', { callSid: activeCall.callSid });
+    const targetSocket = telephonySocket || socket;
+    if (activeCall && targetSocket) {
+      targetSocket.emit('endCall', { callSid: activeCall.callSid });
     }
     setActiveCall(null);
     setStatus('AVAILABLE');
@@ -39,6 +45,7 @@ export const CallControls: React.FC = () => {
         </button>
 
         <button 
+          onClick={onTransferClick}
           aria-label="Transfer call"
           className="p-4 bg-[#111] border border-[#333] text-slate-400 hover:text-white hover:bg-[#222] rounded-2xl transition-all"
           title="Transfer"
@@ -47,6 +54,7 @@ export const CallControls: React.FC = () => {
         </button>
         
         <button 
+          onClick={onNotesClick}
           aria-label="Call notes"
           className="p-4 bg-[#111] border border-[#333] text-slate-400 hover:text-white hover:bg-[#222] rounded-2xl transition-all"
           title="Notes"

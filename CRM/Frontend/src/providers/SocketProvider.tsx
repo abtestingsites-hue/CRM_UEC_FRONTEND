@@ -244,17 +244,55 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     const handleIncomingCall = (data: any) => {
       console.log(`[INBOUND-E2E] STEP=FRONTEND_INCOMING_CALL_RECEIVED | event=incoming_call callId=${data.callSid || data.callId} roomName=${data.roomName} direction=${data.direction} provider=${data.provider || data.source} caller=${data.caller}`);
       console.log(`[INBOUND-CALL] frontend_event_received | data:`, data);
+
+      // If this call is an agent-targeted transfer, make sure other agents don't see it
+      if (data.isTransfer && (data.destinationAgentId || data.destinationUserId || data.assignedAgent?.id)) {
+        const currentAgentId = user?.agentId || user?.id;
+        const currentUserId = user?.userId || user?.id;
+        const isTarget = 
+          (data.destinationAgentId && data.destinationAgentId === currentAgentId) ||
+          (data.destinationUserId && data.destinationUserId === currentUserId) ||
+          (data.assignedAgent?.id && data.assignedAgent.id === currentAgentId);
+        if (!isTarget) {
+          console.log('[INBOUND-CALL] Transfer not targeted to current agent, ignoring.');
+          return;
+        }
+      }
+
       const { status, fetchDashboardCalls } = useCallStore.getState();
 
       fetchDashboardCalls();
 
-      if (status === 'AVAILABLE') {
-        console.log(`[INBOUND-CALL] incoming_call_state_set | roomName=${data.roomName} caller=${data.caller} direction=${data.direction || 'INBOUND'} token_exists=${!!data.token}`);
+      if (status === 'AVAILABLE' || data.isTransfer) {
+        console.log(`[INBOUND-CALL] incoming_call_state_set | roomName=${data.roomName} caller=${data.caller} direction=${data.direction || 'INBOUND'} token_exists=${!!data.token} isTransfer=${data.isTransfer}`);
         console.log(`[INBOUND-E2E] STEP=SETTING_ACTIVE_CALL`);
         useCallStore.getState().setIncomingCall(data);
         console.log(`[INBOUND-E2E] STEP=ACTIVE_CALL_PAYLOAD_PREPARED`);
       } else {
         console.log('Agent is not available, ignoring call.');
+      }
+    };
+
+    const handleIncomingCallTransfer = (data: any) => {
+      console.log('[SOCKET] incoming_call_transfer received:', data);
+      const currentAgentId = user?.agentId || user?.id;
+      const currentUserId = user?.userId || user?.id;
+      if (!data.destinationAgentId || data.destinationAgentId === currentAgentId || data.destinationUserId === currentUserId) {
+        handleIncomingCall(data);
+      }
+    };
+
+    const handleCallTransferredOut = (data: any) => {
+      console.log('[SOCKET] callTransferredOut received:', data);
+      const currentAgentId = user?.agentId || user?.id;
+      if (data.initiatingAgentId && data.initiatingAgentId !== currentAgentId) {
+        return;
+      }
+      const { activeCall, setActiveCall, setStatus, setWebrtcConnected } = useCallStore.getState();
+      if (activeCall && (activeCall.callSid === data.callSid || activeCall.roomName === data.roomName || !data.callSid)) {
+        setActiveCall(null);
+        setWebrtcConnected(false);
+        setStatus('AVAILABLE');
       }
     };
 
@@ -334,6 +372,8 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
 
     console.log(`[INBOUND-E2E] FRONTEND_SOCKET_LISTENER_REGISTERED | socketType=telephony socketId=${socketInstance.id} event=incoming_call`);
     telephonySocketInstance.on('incoming_call', handleIncomingCall);
+    telephonySocketInstance.on('incoming_call_transfer', handleIncomingCallTransfer);
+    telephonySocketInstance.on('callTransferredOut', handleCallTransferredOut);
     telephonySocketInstance.on('incomingEmergencyCall', handleIncomingEmergencyCall);
     telephonySocketInstance.on('agentAssigned', handleAgentAssigned);
     telephonySocketInstance.on('callConnected', handleCallConnected);
@@ -402,6 +442,8 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
       telephonySocketInstance.off('connect', handleTelephonyConnect);
       telephonySocketInstance.off('disconnect', handleTelephonyDisconnect);
       telephonySocketInstance.off('incoming_call', handleIncomingCall);
+      telephonySocketInstance.off('incoming_call_transfer', handleIncomingCallTransfer);
+      telephonySocketInstance.off('callTransferredOut', handleCallTransferredOut);
       telephonySocketInstance.off('incomingEmergencyCall', handleIncomingEmergencyCall);
       telephonySocketInstance.off('agentAssigned', handleAgentAssigned);
       telephonySocketInstance.off('callEnded', handleCallEnded);

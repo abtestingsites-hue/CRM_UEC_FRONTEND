@@ -4,7 +4,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { 
   X, Phone, PhoneIncoming, PhoneOutgoing, Clock, User, Shield, 
   FileText, Play, Pause, Volume2, Calendar, CheckCircle2, 
-  AlertTriangle, ArrowRight, Activity, RotateCcw, Sparkles, Building
+  AlertTriangle, ArrowRight, Activity, RotateCcw, Sparkles, Building,
+  PhoneForwarded, CornerDownRight
 } from 'lucide-react';
 import { api } from '@/lib/api';
 
@@ -253,6 +254,86 @@ export function CallHistoryDrawer({ callId, isOpen, onClose }: CallHistoryDrawer
                       </div>
                     </div>
                   </div>
+
+                  {/* Call Transfer Transmission & Custody Chain Card */}
+                  {((data.overview.transfers && data.overview.transfers.length > 0) || 
+                    (data.overview.transferHistory?.transfers && data.overview.transferHistory.transfers.length > 0) ||
+                    data.overview.transferredFrom) && (
+                    <div className="p-4 bg-gradient-to-r from-amber-500/10 via-[#13171a] to-cyan-500/10 border border-amber-500/30 rounded-xl space-y-3">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div className="w-6 h-6 rounded-lg bg-amber-500/20 flex items-center justify-center text-amber-400">
+                            <PhoneForwarded className="w-3.5 h-3.5" />
+                          </div>
+                          <div>
+                            <h4 className="text-xs font-bold text-white uppercase tracking-wider">
+                              Call Transfer & Transmission Chain
+                            </h4>
+                            <p className="text-[11px] text-slate-400">Audio handover & agent custody log</p>
+                          </div>
+                        </div>
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                          {data.overview.transfers?.length || data.overview.transferHistory?.transfers?.length || 1} Transfer(s)
+                        </span>
+                      </div>
+
+                      {/* Summary Banner */}
+                      <div className="p-3 bg-[#0a0f12] border border-cyan-500/20 rounded-lg flex items-center justify-between text-xs">
+                        <div className="flex items-center gap-2 font-mono">
+                          <span className="font-bold text-slate-200">
+                            {data.overview.transferredFrom || data.overview.transfers?.[0]?.initiatingAgent?.name || data.overview.transferHistory?.lastTransferredFrom || 'Origin Agent'}
+                          </span>
+                          <span className="text-amber-400 font-bold">➔</span>
+                          <span className="font-bold text-emerald-400">
+                            {data.overview.transferredTo || data.overview.transfers?.[0]?.destinationAgent?.name || data.overview.transferHistory?.lastTransferredTo || data.overview.handlingAgent?.name || 'Transmitting Agent'}
+                          </span>
+                        </div>
+                        <span className="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/30 flex items-center gap-1">
+                          <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+                          Audio Transmitted
+                        </span>
+                      </div>
+
+                      {/* Detailed Audit Legs */}
+                      <div className="space-y-2 mt-2">
+                        {(data.overview.transfers || data.overview.transferHistory?.transfers || []).map((tr: any, idx: number) => {
+                          const fromName = tr.initiatingAgent?.name || tr.fromAgentName || tr.metadata?.transferredFrom || data.overview.transferredFrom || 'Agent';
+                          const fromDept = tr.initiatingAgent?.department || tr.sourceDepartment || tr.fromDepartment || 'Care';
+                          const toName = tr.destinationAgent?.name || tr.toAgentName || tr.metadata?.transferredTo || data.overview.transferredTo || 'Destination Agent';
+                          const toDept = tr.destinationAgent?.department || tr.destDepartment || tr.toDepartment || 'Specialist';
+                          const mode = tr.transferMode || 'BLIND';
+                          const status = tr.status || 'COMPLETED';
+                          const time = tr.completedAt || tr.transferredAt || tr.initiatedAt || tr.createdAt;
+                          const reason = tr.reason || tr.metadata?.reason || 'Shift call to coordinator';
+
+                          return (
+                            <div key={tr.id || idx} className="p-3 bg-[#111] border border-[#222] rounded-lg space-y-2 text-xs">
+                              <div className="flex items-center justify-between">
+                                <span className="font-bold text-slate-300 flex items-center gap-1.5">
+                                  <CornerDownRight className="w-3.5 h-3.5 text-amber-400" />
+                                  Leg {idx + 1}: <strong className="text-white">{fromName}</strong> ({fromDept}) ➔ <strong className="text-emerald-300">{toName}</strong> ({toDept})
+                                </span>
+                                <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase border ${
+                                  status === 'COMPLETED'
+                                    ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
+                                    : 'bg-amber-500/10 text-amber-400 border-amber-500/30'
+                                }`}>
+                                  {status} • {mode}
+                                </span>
+                              </div>
+
+                              <div className="flex items-center justify-between text-[11px] text-slate-400 pt-1 border-t border-[#1a1a1a]">
+                                <span className="italic">Reason: {reason}</span>
+                                {time && (
+                                  <span className="font-mono text-slate-500">{new Date(time).toLocaleTimeString()}</span>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
 
                   {/* Timestamps Card */}
                   <div className="p-4 bg-[#111] border border-[#1e1e1e] rounded-xl">
