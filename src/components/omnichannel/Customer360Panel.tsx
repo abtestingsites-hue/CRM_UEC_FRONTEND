@@ -117,7 +117,15 @@ export function Customer360Panel() {
                   <div className="flex justify-between">
                     <span className="text-slate-500">IG User ID</span>
                     <span className="font-mono text-xs text-slate-400 truncate max-w-[150px]">
-                      {activeCustomerProfile?.phone || 'N/A'}
+                      {activeCustomerProfile?.platformUserId || (activeCustomerProfile?.phone?.startsWith('ig_') ? activeCustomerProfile.phone.replace('ig_', '') : (activeCustomerProfile?.phone || 'N/A'))}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-500">Phone</span>
+                    <span className="font-medium text-slate-300">
+                      {activeCustomerProfile?.phone && !activeCustomerProfile.phone.startsWith('ig_') && /^\+?[0-9\s\-]{8,}$/.test(activeCustomerProfile.phone)
+                        ? activeCustomerProfile.phone
+                        : 'No phone number available'}
                     </span>
                   </div>
                 </>

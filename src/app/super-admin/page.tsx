@@ -29,6 +29,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { apiFetch } from '@/lib/api';
+import { IntegrationConfigModal } from '@/components/super-admin/IntegrationConfigModal';
 
 export default function SuperAdminConsolePage() {
   const [activeTab, setActiveTab] = useState<'overview' | 'database' | 'integrations' | 'units' | 'transfers' | 'audit'>('overview');
@@ -80,10 +81,6 @@ export default function SuperAdminConsolePage() {
   // Integration edit modal
   const [showConfigModal, setShowConfigModal] = useState(false);
   const [selectedIntegration, setSelectedIntegration] = useState<any | null>(null);
-  const [configSecret, setConfigSecret] = useState('');
-  const [configEnabled, setConfigEnabled] = useState(true);
-  const [configSettingsJson, setConfigSettingsJson] = useState('{}');
-  const [configError, setConfigError] = useState('');
 
   // 1. Authenticate role
   useEffect(() => {
@@ -319,39 +316,21 @@ export default function SuperAdminConsolePage() {
   };
 
   // Save Integration Config
-  const handleSaveConfig = async () => {
-    setConfigError('');
-    if (!selectedIntegration) return;
-
-    let parsedSettings = {};
-    try {
-      parsedSettings = JSON.parse(configSettingsJson);
-    } catch (_) {
-      setConfigError('Settings must be valid JSON');
-      return;
-    }
-
-    try {
-      const res = await apiFetch(`/api/v1/super-admin/integrations/${selectedIntegration.provider}`, {
-        method: 'PUT',
-        headers: getHeaders(),
-        body: JSON.stringify({
-          enabled: configEnabled,
-          settings: parsedSettings,
-          secret: configSecret ? configSecret.trim() : undefined,
-        }),
-      });
-
-      if (res.ok) {
-        setShowConfigModal(false);
-        setConfigSecret('');
-        fetchAllData();
-      } else {
-        const err = await res.json();
-        setConfigError(err.message || 'Failed to update configuration');
-      }
-    } catch (e: any) {
-      setConfigError(e.message || 'Network error');
+  const handleSaveIntegrationModal = async (
+    provider: string,
+    data: { enabled: boolean; settings: Record<string, any>; secret?: string; unitId?: string }
+  ) => {
+    const res = await apiFetch(`/api/v1/super-admin/integrations/${provider}`, {
+      method: 'PUT',
+      headers: getHeaders(),
+      body: JSON.stringify(data),
+    });
+    if (res.ok) {
+      setShowConfigModal(false);
+      fetchAllData();
+    } else {
+      const err = await res.json();
+      throw new Error(err.message || 'Failed to update configuration');
     }
   };
 
@@ -712,12 +691,9 @@ export default function SuperAdminConsolePage() {
                     <button
                       onClick={() => {
                         setSelectedIntegration(item);
-                        setConfigEnabled(item.enabled);
-                        setConfigSettingsJson(JSON.stringify(item.settings || {}, null, 2));
-                        setConfigSecret('');
                         setShowConfigModal(true);
                       }}
-                      className="px-3 py-1.5 rounded-lg bg-[#161616] hover:bg-[#222] border border-[#282828] text-xs font-medium text-slate-300 transition-colors"
+                      className="px-3.5 py-1.5 rounded-lg bg-[#161616] hover:bg-[#222] border border-[#282828] text-xs font-semibold text-white transition-colors"
                     >
                       Configure
                     </button>
@@ -1339,72 +1315,21 @@ export default function SuperAdminConsolePage() {
       {/* MODAL: EDIT INTEGRATION CONFIGURATION */}
       {/* ==================================================== */}
       {showConfigModal && selectedIntegration && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-          <div className="bg-[#0a0a0a] border border-[#222] rounded-xl max-w-lg w-full p-6 text-xs space-y-4">
-            <h3 className="text-sm font-bold text-white">
-              Configure {selectedIntegration.provider} Integration
-            </h3>
-
-            {configError && (
-              <div className="p-2.5 rounded-lg bg-rose-950/30 border border-rose-500/30 text-rose-300 text-xs">
-                {configError}
-              </div>
-            )}
-
-            <div className="space-y-3">
-              <div className="flex items-center justify-between p-3 rounded-lg bg-[#111] border border-[#222]">
-                <span className="text-slate-300 font-medium">Integration Enabled</span>
-                <input
-                  type="checkbox"
-                  checked={configEnabled}
-                  onChange={(e) => setConfigEnabled(e.target.checked)}
-                  className="rounded accent-primary w-4 h-4 cursor-pointer"
-                />
-              </div>
-
-              <div>
-                <label className="block text-slate-400 font-medium mb-1">
-                  Update Secret / API Key (Leave blank to keep {selectedIntegration.secretMasked})
-                </label>
-                <input
-                  type="password"
-                  value={configSecret}
-                  onChange={(e) => setConfigSecret(e.target.value)}
-                  placeholder="Enter new credential or API key..."
-                  className="w-full bg-[#121212] border border-[#282828] rounded-lg px-3 py-2 text-white font-mono outline-none focus:border-primary"
-                />
-                <span className="text-[10px] text-slate-500 mt-0.5 block">
-                  Encrypted upon submission. Never returned in plaintext to the browser.
-                </span>
-              </div>
-
-              <div>
-                <label className="block text-slate-400 font-medium mb-1">Public Settings (JSON format)</label>
-                <textarea
-                  value={configSettingsJson}
-                  onChange={(e) => setConfigSettingsJson(e.target.value)}
-                  rows={4}
-                  className="w-full bg-[#121212] border border-[#282828] rounded-lg px-3 py-2 text-white font-mono text-[11px] outline-none focus:border-primary"
-                />
-              </div>
-            </div>
-
-            <div className="flex justify-end gap-2 pt-3 border-t border-[#1c1c1c]">
-              <button
-                onClick={() => setShowConfigModal(false)}
-                className="px-4 py-2 rounded-lg bg-[#161616] hover:bg-[#222] text-slate-300 font-medium transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleSaveConfig}
-                className="px-4 py-2 rounded-lg bg-primary hover:bg-primary/90 text-white font-medium transition-colors"
-              >
-                Save Configuration
-              </button>
-            </div>
-          </div>
-        </div>
+        <IntegrationConfigModal
+          integration={selectedIntegration}
+          isOpen={showConfigModal}
+          onClose={() => setShowConfigModal(false)}
+          onSave={handleSaveIntegrationModal}
+          onTest={async (provider) => {
+            const res = await apiFetch(`/api/v1/super-admin/integrations/${provider}/test`, {
+              method: 'POST',
+              headers: getHeaders(),
+            });
+            const data = await res.json();
+            fetchAllData();
+            return data;
+          }}
+        />
       )}
     </div>
   );
