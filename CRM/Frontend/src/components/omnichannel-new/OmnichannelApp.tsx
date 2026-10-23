@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { apiFetch } from '@/lib/api';
 import { WhatsAppWorkspace } from './WhatsAppWorkspace';
+import { InstagramWorkspace } from './InstagramWorkspace';
 import { OmnichannelEnquiryPanel } from './OmnichannelEnquiryPanel';
 
 // Platform Icons
@@ -142,6 +143,11 @@ export function OmnichannelApp() {
     // If it's WhatsApp, render the dedicated WhatsApp adapter
     if (selectedPlatform === 'whatsapp') {
       return <WhatsAppWorkspace platformDef={platformDef} colors={colors} onBack={() => setSelectedPlatform(null)} />;
+    }
+
+    // If it's Instagram, render the dedicated Instagram Direct adapter
+    if (selectedPlatform === 'instagram') {
+      return <InstagramWorkspace platformDef={platformDef} colors={colors} onBack={() => setSelectedPlatform(null)} />;
     }
 
     return (
