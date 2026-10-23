@@ -207,16 +207,33 @@ function CallLogsContent() {
     if (!text) return;
 
     const channel = cur.channel || 'WHATSAPP';
-    const recipient = channel === 'EMAIL'
-      ? (call.customerEmail || call.customerDetails?.email)
-      : (call.callerPhone || call.customerDetails?.phone);
+    let recipient: string | null = null;
+    let missingError = '';
+
+    if (channel === 'EMAIL') {
+      recipient = call.customerEmail || call.customerDetails?.email || null;
+      missingError = 'No customer email address on file for Email delivery';
+    } else if (channel === 'INSTAGRAM') {
+      recipient =
+        call.customerDetails?.platformUserId ||
+        call.customer?.platformUserId ||
+        call.platformUserId ||
+        (call.callerPhone?.startsWith('ig_') ? call.callerPhone.slice(3) : null) ||
+        null;
+      missingError = 'No Instagram User ID (IGSID) on file for this contact. Instagram DMs require an Instagram User ID.';
+    } else {
+      // WHATSAPP
+      const rawPhone = call.callerPhone || call.customerDetails?.phone;
+      recipient = (rawPhone && !rawPhone.startsWith('ig_')) ? rawPhone : null;
+      missingError = 'No valid phone number on file for WhatsApp delivery';
+    }
 
     if (!recipient) {
       setRowMessageState((prev) => ({
         ...prev,
         [call.id]: {
           ...cur,
-          statusText: `No valid ${channel} destination on file`,
+          statusText: missingError,
           isSuccess: false,
         },
       }));
@@ -254,7 +271,7 @@ function CallLogsContent() {
             if (copy[call.id]) copy[call.id].statusText = null;
             return copy;
           });
-        }, 4000);
+        }, 5000);
       } else {
         setRowMessageState((prev) => ({
           ...prev,
@@ -267,12 +284,13 @@ function CallLogsContent() {
         }));
       }
     } catch (err: any) {
+      const serverMsg = err.response?.data?.message || err.message || 'Delivery failed';
       setRowMessageState((prev) => ({
         ...prev,
         [call.id]: {
           ...cur,
           isSending: false,
-          statusText: err.message || 'Send failed',
+          statusText: serverMsg,
           isSuccess: false,
         },
       }));
@@ -870,8 +888,12 @@ function CallLogsContent() {
                               {/* Destination Info */}
                               <span className="text-[10px] text-slate-400 block font-mono truncate max-w-[130px]">
                                 {curMsg.channel === 'EMAIL'
-                                  ? (call.customerEmail || 'No email')
-                                  : (call.callerPhone || 'No phone')}
+                                  ? (call.customerEmail || call.customerDetails?.email || 'No email')
+                                  : (curMsg.channel === 'INSTAGRAM'
+                                      ? (call.customerDetails?.platformUserId
+                                          ? (call.customerDetails.instagramUsername ? `@${call.customerDetails.instagramUsername}` : `ID: ${call.customerDetails.platformUserId}`)
+                                          : 'No IG ID')
+                                      : (call.callerPhone && !call.callerPhone.startsWith('ig_') ? call.callerPhone : (call.customerDetails?.phone || 'No phone')))}
                               </span>
                             </div>
                           </td>
