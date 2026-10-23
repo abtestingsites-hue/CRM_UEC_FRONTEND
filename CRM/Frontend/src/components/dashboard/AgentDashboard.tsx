@@ -78,12 +78,16 @@ export function AgentDashboard({ metrics: initialMetrics }: AgentDashboardProps)
     telephonySocket.on('callEnded', handleCallEvent);
     telephonySocket.on('callTransferCompleted', handleCallEvent);
     telephonySocket.on('agent_status_change', handleCallEvent);
+    telephonySocket.on('ticketCreated', handleCallEvent);
+    telephonySocket.on('ticketUpdated', handleCallEvent);
 
     return () => {
       telephonySocket.off('incoming_call', handleCallEvent);
       telephonySocket.off('callEnded', handleCallEvent);
       telephonySocket.off('callTransferCompleted', handleCallEvent);
       telephonySocket.off('agent_status_change', handleCallEvent);
+      telephonySocket.off('ticketCreated', handleCallEvent);
+      telephonySocket.off('ticketUpdated', handleCallEvent);
     };
   }, [telephonySocket, loadDashboardData]);
 
@@ -116,6 +120,8 @@ export function AgentDashboard({ metrics: initialMetrics }: AgentDashboardProps)
     targetRemaining: 15,
     dailyTarget: 25,
     completedWork: initialMetrics?.totalCalls ?? 0,
+    totalTicketsRaised: initialMetrics?.assignedTickets ?? 0,
+    pendingTickets: 0,
   };
 
   const analytics = dashboardData?.analytics || {
@@ -202,8 +208,8 @@ export function AgentDashboard({ metrics: initialMetrics }: AgentDashboardProps)
         <div className="absolute right-0 top-0 w-80 h-full bg-orange-500/5 blur-3xl pointer-events-none"></div>
       </div>
 
-      {/* 4.3 6 KPI CARDS GRID WITH REAL ACTION ROUTING */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+      {/* 4.3 8 KPI CARDS GRID WITH REAL ACTION ROUTING */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* 1. Total Calls Connected */}
         <div 
           onClick={() => router.push('/call-logs?status=CONNECTED&group=today')}
@@ -326,6 +332,46 @@ export function AgentDashboard({ metrics: initialMetrics }: AgentDashboardProps)
             <div className="flex justify-between text-[9px] text-slate-400 mt-1">
               <span>{kpis.completedWork} completed</span>
               <span>{kpis.dailyTarget} goal</span>
+            </div>
+          </div>
+        </div>
+
+        {/* 7. Total Tickets Raised */}
+        <div 
+          onClick={() => router.push('/tickets')}
+          className="p-4 rounded-2xl bg-gradient-to-br from-[#18130c] to-[#241c0e] border border-amber-500/30 hover:border-amber-500/60 shadow-lg cursor-pointer transition-all hover:-translate-y-0.5 group flex flex-col justify-between h-[130px]"
+        >
+          <div className="flex justify-between items-start">
+            <span className="text-xs font-semibold text-amber-400/90">Total Tickets Raised</span>
+            <div className="p-1.5 bg-amber-500/10 rounded-lg text-amber-400 group-hover:bg-amber-500/20 transition-all">
+              <Ticket className="w-4 h-4" />
+            </div>
+          </div>
+          <div>
+            <div className="text-3xl font-extrabold text-white tracking-tight">{kpis.totalTicketsRaised ?? 0}</div>
+            <div className="flex items-center gap-1 text-[10px] text-amber-400 mt-1 font-medium">
+              <span>Created by agent</span>
+              <ArrowUpRight className="w-3 h-3 ml-auto opacity-70 group-hover:opacity-100" />
+            </div>
+          </div>
+        </div>
+
+        {/* 8. Pending Tickets */}
+        <div 
+          onClick={() => router.push('/agent/tickets')}
+          className="p-4 rounded-2xl bg-gradient-to-br from-[#1c120c] to-[#26170e] border border-orange-500/30 hover:border-orange-500/60 shadow-lg cursor-pointer transition-all hover:-translate-y-0.5 group flex flex-col justify-between h-[130px]"
+        >
+          <div className="flex justify-between items-start">
+            <span className="text-xs font-semibold text-orange-400/90">Pending Tickets</span>
+            <div className="p-1.5 bg-orange-500/10 rounded-lg text-orange-400 group-hover:bg-orange-500/20 transition-all">
+              <Clock className="w-4 h-4" />
+            </div>
+          </div>
+          <div>
+            <div className="text-3xl font-extrabold text-white tracking-tight">{kpis.pendingTickets ?? 0}</div>
+            <div className="flex items-center gap-1 text-[10px] text-orange-400 mt-1 font-medium">
+              <span>Assigned awaiting resolution</span>
+              <ArrowUpRight className="w-3 h-3 ml-auto opacity-70 group-hover:opacity-100" />
             </div>
           </div>
         </div>

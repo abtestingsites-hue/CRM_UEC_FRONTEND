@@ -110,7 +110,7 @@ export function WhatsAppWorkspace({ platformDef, colors, onBack }: any) {
               <ChevronLeft className="w-6 h-6" />
             </button>
             <div className="w-10 h-10 rounded-full bg-[#303f46] overflow-hidden flex items-center justify-center text-slate-300 font-bold">
-              {activeConv.customerAvatar ? <img src={activeConv.customerAvatar} alt="avatar" /> : activeConv.customerName.charAt(0).toUpperCase()}
+              {activeConv.customerAvatar ? <img src={activeConv.customerAvatar} alt="avatar" /> : (activeConv.customerName?.replace(/^@/, '') || 'W').charAt(0).toUpperCase()}
             </div>
             <div className="flex flex-col">
               <span className="font-medium text-base text-[#e9edef] leading-tight">{activeConv.customerName}</span>

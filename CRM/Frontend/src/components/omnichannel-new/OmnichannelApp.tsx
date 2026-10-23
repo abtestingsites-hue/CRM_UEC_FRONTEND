@@ -186,7 +186,7 @@ export function OmnichannelApp() {
               <div className="h-14 border-b border-[#1c1c1c] bg-[#080808] flex items-center justify-between px-6 shrink-0">
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-full bg-[#222] overflow-hidden flex items-center justify-center text-slate-300 font-bold border border-[#333]">
-                    {activeConv.customerAvatar ? <img src={activeConv.customerAvatar} alt="avatar" /> : activeConv.customerName.charAt(0).toUpperCase()}
+                    {activeConv.customerAvatar ? <img src={activeConv.customerAvatar} alt="avatar" /> : (activeConv.customerName?.replace(/^@/, '') || 'U').charAt(0).toUpperCase()}
                   </div>
                   <div>
                     <h3 className="font-bold text-sm text-white">{activeConv.customerName}</h3>
@@ -311,7 +311,7 @@ export function OmnichannelApp() {
                 >
                   <div className="relative shrink-0">
                     <div className="w-11 h-11 rounded-full bg-[#222] overflow-hidden flex items-center justify-center text-slate-400 font-bold border border-[#333]">
-                      {conv.customerAvatar ? <img src={conv.customerAvatar} alt="av" className="w-full h-full object-cover" /> : conv.customerName.charAt(0).toUpperCase()}
+                      {conv.customerAvatar ? <img src={conv.customerAvatar} alt="av" className="w-full h-full object-cover" /> : (conv.customerName?.replace(/^@/, '') || 'U').charAt(0).toUpperCase()}
                     </div>
                     <div 
                       className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center border-2 border-[#050505]"

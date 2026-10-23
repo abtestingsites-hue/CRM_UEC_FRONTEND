@@ -108,7 +108,8 @@ export function InstagramWorkspace({ platformDef, colors, onBack }: any) {
 
   // Determine Customer Details
   const isEnriched = Boolean(activeCustomerProfile?.profileEnriched || activeConv.customerAvatar);
-  const igHandle = activeCustomerProfile?.instagramUsername || (activeConv.customerName?.startsWith('@') ? activeConv.customerName : `@${activeConv.customerName?.toLowerCase().replace(/\s+/g, '_')}`);
+  const igHandle = activeCustomerProfile?.instagramUsername 
+    || (activeConv.customerName?.startsWith('@') ? activeConv.customerName : null);
   const igUserId = activeCustomerProfile?.platformUserId || activeCustomerProfile?.phone || activeConv.customerId;
   
   // Real Phone Number checking
@@ -131,7 +132,7 @@ export function InstagramWorkspace({ platformDef, colors, onBack }: any) {
                 {activeCustomerProfile?.instagramProfilePic || activeConv.customerAvatar ? (
                   <img src={activeCustomerProfile?.instagramProfilePic || activeConv.customerAvatar} alt="avatar" className="w-full h-full object-cover" />
                 ) : (
-                  activeConv.customerName.charAt(0).toUpperCase()
+                  (activeConv.customerName?.replace(/^@/, '') || 'U').charAt(0).toUpperCase()
                 )}
               </div>
               {isEnriched && (
@@ -143,7 +144,9 @@ export function InstagramWorkspace({ platformDef, colors, onBack }: any) {
             <div className="flex flex-col">
               <div className="flex items-center gap-1.5">
                 <span className="font-bold text-sm text-white leading-tight">{activeConv.customerName}</span>
-                <span className="text-xs text-pink-400 font-mono font-medium">{igHandle}</span>
+                {igHandle && (
+                  <span className="text-xs text-pink-400 font-mono font-medium">{igHandle}</span>
+                )}
               </div>
               <div className="flex items-center gap-2 text-[10px] text-slate-400">
                 <span>IGSID: {igUserId ? String(igUserId).substring(0, 15) : 'Connected'}</span>
