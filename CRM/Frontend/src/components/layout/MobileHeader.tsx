@@ -31,7 +31,7 @@ export function MobileHeader({ shouldShowAgentShell, onOpenMenu }: MobileHeaderP
   const getModuleTitle = (path: string) => {
     if (path.includes("/dashboard")) return "Dashboard";
     if (path.includes("/call-center")) return "Call Center";
-    if (path.includes("/omnichannel")) return "Omnichannel";
+    if (path.includes("/omnichannel")) return "Messaging Hub";
     if (path.includes("/tickets")) return "Tickets";
     if (path.includes("/ai-summary")) return "AI Summary";
     if (path.includes("/ai-agents")) return "AI Agents";

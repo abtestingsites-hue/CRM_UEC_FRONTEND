@@ -17,7 +17,7 @@ export function AgentSidebar() {
     { icon: CheckSquare, label: 'SOP & Daily Ops', href: '/sop' },
     { icon: Phone, label: 'Call Center', href: '/agent/call-center' },
     { icon: PhoneCall, label: 'Call Logs', href: '/call-logs' },
-    { icon: MessageSquare, label: 'Omnichannel', href: '/agent/omnichannel' },
+    { icon: MessageSquare, label: 'Messaging Hub', href: '/agent/omnichannel' },
     { icon: FileText, label: 'Tickets', href: '/agent/tickets' },
     { icon: Activity, label: 'AI Call Summary', href: '/agent/ai-summary' },
     { icon: Mic, label: 'AI Call Record', href: '/agent/ai-records' },

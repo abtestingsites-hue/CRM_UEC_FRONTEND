@@ -8,14 +8,15 @@ import {
 } from 'lucide-react';
 import { apiFetch } from '@/lib/api';
 
-interface CallIntakeFormModalProps {
-  callSid: string;
+export interface CallIntakeFormModalProps {
+  callSid?: string;
   customerName?: string;
   phoneNumber?: string;
   leadId?: string;
+  initialData?: any;
   isOpen: boolean;
   onClose: () => void;
-  onSuccess?: () => void;
+  onSuccess?: (lead?: any) => void;
 }
 
 export function CallIntakeFormModal({
@@ -23,6 +24,7 @@ export function CallIntakeFormModal({
   customerName = '',
   phoneNumber = '',
   leadId,
+  initialData,
   isOpen,
   onClose,
   onSuccess,
@@ -114,16 +116,39 @@ export function CallIntakeFormModal({
     return digits.length >= 7 ? digits : '';
   };
 
-  // Synchronize customer phone and name whenever callSid or props change (preventing stale state)
+  // Synchronize customer phone and name whenever callSid, initialData, or props change
   useEffect(() => {
-    const normalized = normalizePhoneNumber(phoneNumber);
-    setPhone(normalized);
-    if (customerName && customerName !== 'Customer' && customerName !== 'Unknown Caller') {
-      setEnquirerName(customerName);
+    if (initialData) {
+      setEnquirerName(initialData.customerName || customerName || '');
+      setPhone(normalizePhoneNumber(initialData.phoneNumber || phoneNumber));
+      setEmail(initialData.email || '');
+      if (initialData.serviceInterest || initialData.primaryService) {
+        setSelectedCategory(initialData.serviceInterest || initialData.primaryService);
+        setPrimaryService(initialData.primaryService || initialData.serviceInterest || '');
+      }
+      if (initialData.subServices) setSelectedSubServices(initialData.subServices);
+      if (initialData.patientName) setPatientName(initialData.patientName);
+      if (initialData.patientAge) setPatientAge(String(initialData.patientAge));
+      if (initialData.patientConditions) setPatientConditions(initialData.patientConditions);
+      if (initialData.patientMobility) setPatientMobility(initialData.patientMobility);
+      if (initialData.engagementType) setEngagementType(initialData.engagementType);
+      if (initialData.careDurationCategory) setCareDurationCategory(initialData.careDurationCategory);
+      if (initialData.careDuration) setCareDuration(initialData.careDuration);
+      if (initialData.careSchedule) setCareSchedule(initialData.careSchedule);
+      if (initialData.serviceAddress) setServiceAddress(initialData.serviceAddress);
+      if (initialData.cityDistrict) setCityDistrict(initialData.cityDistrict);
+      if (initialData.postalCode) setPostalCode(initialData.postalCode);
+      if (initialData.notes) setLiveNotesText(initialData.notes);
     } else {
-      setEnquirerName('');
+      const normalized = normalizePhoneNumber(phoneNumber);
+      setPhone(normalized);
+      if (customerName && customerName !== 'Customer' && customerName !== 'Unknown Caller') {
+        setEnquirerName(customerName);
+      } else {
+        setEnquirerName('');
+      }
     }
-  }, [callSid, phoneNumber, customerName]);
+  }, [callSid, phoneNumber, customerName, initialData, isOpen]);
 
   // Dynamically compute canonical service categories from foundations & catalogItems
   const categories = React.useMemo(() => {
@@ -276,18 +301,30 @@ export function CallIntakeFormModal({
         callbackPriority,
       };
 
-      const res = await apiFetch(`/api/v1/enquiry/calls/${callSid}/intake`, {
-        method: 'PATCH',
+      let endpoint = '/api/v1/enquiry/leads/intake';
+      let method = 'POST';
+
+      if (callSid) {
+        endpoint = `/api/v1/enquiry/calls/${callSid}/intake`;
+        method = 'PATCH';
+      } else if (leadId) {
+        endpoint = `/api/v1/enquiry/leads/${leadId}/intake`;
+        method = 'PATCH';
+      }
+
+      const res = await apiFetch(endpoint, {
+        method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
 
       if (res.ok) {
-        if (onSuccess) onSuccess();
+        const data = await res.json().catch(() => ({}));
+        if (onSuccess) onSuccess(data.lead);
         onClose();
       } else {
-        const err = await res.json();
-        setErrorMessage(err.message || 'Failed to persist call intake form.');
+        const err = await res.json().catch(() => ({}));
+        setErrorMessage(err.message || err.error || 'Failed to persist enquiry intake form.');
       }
     } catch (e: any) {
       console.error('Call intake submit error:', e);
@@ -308,8 +345,12 @@ export function CallIntakeFormModal({
               <Phone className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="font-bold text-white text-sm">Call Intake & Structured Disposition</h3>
-              <p className="text-[11px] text-slate-400">Call ID: {callSid.slice(0, 24)}... • Direct CRM Database Record</p>
+              <h3 className="font-bold text-white text-sm">
+                {callSid ? 'Call Intake & Structured Disposition' : leadId ? 'Edit Lead Enquiry & Structured Intake' : 'New Lead Enquiry Intake'}
+              </h3>
+              <p className="text-[11px] text-slate-400">
+                {callSid ? `Call ID: ${callSid.slice(0, 24)}...` : leadId ? `Lead ID: ${leadId.slice(0, 8)}...` : 'Manual Structured Entry'} • Direct CRM Database Record
+              </p>
             </div>
           </div>
 
