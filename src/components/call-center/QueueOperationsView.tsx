@@ -14,24 +14,58 @@ import {
   AlertTriangle,
   Radio,
   Lock,
+  Sliders,
+  PhoneForwarded,
+  Layers,
+  Zap,
 } from 'lucide-react';
 import { apiFetch, API_BASE_URL } from '@/lib/api';
 
 export function QueueOperationsView() {
   const [data, setData] = useState<any>(null);
+  const [capacity, setCapacity] = useState<any>(null);
+  const [callbacks, setCallbacks] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [lastRefreshed, setLastRefreshed] = useState<Date>(new Date());
   const [autoRefresh, setAutoRefresh] = useState(true);
+  const [activeTab, setActiveTab] = useState<'roster' | 'queue' | 'callbacks'>('roster');
+
+  // Capacity edit modal state
+  const [showConfigModal, setShowConfigModal] = useState(false);
+  const [editTotalChannels, setEditTotalChannels] = useState(3);
+  const [editInboundReserved, setEditInboundReserved] = useState(1);
+  const [isSavingConfig, setIsSavingConfig] = useState(false);
+  const [reconciling, setReconciling] = useState(false);
 
   const fetchOperations = async () => {
     try {
       setLoading(true);
-      const res = await apiFetch(`${API_BASE_URL}/telephony/queue/operations`);
-      if (res.ok) {
-        const json = await res.json();
+      const [opsRes, capRes, cbRes] = await Promise.all([
+        apiFetch(`${API_BASE_URL}/telephony/queue/operations`).catch(() => null),
+        apiFetch(`${API_BASE_URL}/telephony/capacity/status?provider=vobiz`).catch(() => null),
+        apiFetch(`${API_BASE_URL}/telephony/queue/callbacks`).catch(() => null),
+      ]);
+
+      if (opsRes && opsRes.ok) {
+        const json = await opsRes.json();
         setData(json);
-        setLastRefreshed(new Date());
       }
+
+      if (capRes && capRes.ok) {
+        const capJson = await capRes.json();
+        setCapacity(capJson?.data);
+        if (capJson?.data) {
+          setEditTotalChannels(capJson.data.totalChannels || 3);
+          setEditInboundReserved(capJson.data.inboundReserved || 1);
+        }
+      }
+
+      if (cbRes && cbRes.ok) {
+        const cbJson = await cbRes.json();
+        setCallbacks(Array.isArray(cbJson) ? cbJson : []);
+      }
+
+      setLastRefreshed(new Date());
     } catch (err) {
       console.error('Failed to load queue operations dashboard', err);
     } finally {
@@ -42,9 +76,53 @@ export function QueueOperationsView() {
   useEffect(() => {
     fetchOperations();
     if (!autoRefresh) return;
-    const interval = setInterval(fetchOperations, 10000);
+    const interval = setInterval(fetchOperations, 8000);
     return () => clearInterval(interval);
   }, [autoRefresh]);
+
+  const handleSaveCapacityConfig = async () => {
+    try {
+      setIsSavingConfig(true);
+      const res = await apiFetch(`${API_BASE_URL}/telephony/capacity/config`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          provider: 'vobiz',
+          totalChannels: Number(editTotalChannels),
+          inboundReserved: Number(editInboundReserved),
+          maxOutboundChannels: Math.max(Number(editTotalChannels) - Number(editInboundReserved), 1),
+        }),
+      });
+
+      if (res.ok) {
+        setShowConfigModal(false);
+        await fetchOperations();
+      } else {
+        const err = await res.json();
+        alert(err.message || 'Failed to update capacity');
+      }
+    } catch (e: any) {
+      alert(e.message || 'Error updating configuration');
+    } finally {
+      setIsSavingConfig(false);
+    }
+  };
+
+  const handleReconcile = async () => {
+    try {
+      setReconciling(true);
+      const res = await apiFetch(`${API_BASE_URL}/telephony/capacity/reconcile?provider=vobiz`, {
+        method: 'POST',
+      });
+      if (res.ok) {
+        await fetchOperations();
+      }
+    } catch (e: any) {
+      console.error('Reconciliation error', e);
+    } finally {
+      setReconciling(false);
+    }
+  };
 
   const formatSeconds = (sec: number) => {
     if (!sec || sec <= 0) return '0s';
@@ -57,6 +135,13 @@ export function QueueOperationsView() {
   const agents = data?.agents || { available: 0, busy: 0, break: 0, wrapUp: 0, offline: 0, total: 0 };
   const metrics = data?.metricsToday || { offered: 0, answered: 0, missed: 0, abandoned: 0, answerRate: 100 };
   const roster = data?.agentRoster || [];
+  const waitingDetails = data?.waitingQueueDetails || [];
+
+  const capTotal = capacity?.totalChannels || 3;
+  const capActive = capacity?.totalActive || 0;
+  const capAvailable = capacity?.availableChannels ?? Math.max(capTotal - capActive, 0);
+  const capUtil = capacity?.utilizationPercent ?? Math.round((capActive / capTotal) * 100);
+  const isThrottled = capacity?.isThrottled || (waitingDetails.length > 0 && capAvailable <= 1);
 
   return (
     <div className="flex flex-col h-full overflow-y-auto p-5 space-y-6 custom-scrollbar text-white">
@@ -70,15 +155,31 @@ export function QueueOperationsView() {
             </span>
             <h2 className="text-xl font-bold tracking-tight text-white flex items-center gap-2">
               <Activity className="w-5 h-5 text-emerald-400" />
-              Contact-Center Queue Engine & Concurrency
+              Telephony Concurrency & Inbound Queue Orchestrator
             </h2>
           </div>
           <p className="text-xs text-slate-400 mt-1">
-            Real-time atomic reservation telemetry, queue depth, and agent availability state.
+            Real-time capacity orchestration, atomic agent reservation, and priority queue management.
           </p>
         </div>
 
         <div className="flex items-center gap-3">
+          <button
+            onClick={() => setShowConfigModal(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#18181b] hover:bg-[#27272a] text-xs font-semibold text-slate-200 border border-[#333] transition-colors"
+          >
+            <Sliders className="w-3.5 h-3.5 text-emerald-400" />
+            Capacity Policy ({capTotal} Channels)
+          </button>
+          <button
+            onClick={handleReconcile}
+            disabled={reconciling}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#18181b] hover:bg-[#27272a] text-xs font-semibold text-slate-200 border border-[#333] transition-colors disabled:opacity-50"
+            title="Flush stale sessions & synchronize database with provider"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 text-blue-400 ${reconciling ? 'animate-spin' : ''}`} />
+            Reconcile
+          </button>
           <label className="flex items-center gap-2 text-xs text-slate-400 cursor-pointer select-none">
             <input
               type="checkbox"
@@ -86,7 +187,7 @@ export function QueueOperationsView() {
               onChange={(e) => setAutoRefresh(e.target.checked)}
               className="rounded bg-[#1a1a1e] border-[#333] text-emerald-500 focus:ring-emerald-500/20"
             />
-            Auto-refresh (10s)
+            Auto-refresh (8s)
           </label>
           <button
             onClick={fetchOperations}
@@ -95,6 +196,97 @@ export function QueueOperationsView() {
           >
             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin text-emerald-400' : ''}`} />
           </button>
+        </div>
+      </div>
+
+      {/* GLOBAL TELEPHONY CONCURRENCY & CAPACITY PANEL */}
+      <div className="bg-gradient-to-r from-[#0c0d10] via-[#0f1115] to-[#0c0d10] border border-[#272a30] rounded-xl p-5 shadow-lg">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-[#1f2228]">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
+              <Zap className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-bold text-white uppercase tracking-wider">
+                  Provider Concurrency Capacity Pool
+                </span>
+                <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-blue-500/20 text-blue-400 border border-blue-500/30 uppercase">
+                  {capacity?.provider || 'Vobiz'} PSTN TRUNK
+                </span>
+              </div>
+              <span className="text-xs text-slate-400">
+                Configurable runtime capacity limit: {capTotal} channels total • {capacity?.inboundReserved || 1} reserved for inbound
+              </span>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            {isThrottled ? (
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                <AlertTriangle className="w-3.5 h-3.5" />
+                OUTBOUND THROTTLED (INBOUND PRIORITY)
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                <CheckCircle2 className="w-3.5 h-3.5" />
+                CAPACITY OPTIMAL
+              </span>
+            )}
+          </div>
+        </div>
+
+        {/* Capacity Breakdown Gauges */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+          <div className="bg-[#121418] p-3 rounded-lg border border-[#22252b]">
+            <span className="text-[11px] text-slate-400 block">Total Account Channels</span>
+            <div className="flex items-baseline gap-2 mt-1">
+              <span className="text-2xl font-black text-white">{capTotal}</span>
+              <span className="text-[11px] text-slate-500">simultaneous</span>
+            </div>
+          </div>
+
+          <div className="bg-[#121418] p-3 rounded-lg border border-[#22252b]">
+            <span className="text-[11px] text-slate-400 block">Active Inbound Channels</span>
+            <div className="flex items-baseline gap-2 mt-1">
+              <span className="text-2xl font-black text-emerald-400">{capacity?.activeInbound || 0}</span>
+              <span className="text-[11px] text-slate-500">in-use</span>
+            </div>
+          </div>
+
+          <div className="bg-[#121418] p-3 rounded-lg border border-[#22252b]">
+            <span className="text-[11px] text-slate-400 block">Active Outbound Calls</span>
+            <div className="flex items-baseline gap-2 mt-1">
+              <span className="text-2xl font-black text-blue-400">{capacity?.activeOutbound || 0}</span>
+              <span className="text-[11px] text-slate-500">max: {capacity?.maxOutboundChannels || 2}</span>
+            </div>
+          </div>
+
+          <div className="bg-[#121418] p-3 rounded-lg border border-[#22252b]">
+            <span className="text-[11px] text-slate-400 block">Available Trunk Channels</span>
+            <div className="flex items-baseline gap-2 mt-1">
+              <span className={`text-2xl font-black ${capAvailable > 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                {capAvailable}
+              </span>
+              <span className="text-[11px] text-slate-500">free</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Utilization Bar */}
+        <div className="mt-4 space-y-1.5">
+          <div className="flex justify-between text-xs text-slate-400 font-mono">
+            <span>Utilization: {capUtil}% ({capActive} / {capTotal} channels held)</span>
+            <span>Free Capacity: {capAvailable}</span>
+          </div>
+          <div className="w-full bg-[#181a1f] h-2.5 rounded-full overflow-hidden flex">
+            <div
+              style={{ width: `${Math.min(capUtil, 100)}%` }}
+              className={`h-full transition-all duration-500 ${
+                capUtil >= 90 ? 'bg-rose-500' : capUtil >= 66 ? 'bg-amber-500' : 'bg-emerald-500'
+              }`}
+            />
+          </div>
         </div>
       </div>
 
@@ -171,152 +363,338 @@ export function QueueOperationsView() {
         </div>
       </div>
 
-      {/* Agent Telephony Status Breakdown Bar */}
-      <div className="bg-[#0c0c0e] border border-[#222] rounded-xl p-4 space-y-3">
-        <div className="flex items-center justify-between">
-          <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
-            Agent Availability Breakdown ({agents.total} Total Configured)
-          </span>
-          <div className="flex items-center gap-4 text-xs font-mono">
-            <span className="flex items-center gap-1.5 text-emerald-400">
-              <span className="w-2 h-2 rounded-full bg-emerald-400" />
-              {agents.available} Available
+      {/* Tabs: Agent Roster vs. Live Queue Items vs. Callbacks */}
+      <div className="flex items-center gap-2 border-b border-[#222]">
+        <button
+          onClick={() => setActiveTab('roster')}
+          className={`px-4 py-2 text-xs font-bold uppercase tracking-wider border-b-2 transition-all ${
+            activeTab === 'roster'
+              ? 'border-emerald-400 text-emerald-400'
+              : 'border-transparent text-slate-400 hover:text-white'
+          }`}
+        >
+          Agent Dispatch Roster ({roster.length})
+        </button>
+        <button
+          onClick={() => setActiveTab('queue')}
+          className={`px-4 py-2 text-xs font-bold uppercase tracking-wider border-b-2 transition-all flex items-center gap-2 ${
+            activeTab === 'queue'
+              ? 'border-emerald-400 text-emerald-400'
+              : 'border-transparent text-slate-400 hover:text-white'
+          }`}
+        >
+          Waiting Inbound Calls ({waitingDetails.length})
+          {waitingDetails.length > 0 && (
+            <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-amber-500/20 text-amber-300 font-mono">
+              {waitingDetails.length}
             </span>
-            <span className="flex items-center gap-1.5 text-rose-400">
-              <span className="w-2 h-2 rounded-full bg-rose-400" />
-              {agents.busy} Busy / In-Call
-            </span>
-            <span className="flex items-center gap-1.5 text-amber-400">
-              <span className="w-2 h-2 rounded-full bg-amber-400" />
-              {agents.break + agents.wrapUp} Pause / Wrap
-            </span>
-            <span className="flex items-center gap-1.5 text-slate-500">
-              <span className="w-2 h-2 rounded-full bg-slate-600" />
-              {agents.offline} Offline
+          )}
+        </button>
+        <button
+          onClick={() => setActiveTab('callbacks')}
+          className={`px-4 py-2 text-xs font-bold uppercase tracking-wider border-b-2 transition-all flex items-center gap-2 ${
+            activeTab === 'callbacks'
+              ? 'border-emerald-400 text-emerald-400'
+              : 'border-transparent text-slate-400 hover:text-white'
+          }`}
+        >
+          Overflow Callback Requests ({callbacks.length})
+        </button>
+      </div>
+
+      {/* TAB CONTENT 1: WAITING INBOUND CALLS TABLE */}
+      {activeTab === 'queue' && (
+        <div className="bg-[#0c0c0e] border border-[#222] rounded-xl overflow-hidden">
+          <div className="p-4 border-b border-[#222] flex items-center justify-between">
+            <h3 className="text-sm font-bold text-white flex items-center gap-2">
+              <Users className="w-4 h-4 text-amber-400" />
+              Live Waiting Calls in Queue
+            </h3>
+            <span className="text-xs text-slate-400">
+              Auto-dequeued by worker engine every 3 seconds
             </span>
           </div>
-        </div>
 
-        {/* Progress bar */}
-        <div className="w-full bg-[#18181b] h-3 rounded-full overflow-hidden flex">
-          {agents.total > 0 && (
-            <>
-              <div
-                style={{ width: `${(agents.available / agents.total) * 100}%` }}
-                className="bg-emerald-500 h-full transition-all"
-                title={`${agents.available} Available`}
-              />
-              <div
-                style={{ width: `${(agents.busy / agents.total) * 100}%` }}
-                className="bg-rose-500 h-full transition-all"
-                title={`${agents.busy} Busy`}
-              />
-              <div
-                style={{ width: `${((agents.break + agents.wrapUp) / agents.total) * 100}%` }}
-                className="bg-amber-500 h-full transition-all"
-                title={`${agents.break + agents.wrapUp} Break/Wrap`}
-              />
-              <div
-                style={{ width: `${(agents.offline / agents.total) * 100}%` }}
-                className="bg-slate-700 h-full transition-all"
-                title={`${agents.offline} Offline`}
-              />
-            </>
+          {waitingDetails.length === 0 ? (
+            <div className="p-10 text-center text-slate-500 text-xs">
+              No callers currently waiting in queue. Inbound calls are being directly connected to agents.
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-[#141416] text-slate-400 uppercase font-semibold text-[10px] border-b border-[#222]">
+                  <tr>
+                    <th className="px-4 py-3">Queue ID</th>
+                    <th className="px-4 py-3">Priority</th>
+                    <th className="px-4 py-3">Department</th>
+                    <th className="px-4 py-3">Wait Duration</th>
+                    <th className="px-4 py-3">Entered At</th>
+                    <th className="px-4 py-3">Status</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[#1e1e22]">
+                  {waitingDetails.map((item: any) => (
+                    <tr key={item.id} className="hover:bg-[#121215] transition-colors">
+                      <td className="px-4 py-3 font-mono text-slate-300">
+                        {item.callSessionId ? item.callSessionId.substring(0, 8) : item.id.substring(0, 8)}
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                          item.priority === 'EMERGENCY'
+                            ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30'
+                            : item.priority === 'HIGH'
+                            ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
+                            : 'bg-blue-500/20 text-blue-300 border border-blue-500/30'
+                        }`}>
+                          {item.priority}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-slate-300">{item.department}</td>
+                      <td className="px-4 py-3 font-mono text-amber-400 font-bold">
+                        {formatSeconds(item.waitSeconds)}
+                      </td>
+                      <td className="px-4 py-3 text-slate-400">
+                        {new Date(item.enteredAt).toLocaleTimeString()}
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className="inline-flex items-center gap-1 text-emerald-400 font-semibold">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                          WAITING AGENT
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
         </div>
-      </div>
+      )}
 
-      {/* Queue Concurrency & Mutex Hardening Info */}
-      <div className="bg-[#0a0a0c] border border-emerald-500/20 rounded-xl p-4 flex items-start gap-3">
-        <Lock className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
-        <div className="text-xs space-y-1">
-          <div className="font-bold text-white flex items-center gap-2">
-            Phase 16 Hardened Queue Engine Active
-            <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-              Atomic Mutex + PostgreSQL Isolation
+      {/* TAB CONTENT 2: OVERFLOW CALLBACK REQUESTS TABLE */}
+      {activeTab === 'callbacks' && (
+        <div className="bg-[#0c0c0e] border border-[#222] rounded-xl overflow-hidden">
+          <div className="p-4 border-b border-[#222] flex items-center justify-between">
+            <h3 className="text-sm font-bold text-white flex items-center gap-2">
+              <PhoneForwarded className="w-4 h-4 text-blue-400" />
+              Overflow Callback Requests
+            </h3>
+            <span className="text-xs text-slate-400">
+              Generated when callers time out in queue or capacity is full
             </span>
           </div>
-          <p className="text-slate-400 leading-relaxed">
-            Every agent allocation uses an atomic Redis lock (<code className="text-emerald-300">SET lock:agent:&#123;id&#125;:reservation EX 25 NX</code>) coupled with a serializable database transaction. Concurrent inbound calls cannot double-assign a single agent. If an agent fails to answer within the 25-second ring timeout, the reservation is automatically released and routed to backup overflow.
-          </p>
-        </div>
-      </div>
 
-      {/* Agent Roster Live Status Table */}
-      <div className="bg-[#0c0c0e] border border-[#222] rounded-xl overflow-hidden">
-        <div className="p-4 border-b border-[#222] flex items-center justify-between">
-          <h3 className="text-sm font-bold text-white flex items-center gap-2">
-            <Radio className="w-4 h-4 text-emerald-400" />
-            Live Agent Dispatch Telemetry
-          </h3>
-          <span className="text-xs text-slate-500">
-            Last updated: {lastRefreshed.toLocaleTimeString()}
-          </span>
+          {callbacks.length === 0 ? (
+            <div className="p-10 text-center text-slate-500 text-xs">
+              No pending callback requests.
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-[#141416] text-slate-400 uppercase font-semibold text-[10px] border-b border-[#222]">
+                  <tr>
+                    <th className="px-4 py-3">Phone Number</th>
+                    <th className="px-4 py-3">Caller Name</th>
+                    <th className="px-4 py-3">Priority</th>
+                    <th className="px-4 py-3">Department</th>
+                    <th className="px-4 py-3">Requested At</th>
+                    <th className="px-4 py-3">Action</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[#1e1e22]">
+                  {callbacks.map((cb: any) => (
+                    <tr key={cb.id} className="hover:bg-[#121215] transition-colors">
+                      <td className="px-4 py-3 font-mono text-emerald-400 font-semibold">{cb.phoneNumber}</td>
+                      <td className="px-4 py-3 text-slate-300">{cb.customerName || 'Customer'}</td>
+                      <td className="px-4 py-3">
+                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-500/20 text-blue-300">
+                          {cb.priority || 'NORMAL'}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-slate-400">{cb.department || 'GENERAL'}</td>
+                      <td className="px-4 py-3 text-slate-400">{new Date(cb.requestedAt).toLocaleString()}</td>
+                      <td className="px-4 py-3">
+                        <button
+                          onClick={async () => {
+                            await apiFetch(`${API_BASE_URL}/telephony/queue/callbacks/${cb.id}/process`, { method: 'POST' });
+                            fetchOperations();
+                          }}
+                          className="px-2.5 py-1 rounded bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[11px] transition-colors"
+                        >
+                          Mark Processed
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
+      )}
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
-            <thead className="bg-[#141416] text-slate-400 uppercase font-semibold border-b border-[#222]">
-              <tr>
-                <th className="p-3">Agent</th>
-                <th className="p-3">Department</th>
-                <th className="p-3">Status</th>
-                <th className="p-3">Active Calls</th>
-                <th className="p-3">Socket Connection</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[#1e1e22]">
-              {roster.length === 0 ? (
+      {/* TAB CONTENT 3: AGENT ROSTER TABLE */}
+      {activeTab === 'roster' && (
+        <div className="bg-[#0c0c0e] border border-[#222] rounded-xl overflow-hidden">
+          <div className="p-4 border-b border-[#222] flex items-center justify-between">
+            <h3 className="text-sm font-bold text-white flex items-center gap-2">
+              <Radio className="w-4 h-4 text-emerald-400" />
+              Live Agent Dispatch Telemetry
+            </h3>
+            <span className="text-xs text-slate-400 font-mono">
+              {roster.filter((a: any) => a.isOnline).length} / {roster.length} Sockets Connected
+            </span>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs">
+              <thead className="bg-[#141416] text-slate-400 uppercase font-semibold text-[10px] border-b border-[#222]">
                 <tr>
-                  <td colSpan={5} className="p-8 text-center text-slate-500">
-                    No agents registered in contact center roster.
-                  </td>
+                  <th className="px-4 py-3">Agent</th>
+                  <th className="px-4 py-3">Department</th>
+                  <th className="px-4 py-3">Status</th>
+                  <th className="px-4 py-3">Active Calls</th>
+                  <th className="px-4 py-3">WebRTC Socket</th>
                 </tr>
-              ) : (
-                roster.map((agent: any) => (
-                  <tr key={agent.id} className="hover:bg-[#141416]/50 transition-colors">
-                    <td className="p-3 font-semibold text-white">
-                      {agent.name}
-                    </td>
-                    <td className="p-3 text-slate-400">
-                      {agent.department}
-                    </td>
-                    <td className="p-3">
-                      <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                        agent.status === 'AVAILABLE'
-                          ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                          : agent.status === 'BUSY'
-                          ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30'
-                          : agent.status === 'BREAK' || agent.status === 'WRAP_UP'
-                          ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
-                          : 'bg-slate-700 text-slate-400'
-                      }`}>
-                        {agent.status}
-                      </span>
-                    </td>
-                    <td className="p-3 font-mono text-slate-300">
-                      {agent.activeCalls || 0} / 1
-                    </td>
-                    <td className="p-3">
-                      {agent.isOnline ? (
-                        <span className="flex items-center gap-1.5 text-emerald-400 text-[11px]">
-                          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                          Connected
-                        </span>
-                      ) : (
-                        <span className="flex items-center gap-1.5 text-slate-500 text-[11px]">
-                          <span className="w-2 h-2 rounded-full bg-slate-600" />
-                          Offline
-                        </span>
-                      )}
+              </thead>
+              <tbody className="divide-y divide-[#1e1e22]">
+                {roster.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="px-4 py-8 text-center text-slate-500">
+                      No agents configured in roster.
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                ) : (
+                  roster.map((agent: any) => (
+                    <tr key={agent.id} className="hover:bg-[#121215] transition-colors">
+                      <td className="px-4 py-3 font-medium text-white flex items-center gap-2">
+                        <span className={`w-2 h-2 rounded-full ${
+                          agent.status === 'AVAILABLE' ? 'bg-emerald-400' :
+                          agent.status === 'BUSY' ? 'bg-rose-400' :
+                          agent.status === 'BREAK' || agent.status === 'WRAP_UP' ? 'bg-amber-400' :
+                          'bg-slate-600'
+                        }`} />
+                        {agent.name}
+                      </td>
+                      <td className="px-4 py-3 text-slate-400">{agent.department}</td>
+                      <td className="px-4 py-3">
+                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                          agent.status === 'AVAILABLE' ? 'bg-emerald-500/20 text-emerald-300' :
+                          agent.status === 'BUSY' ? 'bg-rose-500/20 text-rose-300' :
+                          agent.status === 'BREAK' || agent.status === 'WRAP_UP' ? 'bg-amber-500/20 text-amber-300' :
+                          'bg-slate-800 text-slate-400'
+                        }`}>
+                          {agent.status}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 font-mono font-bold text-slate-300">
+                        {agent.activeCalls}
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className={`inline-flex items-center gap-1.5 text-[11px] font-mono ${
+                          agent.isOnline ? 'text-emerald-400' : 'text-slate-500'
+                        }`}>
+                          <span className={`w-1.5 h-1.5 rounded-full ${agent.isOnline ? 'bg-emerald-400' : 'bg-slate-600'}`} />
+                          {agent.isOnline ? 'CONNECTED' : 'DISCONNECTED'}
+                        </span>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
-      </div>
+      )}
+
+      {/* CAPACITY CONFIGURATION MODAL */}
+      {showConfigModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+          <div className="bg-[#121316] border border-[#2a2c32] rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-5 text-white">
+            <div className="flex items-center justify-between pb-3 border-b border-[#222]">
+              <div className="flex items-center gap-2">
+                <Sliders className="w-5 h-5 text-emerald-400" />
+                <h3 className="text-base font-bold">Runtime Capacity Orchestration Policy</h3>
+              </div>
+              <button
+                onClick={() => setShowConfigModal(false)}
+                className="text-slate-400 hover:text-white text-lg font-bold"
+              >
+                ×
+              </button>
+            </div>
+
+            <p className="text-xs text-slate-400">
+              Configure global telephony limits across inbound & outbound traffic.
+              Changes apply immediately to all horizontally scaled workers without redeploying code.
+            </p>
+
+            <div className="space-y-4 text-xs">
+              <div>
+                <label className="font-semibold text-slate-300 block mb-1">
+                  Total Telephony Account Channels ($C_{'total'}$)
+                </label>
+                <input
+                  type="number"
+                  min="1"
+                  max="1000"
+                  value={editTotalChannels}
+                  onChange={(e) => setEditTotalChannels(parseInt(e.target.value || '1', 10))}
+                  className="w-full bg-[#181a1f] border border-[#333] rounded-lg px-3 py-2 text-white font-mono focus:border-emerald-500 focus:outline-none"
+                />
+                <span className="text-[11px] text-slate-500 mt-1 block">
+                  Current provider allocation: 3 (Upgrade to 10, 30, or 100+ anytime).
+                </span>
+              </div>
+
+              <div>
+                <label className="font-semibold text-slate-300 block mb-1">
+                  Inbound Reserved Channel Floor ($C_{'inbound_reserve'}$)
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  max={editTotalChannels - 1}
+                  value={editInboundReserved}
+                  onChange={(e) => setEditInboundReserved(parseInt(e.target.value || '0', 10))}
+                  className="w-full bg-[#181a1f] border border-[#333] rounded-lg px-3 py-2 text-white font-mono focus:border-emerald-500 focus:outline-none"
+                />
+                <span className="text-[11px] text-slate-500 mt-1 block">
+                  Guaranteed channels reserved exclusively for incoming customer calls.
+                </span>
+              </div>
+
+              <div className="p-3 rounded-lg bg-[#181a1f] border border-[#26282e] space-y-1">
+                <span className="text-[11px] text-slate-400 block font-semibold">Resulting Policy Limits:</span>
+                <div className="flex justify-between font-mono text-slate-300 text-[11px]">
+                  <span>Max Concurrent Outbound:</span>
+                  <span className="text-blue-400 font-bold">{Math.max(editTotalChannels - editInboundReserved, 1)}</span>
+                </div>
+                <div className="flex justify-between font-mono text-slate-300 text-[11px]">
+                  <span>Outbound Throttler Trigger:</span>
+                  <span className="text-amber-400 font-bold">Queue Depth &gt; 0</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-3 pt-2">
+              <button
+                onClick={() => setShowConfigModal(false)}
+                className="px-4 py-2 rounded-lg bg-[#1e2024] hover:bg-[#282a30] text-xs font-semibold text-slate-300 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSaveCapacityConfig}
+                disabled={isSavingConfig}
+                className="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-xs font-bold text-white transition-colors disabled:opacity-50"
+              >
+                {isSavingConfig ? 'Saving...' : 'Apply Runtime Policy'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

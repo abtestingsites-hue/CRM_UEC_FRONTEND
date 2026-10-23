@@ -245,16 +245,19 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
       console.log(`[INBOUND-E2E] STEP=FRONTEND_INCOMING_CALL_RECEIVED | event=incoming_call callId=${data.callSid || data.callId} roomName=${data.roomName} direction=${data.direction} provider=${data.provider || data.source} caller=${data.caller}`);
       console.log(`[INBOUND-CALL] frontend_event_received | data:`, data);
 
-      // If this call is an agent-targeted transfer, make sure other agents don't see it
-      if (data.isTransfer && (data.destinationAgentId || data.destinationUserId || data.assignedAgent?.id)) {
-        const currentAgentId = user?.agentId || user?.id;
-        const currentUserId = user?.userId || user?.id;
-        const isTarget = 
-          (data.destinationAgentId && data.destinationAgentId === currentAgentId) ||
-          (data.destinationUserId && data.destinationUserId === currentUserId) ||
-          (data.assignedAgent?.id && data.assignedAgent.id === currentAgentId);
-        if (!isTarget) {
-          console.log('[INBOUND-CALL] Transfer not targeted to current agent, ignoring.');
+      // Target agent validation: ensure this call is intended for THIS specific agent
+      const currentAgentId = user?.agentId || user?.id;
+      const currentUserId = user?.userId || user?.id;
+      const targetAgentId = data.destinationAgentId || data.targetAgentId || data.assignedAgent?.id;
+      const targetUserId = data.destinationUserId || data.targetUserId || data.assignedAgent?.userId;
+
+      if (targetAgentId || targetUserId) {
+        const isIntendedRecipient =
+          (targetAgentId && (targetAgentId === currentAgentId || targetAgentId === currentUserId)) ||
+          (targetUserId && (targetUserId === currentUserId || targetUserId === currentAgentId));
+
+        if (!isIntendedRecipient) {
+          console.log(`[INBOUND-CALL] Call not targeted to current agent (${currentAgentId}), ignoring.`);
           return;
         }
       }
