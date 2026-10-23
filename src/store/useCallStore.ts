@@ -27,6 +27,13 @@ export interface CallData {
   type?: string;
   caller?: string;
   callerName?: string;
+  isTransfer?: boolean;
+  transferAuditId?: string;
+  transferMode?: string;
+  transferReason?: string;
+  sourceAgent?: { id?: string; name?: string; department?: string };
+  destinationAgentId?: string;
+  destinationUserId?: string;
 }
 
 export interface CallState {

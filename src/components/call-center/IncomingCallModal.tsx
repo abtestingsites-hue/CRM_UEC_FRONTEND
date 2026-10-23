@@ -3,12 +3,14 @@
 import React, { useEffect, useRef } from 'react';
 import { useCallStore } from '@/store/useCallStore';
 import { useSocket } from '@/providers/SocketProvider';
-import { Phone, PhoneOff, AlertTriangle, User, Clock } from 'lucide-react';
+import { useAuthStore } from '@/store/authStore';
+import { Phone, PhoneOff, AlertTriangle, User, Clock, PhoneForwarded } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export const IncomingCallModal = () => {
   const { incomingCall, setIncomingCall, setActiveCall, setStatus } = useCallStore();
   const { telephonySocket, mediaSocket } = useSocket();
+  const { user } = useAuthStore();
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
@@ -36,16 +38,20 @@ export const IncomingCallModal = () => {
   const handleAccept = () => {
     if (!incomingCall) return;
     
+    const activeUserId = user?.agentId || user?.id;
+
     // Notify backend that we accepted
     if (incomingCall.category === 'Internal' && mediaSocket) {
       mediaSocket.emit('acceptCall', { 
         callSid: incomingCall.callSid,
-        roomName: incomingCall.roomName
+        roomName: incomingCall.roomName,
+        agentId: activeUserId,
       });
     } else if (telephonySocket) {
       telephonySocket.emit('acceptCall', { 
         callSid: incomingCall.callSid,
-        roomName: incomingCall.roomName
+        roomName: incomingCall.roomName,
+        agentId: activeUserId,
       });
     }
     
@@ -53,7 +59,7 @@ export const IncomingCallModal = () => {
     setIncomingCall(null);
     setStatus('BUSY');
     
-    // LiveKit/Mediasoup WebRTC logic will now trigger in CallWidget.tsx automatically
+    // LiveKit/Mediasoup WebRTC logic will now trigger in CallWidget.tsx / LiveCallPanel.tsx automatically
   };
 
   const handleReject = () => {
@@ -105,6 +111,27 @@ export const IncomingCallModal = () => {
                 </span>
               </div>
             </div>
+
+            {/* Transferred Call Indicator */}
+            {incomingCall.isTransfer && (
+              <div className="mb-4 bg-amber-500/10 border border-amber-500/30 p-3.5 rounded-xl flex items-center justify-between text-xs">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-1.5 text-amber-400 font-bold uppercase tracking-wider text-[10px]">
+                    <PhoneForwarded className="w-3.5 h-3.5" />
+                    Incoming Transferred Call
+                  </div>
+                  <p className="font-semibold text-slate-800 dark:text-slate-200">
+                    Transferred by: <strong className="text-amber-400">{incomingCall.sourceAgent?.name || 'Agent'}</strong> ({incomingCall.sourceAgent?.department || 'Care'})
+                  </p>
+                  {incomingCall.transferReason && (
+                    <p className="text-[11px] text-slate-400 italic">"{incomingCall.transferReason}"</p>
+                  )}
+                </div>
+                <span className="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 text-[10px] font-bold uppercase border border-amber-500/40">
+                  {incomingCall.transferMode || 'Blind'}
+                </span>
+              </div>
+            )}
 
             {/* CRM Customer Context Overlay */}
             {incomingCall.customerContext && (

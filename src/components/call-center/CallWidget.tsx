@@ -743,7 +743,11 @@ export function CallWidget() {
           callSid={activeCall?.callSid || activeCall?.roomName || 'unknown'}
           isOpen={showTransferModal}
           onClose={() => setShowTransferModal(false)}
-          onSuccess={() => setShowTransferModal(false)}
+          onSuccess={() => {
+            setShowTransferModal(false);
+            setActiveCall(null);
+            setStatus('AVAILABLE');
+          }}
           callerName={resolvedCustomerName}
           callerPhone={resolvedCustomerPhone}
         />
