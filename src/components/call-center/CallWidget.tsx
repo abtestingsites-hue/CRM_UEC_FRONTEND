@@ -11,7 +11,7 @@ import { CallTransferModal } from '@/components/call-center/CallTransferModal';
 import { CustomerHistoryDrawer } from '@/components/call-center/CustomerHistoryDrawer';
 import { useMediasoup } from '@/hooks/useMediasoup';
 import { LiveKitRoom, RoomAudioRenderer, useConnectionState, useRoomContext, useLocalParticipant, useRemoteParticipants } from '@livekit/components-react';
-function LiveKitManager({ setCallState, setWebrtcConnected, callSid, isMuted, isSpeaker, callCategory, telephonySocket }: any) {
+function LiveKitManager({ setCallState, setWebrtcConnected, callSid, isMuted, isSpeaker, callCategory, telephonySocket, onAudioBlockedChange, onRoomReady }: any) {
   const room = useRoomContext();
   const state = useConnectionState();
   const { localParticipant } = useLocalParticipant();
@@ -19,28 +19,76 @@ function LiveKitManager({ setCallState, setWebrtcConnected, callSid, isMuted, is
 
   useEffect(() => {
     console.log('[LK-MANAGER]', 'mounted', { callSid, roomState: room?.state });
+    if (room && typeof onRoomReady === 'function') {
+      onRoomReady(room);
+    }
     return () => console.log('[LK-MANAGER]', 'unmounted', { callSid });
-  }, [callSid]);
+  }, [callSid, room, onRoomReady]);
 
   const hasStartedRecording = useRef(false);
+  const callEndedTriggeredRef = useRef(false);
 
-  // Helper to mark call as CONNECTED and trigger recording once
+  // Helper to mark call as CONNECTED and trigger recording once on verified answer
   const markConnectedAndRecord = () => {
+    if (hasStartedRecording.current) return;
+    hasStartedRecording.current = true;
+    console.log(`[CALL-LIFECYCLE-DIAG] callId=${callSid} stage=CUSTOMER_ANSWERED source=livekit_sip_active timestamp=${new Date().toISOString()}`);
     setCallState('CONNECTED');
     setWebrtcConnected(true);
-    if (telephonySocket && room && !hasStartedRecording.current) {
-      hasStartedRecording.current = true;
-      console.log(`[CALL-RECORDING] Emitting startRecording callSid=${callSid} roomName=${room.name}`);
+    if (telephonySocket && room) {
+      console.log(`[CALL-RECORDING] Emitting startRecording and callAnswered callSid=${callSid} roomName=${room.name}`);
+      telephonySocket.emit('callAnswered', { callSid, roomName: room.name });
       telephonySocket.emit('startRecording', { callSid, roomName: room.name });
     }
   };
 
-  // Autoplay unlock
-  useEffect(() => {
-    if (room && typeof (room as any).startAudio === 'function') {
-      (room as any).startAudio().catch((e: any) => console.log('[LK-ROOT] startAudio autoplay wait:', e));
+  const triggerCallEnd = (reason: string) => {
+    if (callEndedTriggeredRef.current) return;
+    callEndedTriggeredRef.current = true;
+    console.log(`[CALL-LIFECYCLE-DIAG] callId=${callSid} stage=CALL_TERMINATED source=${reason} timestamp=${new Date().toISOString()}`);
+    setCallState('ENDED');
+    setWebrtcConnected(false);
+    if (telephonySocket && room) {
+      telephonySocket.emit('endCall', {
+        callSid,
+        roomName: room.name,
+        reason,
+      });
     }
-  }, [room, state]);
+  };
+
+  // Monitor Autoplay and Audio Playback Allowed State
+  useEffect(() => {
+    if (!room) return;
+
+    const checkAudioPlayback = () => {
+      const canPlay = (room as any).canPlaybackAudio;
+      if (typeof onAudioBlockedChange === 'function') {
+        onAudioBlockedChange(!canPlay);
+      }
+      if (!canPlay && typeof (room as any).startAudio === 'function') {
+        (room as any).startAudio().catch((err: any) => {
+          console.warn('[AUDIO-AUTOPLAY] Autoplay restricted. Awaiting agent interaction to unlock:', err?.message);
+        });
+      }
+    };
+
+    checkAudioPlayback();
+
+    const handleAudioPlaybackChange = () => {
+      const canPlay = (room as any).canPlaybackAudio;
+      if (typeof onAudioBlockedChange === 'function') {
+        onAudioBlockedChange(!canPlay);
+      }
+      console.log(`[AUDIO-PLAYBACK-STATUS] canPlaybackAudio=${canPlay}`);
+    };
+
+    room.on('audioPlaybackChanged', handleAudioPlaybackChange);
+
+    return () => {
+      room.off('audioPlaybackChanged', handleAudioPlaybackChange);
+    };
+  }, [room, onAudioBlockedChange]);
 
   useEffect(() => {
     console.log('[LK-MANAGER]', 'room_context_available', { callSid, roomName: room?.name, state: room?.state });
@@ -61,7 +109,7 @@ function LiveKitManager({ setCallState, setWebrtcConnected, callSid, isMuted, is
       if (status === 'active') {
         markConnectedAndRecord();
       } else if (status === 'hangup' || status === 'disconnect') {
-        setCallState('ENDED');
+        triggerCallEnd('sip_hangup');
       }
     };
 
@@ -72,17 +120,30 @@ function LiveKitManager({ setCallState, setWebrtcConnected, callSid, isMuted, is
           (room as any).startAudio().catch(() => {});
         }
       },
-      disconnected: (reason: any) => logEvent('disconnected', reason),
+      disconnected: (reason: any) => {
+        logEvent('disconnected', reason);
+        triggerCallEnd('room_disconnected');
+      },
       reconnecting: () => logEvent('reconnecting'),
       reconnected: () => logEvent('reconnected'),
-      mediaDevicesError: (e: any) => logEvent('media_devices_error', e),
+      mediaDevicesError: (e: any) => {
+        logEvent('media_devices_error', e);
+        console.error('[MEDIA-DEVICES-ERROR]', e);
+      },
       participantConnected: (p: any) => {
         logEvent('participant_connected', p);
-        if (!p.isLocal) {
+        // Only mark connected if customer has already answered (active)
+        if (p.attributes?.['sip.callStatus'] === 'active') {
           markConnectedAndRecord();
         }
       },
-      participantDisconnected: (p: any) => logEvent('participant_disconnected', p),
+      participantDisconnected: (p: any) => {
+        logEvent('participant_disconnected', p);
+        // If remote participant (PSTN customer) disconnects, customer hung up!
+        if (!p.isLocal) {
+          triggerCallEnd('customer_hangup');
+        }
+      },
       participantAttributesChanged: (changedAttributes: any, participant: any) => {
         if (participant.identity.startsWith('sip_') && changedAttributes['sip.callStatus']) {
           checkSipStatus(participant.identity, changedAttributes['sip.callStatus']);
@@ -117,136 +178,92 @@ function LiveKitManager({ setCallState, setWebrtcConnected, callSid, isMuted, is
     };
   }, [room, callSid]);
 
+  // Check remote participants attributes for answer state
   useEffect(() => {
     if (!room || state !== 'connected') return;
-    
-    // Explicitly scan remote participants in case they joined before listeners attached
-    if (remoteParticipants.length > 0) {
-      const hasActive = remoteParticipants.some(p => {
-        const isSipActive = p.attributes?.['sip.callStatus'] === 'active';
-        const hasAudio = p.audioTrackPublications?.size > 0;
-        return isSipActive || hasAudio || p.identity.startsWith('sip_');
-      });
-      if (hasActive) {
-        markConnectedAndRecord();
-      }
+
+    if (callCategory === 'Inbound') {
+      markConnectedAndRecord();
+      return;
     }
-  }, [remoteParticipants, room, state]);
+
+    // Outbound call: verify customer actually answered
+    const hasActiveSip = remoteParticipants.some(p => p.attributes?.['sip.callStatus'] === 'active');
+    if (hasActiveSip) {
+      markConnectedAndRecord();
+    }
+  }, [remoteParticipants, room, state, callCategory]);
 
   useEffect(() => {
     if (state === 'connected') {
       if (callCategory === 'Inbound') {
         markConnectedAndRecord();
-        console.log('[WEBRTC-DIAGNOSTIC]', JSON.stringify({
-          event: 'room_connected_inbound',
+        console.log('[CALL-LIFECYCLE-DIAG]', JSON.stringify({
+          stage: 'CUSTOMER_ANSWERED',
+          source: 'inbound_agent_connected',
           callId: callSid,
           roomName: room?.name,
           connectionState: state,
-          reason: 'LiveKit Room is fully connected (Inbound).'
+          timestamp: new Date().toISOString(),
         }));
       } else {
-        // Outbound call
-        if (remoteParticipants.length > 0) {
+        // Outbound call: Keep in RINGING until customer picks up
+        const hasActiveSip = remoteParticipants.some(p => p.attributes?.['sip.callStatus'] === 'active');
+        if (hasActiveSip) {
           markConnectedAndRecord();
         } else {
           setCallState('RINGING');
+          console.log('[CALL-LIFECYCLE-DIAG]', JSON.stringify({
+            stage: 'PROVIDER_RINGING',
+            source: 'sip_trunk_ringing',
+            callId: callSid,
+            roomName: room?.name,
+            timestamp: new Date().toISOString(),
+          }));
         }
-        setWebrtcConnected(true);
       }
+      setWebrtcConnected(true);
     } else if (state === 'connecting') {
       setCallState('CONNECTING');
     } else if (state === 'disconnected') {
-      console.log('[WEBRTC-DIAGNOSTIC]', JSON.stringify({
-        event: 'room_disconnected',
-        callId: callSid,
-        roomName: room?.name,
-        connectionState: state,
-        participantIdentity: room?.localParticipant?.identity,
-        reason: 'LiveKit Room disconnected.'
-      }));
+      triggerCallEnd('webrtc_disconnected');
     }
-  }, [state, room, callSid, setCallState, setWebrtcConnected, callCategory, remoteParticipants.length]);
+  }, [state, room, callSid, setCallState, setWebrtcConnected, callCategory, remoteParticipants]);
 
-  // Handle Microphone Lifecycle safely without causing redundant renegotiation
+  // Handle Microphone Lifecycle safely
   useEffect(() => {
     if (state !== 'connected' || !room || !localParticipant) return;
 
     const manageMicrophone = async () => {
       try {
         if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-          console.log('[WEBRTC-DIAGNOSTIC]', JSON.stringify({
-            event: 'microphone_permission',
-            callId: callSid,
-            roomName: room.name,
-            connectionState: state,
-            participantIdentity: localParticipant.identity,
-            error: 'navigator.mediaDevices.getUserMedia is not supported or not available (HTTPS required)'
-          }));
+          console.warn('[WEBRTC-DIAGNOSTIC] mediaDevices.getUserMedia not available');
           return;
         }
 
-        // Only toggle if microphone state differs from desired state
         if (localParticipant.isMicrophoneEnabled === isMuted) {
-          console.log('[WEBRTC-DIAGNOSTIC]', JSON.stringify({
-            event: 'microphone_publish_start',
-            callId: callSid,
-            roomName: room.name,
-            connectionState: state,
-            participantIdentity: localParticipant.identity,
-            reason: `Syncing mic state: desired=${!isMuted}`
-          }));
-
           await localParticipant.setMicrophoneEnabled(!isMuted);
-
-          console.log('[WEBRTC-DIAGNOSTIC]', JSON.stringify({
-            event: 'microphone_publish_success',
-            callId: callSid,
-            roomName: room.name,
-            connectionState: state,
-            participantIdentity: localParticipant.identity,
-            reason: `Microphone synced successfully, muted: ${isMuted}`
-          }));
           console.log('[INBOUND-AUDIO] local_microphone_published | muted=' + isMuted);
         }
       } catch (err: any) {
-        console.error('[WEBRTC-DIAGNOSTIC]', JSON.stringify({
-          event: 'microphone_publish_failure',
-          callId: callSid,
-          roomName: room.name,
-          connectionState: state,
-          participantIdentity: localParticipant.identity,
-          error: err.message
-        }));
+        console.error('[WEBRTC-DIAGNOSTIC] Microphone sync failed:', err.message);
       }
     };
 
     manageMicrophone();
   }, [state, room, localParticipant, isMuted, callSid]);
 
-  // Handle remote audio subscriptions
+  // Handle remote audio subscriptions without competing manual track.attach()
   useEffect(() => {
     if (!room) return;
 
     const handleTrackSubscribed = (track: any, publication: any, participant: any) => {
       if (track.kind === 'audio') {
+        console.log(`[CALL-LIFECYCLE-DIAG] callId=${callSid} stage=AUDIO_CONNECTED source=trackSubscribed timestamp=${new Date().toISOString()} participant=${participant.identity} trackSid=${track.sid}`);
         if (typeof (room as any).startAudio === 'function') {
           (room as any).startAudio().catch(() => {});
         }
-        try {
-          track.attach();
-        } catch (_) {}
-        console.log('[WEBRTC-DIAGNOSTIC]', JSON.stringify({
-          event: 'remote_audio_subscribed',
-          callId: callSid,
-          roomName: room.name,
-          connectionState: room.state,
-          participantIdentity: participant.identity,
-          trackSid: track.sid,
-          trackKind: track.kind,
-          isMuted: track.isMuted
-        }));
-        console.log('[INBOUND-AUDIO] remote_audio_subscribed | callId=' + callSid);
-        markConnectedAndRecord();
+        // Note: RoomAudioRenderer handles declarative audio element rendering and volume/mute
       }
     };
 
@@ -340,6 +357,8 @@ export function CallWidget() {
   const { telephonySocket, mediaSocket } = useSocket();
   const [isSpeaker, setIsSpeaker] = useState(true);
   const [duration, setDuration] = useState(0);
+  const [audioBlocked, setAudioBlocked] = useState(false);
+  const roomContextRef = useRef<any>(null);
   
   const callState = activeCall?.status || 'IDLE';
 
@@ -657,14 +676,30 @@ export function CallWidget() {
           {/* LiveKit Connection */}
           {activeCall?.accepted && isLiveKit && (
             <div className="mt-4 w-full">
+              {audioBlocked && (
+                <div className="mb-4 p-3 bg-amber-500/20 border border-amber-500/40 rounded-xl text-amber-300 text-xs flex items-center justify-between gap-2 shadow-lg animate-pulse">
+                  <span className="font-semibold">Speaker audio paused by browser.</span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (roomContextRef.current && typeof roomContextRef.current.startAudio === 'function') {
+                        roomContextRef.current.startAudio().then(() => setAudioBlocked(false)).catch(console.error);
+                      }
+                    }}
+                    className="px-3 py-1 bg-amber-500 text-black font-bold rounded-lg hover:bg-amber-400 text-xs shrink-0 shadow"
+                  >
+                    Enable Speaker
+                  </button>
+                </div>
+              )}
               <LiveKitRoom
                 serverUrl={activeCall?.serverUrl || activeCall?.wsUrl || process.env.NEXT_PUBLIC_LIVEKIT_URL || 'wss://23jy3gv6xcs.livekit.cloud'}
                 token={activeCall.token}
                 connect={callState !== 'ENDED'}
-                audio={!isMuted} // Pre-warms and publishes audio on initial connection to avoid 2-5s delay
+                audio={!isMuted} // Pre-warms and publishes audio on initial connection
                 video={false}
               >
-                <RoomAudioRenderer volume={1} muted={!isSpeaker} />
+                <RoomAudioRenderer volume={isSpeaker ? 1 : 0} muted={!isSpeaker} />
                 <LiveKitManager 
                   setCallState={updateActiveCallStatus} 
                   setWebrtcConnected={setWebrtcConnected} 
@@ -673,6 +708,8 @@ export function CallWidget() {
                   isSpeaker={isSpeaker}
                   callCategory={activeCall.category}
                   telephonySocket={telephonySocket}
+                  onAudioBlockedChange={setAudioBlocked}
+                  onRoomReady={(r: any) => { roomContextRef.current = r; }}
                 />
               </LiveKitRoom>
               <CallControlsInner 

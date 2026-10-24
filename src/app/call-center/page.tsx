@@ -61,6 +61,29 @@ export default function CallCenterPage() {
     fetchAgents();
   }, []);
 
+  // Reconcile active call state on mount to prevent zombie/stale calls after page navigation
+  useEffect(() => {
+    const reconcileActiveCall = async () => {
+      try {
+        const { activeCall, setActiveCall, setStatus } = useCallStore.getState();
+        if (activeCall) {
+          const res = await apiFetch('/telephony/my-active-call');
+          if (res.ok) {
+            const data = await res.json();
+            if (!data.activeCall) {
+              console.log('[CALL-RECONCILIATION] Backend reports no active call. Clearing stale activeCall.');
+              setActiveCall(null);
+              setStatus('AVAILABLE');
+            }
+          }
+        }
+      } catch (err) {
+        console.warn('[CALL-RECONCILIATION] Error during active call reconciliation:', err);
+      }
+    };
+    reconcileActiveCall();
+  }, []);
+
   useEffect(() => {
     const handleStatusChange = (data: any) => {
       if (!data || !data.agentId) return;
