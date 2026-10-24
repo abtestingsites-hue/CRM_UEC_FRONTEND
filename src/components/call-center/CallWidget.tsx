@@ -27,6 +27,7 @@ function LiveKitManager({ setCallState, setWebrtcConnected, callSid, isMuted, is
 
   const hasStartedRecording = useRef(false);
   const callEndedTriggeredRef = useRef(false);
+  const hasEverConnectedRef = useRef(false);
 
   // Helper to mark call as CONNECTED and trigger recording once on verified answer
   const markConnectedAndRecord = () => {
@@ -116,16 +117,26 @@ function LiveKitManager({ setCallState, setWebrtcConnected, callSid, isMuted, is
     const events = {
       connected: () => {
         logEvent('connected');
+        hasEverConnectedRef.current = true;
         if (typeof (room as any).startAudio === 'function') {
           (room as any).startAudio().catch(() => {});
         }
       },
       disconnected: (reason: any) => {
         logEvent('disconnected', reason);
-        triggerCallEnd('room_disconnected');
+        if (hasEverConnectedRef.current && !callEndedTriggeredRef.current) {
+          console.log(`[CALL-LIFECYCLE-DIAG] LiveKit room disconnected after connection: reason=${reason}`);
+          triggerCallEnd('room_disconnected');
+        }
       },
-      reconnecting: () => logEvent('reconnecting'),
-      reconnected: () => logEvent('reconnected'),
+      reconnecting: () => {
+        logEvent('reconnecting');
+        setWebrtcConnected(false);
+      },
+      reconnected: () => {
+        logEvent('reconnected');
+        setWebrtcConnected(true);
+      },
       mediaDevicesError: (e: any) => {
         logEvent('media_devices_error', e);
         console.error('[MEDIA-DEVICES-ERROR]', e);
@@ -196,6 +207,7 @@ function LiveKitManager({ setCallState, setWebrtcConnected, callSid, isMuted, is
 
   useEffect(() => {
     if (state === 'connected') {
+      hasEverConnectedRef.current = true;
       if (callCategory === 'Inbound') {
         markConnectedAndRecord();
         console.log('[CALL-LIFECYCLE-DIAG]', JSON.stringify({
@@ -224,9 +236,13 @@ function LiveKitManager({ setCallState, setWebrtcConnected, callSid, isMuted, is
       }
       setWebrtcConnected(true);
     } else if (state === 'connecting') {
-      setCallState('CONNECTING');
+      setWebrtcConnected(false);
+    } else if (state === 'reconnecting') {
+      setWebrtcConnected(false);
+      console.warn('[CALL-LIFECYCLE-DIAG] WebRTC connection reconnecting. Preserving PSTN call.', { callId: callSid, state });
     } else if (state === 'disconnected') {
-      triggerCallEnd('webrtc_disconnected');
+      setWebrtcConnected(false);
+      console.log('[CALL-LIFECYCLE-DIAG] WebRTC connection in disconnected state. Preserving PSTN call without terminating.', { callId: callSid, state, hasEverConnected: hasEverConnectedRef.current });
     }
   }, [state, room, callSid, setCallState, setWebrtcConnected, callCategory, remoteParticipants]);
 
