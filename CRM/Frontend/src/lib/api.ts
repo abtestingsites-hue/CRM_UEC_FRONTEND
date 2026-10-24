@@ -30,9 +30,9 @@ class APIClient {
 
   private getToken() {
     if (typeof window === 'undefined') return null;
-    return localStorage.getItem('access_token') || 
-           localStorage.getItem('paramantra_access_token') || 
-           localStorage.getItem('crm_token');
+    const token = localStorage.getItem('paramantra_access_token') || 
+                  localStorage.getItem('crm_token');
+    return token ? token.trim().replace(/^["']|["']$/g, '') : null;
   }
 
   private getRefreshToken() {
@@ -44,6 +44,7 @@ class APIClient {
   private clearSessionAndRedirect() {
     if (typeof window === 'undefined') return;
     localStorage.removeItem('access_token');
+    localStorage.removeItem('token');
     localStorage.removeItem('paramantra_access_token');
     localStorage.removeItem('paramantra_refresh_token');
     localStorage.removeItem('crm_token');
@@ -79,12 +80,21 @@ class APIClient {
 
         const data = await res.json();
         if (data.accessToken) {
-          localStorage.setItem('paramantra_access_token', data.accessToken);
-          localStorage.setItem('crm_token', data.accessToken);
+          const cleanToken = data.accessToken.trim().replace(/^["']|["']$/g, '');
+          localStorage.setItem('paramantra_access_token', cleanToken);
+          localStorage.setItem('crm_token', cleanToken);
+          localStorage.removeItem('access_token');
+          localStorage.removeItem('token');
           if (data.refreshToken) {
             localStorage.setItem('paramantra_refresh_token', data.refreshToken);
           }
-          return data.accessToken;
+
+          // Broadcast real-time token rotation event so WebSocket updates its credentials
+          if (typeof window !== 'undefined') {
+            window.dispatchEvent(new CustomEvent('auth-token-refreshed', { detail: { token: cleanToken } }));
+          }
+
+          return cleanToken;
         }
         this.clearSessionAndRedirect();
         return null;

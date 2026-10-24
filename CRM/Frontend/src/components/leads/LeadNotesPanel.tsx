@@ -1,7 +1,7 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Send, User, Calendar, Briefcase, PhoneCall, Edit2, History } from 'lucide-react';
 import { useLeadStore } from '@/store/useLeadStore';
-import { io, Socket } from 'socket.io-client';
+import { useSocket } from '@/providers/SocketProvider';
 import { apiFetch, API_BASE_URL } from '@/lib/api';
 
 interface LeadNote {
@@ -24,7 +24,7 @@ export const LeadNotesPanel = ({ leadId }: { leadId: string }) => {
   const [newNote, setNewNote] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [correctingNoteId, setCorrectingNoteId] = useState<string | null>(null);
-  const socketRef = useRef<Socket | null>(null);
+  const { socket } = useSocket();
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL 
     ? (process.env.NEXT_PUBLIC_API_URL.endsWith('/') ? process.env.NEXT_PUBLIC_API_URL.slice(0, -1) : process.env.NEXT_PUBLIC_API_URL)
@@ -60,23 +60,23 @@ export const LeadNotesPanel = ({ leadId }: { leadId: string }) => {
 
     window.addEventListener('lead-action-completed', handleActionCompleted as EventListener);
     
-    // Initialize WebSocket connection
-    socketRef.current = io(API_URL);
-    socketRef.current.on('connect', () => {
-      socketRef.current?.emit('joinLeadRoom', leadId);
-    });
-
-    socketRef.current.on('lead-action-completed', (data: any) => {
-      // Auto refresh notes when an event occurs
+    const handleRemoteAction = () => {
       fetchNotes();
-    });
+    };
+
+    if (socket) {
+      socket.emit('joinLeadRoom', leadId);
+      socket.on('lead-action-completed', handleRemoteAction);
+    }
 
     return () => {
       window.removeEventListener('lead-action-completed', handleActionCompleted as EventListener);
-      socketRef.current?.emit('leaveLeadRoom', leadId);
-      socketRef.current?.disconnect();
+      if (socket) {
+        socket.emit('leaveLeadRoom', leadId);
+        socket.off('lead-action-completed', handleRemoteAction);
+      }
     };
-  }, [leadId, API_URL]);
+  }, [leadId, API_URL, socket]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
