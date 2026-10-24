@@ -15,9 +15,13 @@ export const CallControls: React.FC<CallControlsProps> = ({ onTransferClick, onN
   const { socket, telephonySocket } = useSocket();
 
   const handleEndCall = () => {
+    if (!activeCall || activeCall.status === 'ENDED') return;
     const targetSocket = telephonySocket || socket;
-    if (activeCall && targetSocket) {
-      targetSocket.emit('endCall', { callSid: activeCall.callSid });
+    if (targetSocket) {
+      targetSocket.emit('endCall', { 
+        callSid: activeCall.callSid,
+        reason: 'explicit_user_end'
+      });
     }
     setActiveCall(null);
     setStatus('AVAILABLE');

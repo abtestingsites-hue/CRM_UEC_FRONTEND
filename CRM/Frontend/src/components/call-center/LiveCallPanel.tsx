@@ -34,14 +34,14 @@ function LiveKitAudioBridge({
   const remoteParticipants = useRemoteParticipants();
   const hasStartedRecording = useRef(false);
 
-  // Helper to mark call as CONNECTED and trigger recording once
+  // Helper to mark call as CONNECTED once verified answer received
   const markConnectedAndRecord = () => {
     updateActiveCallStatus('CONNECTED');
     setWebrtcConnected(true);
     if (telephonySocket && room && !hasStartedRecording.current) {
       hasStartedRecording.current = true;
-      console.log(`[CALL-RECORDING] Emitting startRecording callSid=${callSid} roomName=${room.name}`);
-      telephonySocket.emit('startRecording', { callSid, roomName: room.name });
+      console.log(`[CALL-RECORDING] Emitting callAnswered callSid=${callSid} roomName=${room.name}`);
+      telephonySocket.emit('callAnswered', { callSid, roomName: room.name });
     }
   };
 
@@ -64,16 +64,21 @@ function LiveKitAudioBridge({
       },
       participantConnected: (p: any) => {
         console.log('[LIVEKIT-AUDIO] Remote participant connected:', p.identity);
-        if (!p.isLocal) {
+        if (!p.isLocal && p.attributes?.['sip.callStatus'] === 'active') {
           markConnectedAndRecord();
         }
       },
       participantDisconnected: (p: any) => {
         console.log('[LIVEKIT-AUDIO] Participant disconnected:', p.identity);
       },
+      participantAttributesChanged: (changedAttributes: any, participant: any) => {
+        if (participant.identity.startsWith('sip_') && changedAttributes['sip.callStatus'] === 'active') {
+          markConnectedAndRecord();
+        }
+      },
       trackSubscribed: (track: any, pub: any, participant: any) => {
         console.log('[LIVEKIT-AUDIO] Track subscribed:', track.kind, 'from', participant.identity);
-        if (track.kind === 'audio') {
+        if (track.kind === 'audio' && participant.attributes?.['sip.callStatus'] === 'active') {
           markConnectedAndRecord();
         }
       }
@@ -82,12 +87,14 @@ function LiveKitAudioBridge({
     room.on('connected', events.connected);
     room.on('participantConnected', events.participantConnected);
     room.on('participantDisconnected', events.participantDisconnected);
+    room.on('participantAttributesChanged', events.participantAttributesChanged);
     room.on('trackSubscribed', events.trackSubscribed);
 
     return () => {
       room.off('connected', events.connected);
       room.off('participantConnected', events.participantConnected);
       room.off('participantDisconnected', events.participantDisconnected);
+      room.off('participantAttributesChanged', events.participantAttributesChanged);
       room.off('trackSubscribed', events.trackSubscribed);
     };
   }, [room, callSid]);
@@ -96,11 +103,7 @@ function LiveKitAudioBridge({
     if (!room || state !== 'connected') return;
 
     if (remoteParticipants.length > 0) {
-      const hasActive = remoteParticipants.some(p => {
-        const isSipActive = p.attributes?.['sip.callStatus'] === 'active';
-        const hasAudio = p.audioTrackPublications?.size > 0;
-        return isSipActive || hasAudio || p.identity.startsWith('sip_');
-      });
+      const hasActive = remoteParticipants.some(p => p.attributes?.['sip.callStatus'] === 'active');
       if (hasActive) {
         markConnectedAndRecord();
       }
@@ -109,7 +112,7 @@ function LiveKitAudioBridge({
 
   useEffect(() => {
     if (state === 'connected') {
-      markConnectedAndRecord();
+      setWebrtcConnected(true);
     } else if (state === 'connecting') {
       updateActiveCallStatus('CONNECTING');
     } else if (state === 'disconnected') {
