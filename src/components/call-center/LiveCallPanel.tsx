@@ -70,10 +70,40 @@ function LiveKitAudioBridge({
       },
       participantDisconnected: (p: any) => {
         console.log('[LIVEKIT-AUDIO] Participant disconnected:', p.identity);
+        if (!p.isLocal) {
+          console.log('[LIVEKIT-AUDIO] Remote participant disconnected -> triggering call end');
+          const targetSocket = telephonySocket;
+          if (targetSocket) {
+            targetSocket.emit('endCall', {
+              callSid,
+              roomName: room.name,
+              reason: 'customer_hangup',
+            });
+          }
+          updateActiveCallStatus('ENDED');
+          useCallStore.getState().setActiveCall(null);
+          useCallStore.getState().setStatus('AVAILABLE');
+        }
       },
       participantAttributesChanged: (changedAttributes: any, participant: any) => {
-        if (participant.identity.startsWith('sip_') && changedAttributes['sip.callStatus'] === 'active') {
-          markConnectedAndRecord();
+        if (participant.identity?.startsWith('sip_')) {
+          const sipStatus = changedAttributes['sip.callStatus'];
+          if (sipStatus === 'active') {
+            markConnectedAndRecord();
+          } else if (sipStatus === 'hangup' || sipStatus === 'disconnect') {
+            console.log('[LIVEKIT-AUDIO] SIP hangup detected -> triggering call end');
+            const targetSocket = telephonySocket;
+            if (targetSocket) {
+              targetSocket.emit('endCall', {
+                callSid,
+                roomName: room.name,
+                reason: 'sip_hangup',
+              });
+            }
+            updateActiveCallStatus('ENDED');
+            useCallStore.getState().setActiveCall(null);
+            useCallStore.getState().setStatus('AVAILABLE');
+          }
         }
       },
       trackSubscribed: (track: any, pub: any, participant: any) => {
