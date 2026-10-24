@@ -27,7 +27,8 @@ export default function AIRecordsPage() {
         if (!res.ok) throw new Error('Failed to fetch');
         const data = await res.json();
         
-        setRecords(data || []);
+        const recordsList = Array.isArray(data) ? data : (data?.calls || []);
+        setRecords(recordsList);
         setIsLoading(false);
       } catch (err) {
         console.error("Failed to fetch call records", err);
