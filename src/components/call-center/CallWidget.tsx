@@ -195,50 +195,44 @@ function LiveKitManager({ setCallState, setWebrtcConnected, callSid, isMuted, is
   }, [room, callSid]);
 
   // Check remote participants attributes for answer state
+  // Check remote participants attributes for verified answer state
   useEffect(() => {
     if (!room || state !== 'connected') return;
 
-    if (callCategory === 'Inbound') {
-      markConnectedAndRecord();
-      return;
-    }
+    const hasRemote = remoteParticipants.length > 0;
+    const hasActiveSip = remoteParticipants.some(p => 
+      p.attributes?.['sip.callStatus'] === 'active' || 
+      p.isSpeaking || 
+      p.getTrackPublications().length > 0
+    );
 
-    // Outbound call: verify customer actually answered
-    const hasActiveSip = remoteParticipants.some(p => p.attributes?.['sip.callStatus'] === 'active');
-    if (hasActiveSip) {
+    if (hasRemote && (callCategory === 'Inbound' || hasActiveSip)) {
       markConnectedAndRecord();
+      console.log('[CALL-LIFECYCLE-DIAG]', JSON.stringify({
+        stage: 'CUSTOMER_ANSWERED',
+        source: callCategory === 'Inbound' ? 'inbound_remote_participant_connected' : 'sip_active_confirmed',
+        callId: callSid,
+        roomName: room?.name,
+        remoteParticipantCount: remoteParticipants.length,
+        timestamp: new Date().toISOString(),
+      }));
+    } else if (callCategory === 'Outbound') {
+      setCallState('RINGING');
+      console.log('[CALL-LIFECYCLE-DIAG]', JSON.stringify({
+        stage: 'PROVIDER_RINGING',
+        source: 'sip_trunk_ringing',
+        callId: callSid,
+        roomName: room?.name,
+        timestamp: new Date().toISOString(),
+      }));
+    } else {
+      setCallState('CONNECTING');
     }
   }, [remoteParticipants, room, state, callCategory]);
 
   useEffect(() => {
     if (state === 'connected') {
       hasEverConnectedRef.current = true;
-      if (callCategory === 'Inbound') {
-        markConnectedAndRecord();
-        console.log('[CALL-LIFECYCLE-DIAG]', JSON.stringify({
-          stage: 'CUSTOMER_ANSWERED',
-          source: 'inbound_agent_connected',
-          callId: callSid,
-          roomName: room?.name,
-          connectionState: state,
-          timestamp: new Date().toISOString(),
-        }));
-      } else {
-        // Outbound call: Keep in RINGING until customer picks up
-        const hasActiveSip = remoteParticipants.some(p => p.attributes?.['sip.callStatus'] === 'active');
-        if (hasActiveSip) {
-          markConnectedAndRecord();
-        } else {
-          setCallState('RINGING');
-          console.log('[CALL-LIFECYCLE-DIAG]', JSON.stringify({
-            stage: 'PROVIDER_RINGING',
-            source: 'sip_trunk_ringing',
-            callId: callSid,
-            roomName: room?.name,
-            timestamp: new Date().toISOString(),
-          }));
-        }
-      }
       setWebrtcConnected(true);
     } else if (state === 'connecting') {
       setWebrtcConnected(false);

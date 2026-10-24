@@ -136,57 +136,70 @@ export default function AIRecordsPage() {
                   </td>
                 </tr>
               ) : filteredRecords.length > 0 ? (
-                filteredRecords.map((record, idx) => (
-                  <tr key={idx} className="hover:bg-[#111] transition-colors group">
-                    <td className="px-6 py-4 font-medium text-slate-300">
-                      <div className="flex items-center gap-2">
-                        {record.direction === 'INBOUND' ? (
-                          <PhoneIncoming className="w-4 h-4 text-emerald-500" />
-                        ) : (
-                          <PhoneOutgoing className="w-4 h-4 text-blue-500" />
-                        )}
-                        {record.id.substring(0,8)}...
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 font-medium text-white">{record.customerName}</td>
-                    <td className="px-6 py-4 text-slate-400">{record.agentName}</td>
-                    <td className="px-6 py-4">
-                      <span className="flex items-center gap-1.5 text-slate-300">
-                        <Clock className="w-3 h-3 text-slate-500" />
-                        {formatDuration(record.duration)}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-slate-500">
-                      {new Date(record.timestamp).toLocaleString()}
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      {record.recordingStatus === 'READY' && record.recordingUrl ? (
-                        <div className="flex items-center justify-end gap-2">
-                          <audio 
-                            src={record.recordingUrl} 
-                            controls 
-                            className="w-48 h-8 rounded-lg outline-none" 
-                            preload="metadata"
-                            crossOrigin="anonymous"
-                            onLoadStart={(e) => console.log(`[RECORDING-PLAYER] event=loadStart callId=${record.id} srcPresent=${!!e.currentTarget.src}`)}
-                            onLoadedMetadata={(e) => console.log(`[RECORDING-PLAYER] event=loadedMetadata callId=${record.id} duration=${e.currentTarget.duration}`)}
-                            onCanPlay={(e) => console.log(`[RECORDING-PLAYER] event=canPlay callId=${record.id} readyState=${e.currentTarget.readyState}`)}
-                            onError={(e) => console.error(`[RECORDING-PLAYER] event=error callId=${record.id} networkState=${e.currentTarget.networkState} errorCode=${e.currentTarget.error?.code} errorMessage=${e.currentTarget.error?.message}`)}
-                          />
+                filteredRecords.map((record, idx) => {
+                  const customerDisplay = record.customerName || record.customerDetails?.name || record.callerName || (record.customerPhone && record.customerPhone !== 'Unknown' ? record.customerPhone : (record.callerPhone && record.callerPhone !== 'Unknown' ? record.callerPhone : 'Customer'));
+                  const agentDisplay = record.agentName || record.handlingAgent?.name || record.originalAgent?.name || 'Agent';
+                  const rawDate = record.timestamp || record.startedAt || record.date || record.createdAt;
+                  const dateObj = rawDate ? new Date(rawDate) : null;
+                  const dateDisplay = dateObj && !isNaN(dateObj.getTime())
+                    ? `${dateObj.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}, ${dateObj.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}`
+                    : '—';
+                  const displayId = (record.callSid || record.id || '').replace(/^call_outbound_/, 'OUT-').replace(/^call_inbound_/, 'IN-');
+                  const shortId = displayId.length > 12 ? `${displayId.substring(0, 10)}...` : displayId;
+                  const durationVal = record.duration || record.connectedDuration || 0;
+
+                  return (
+                    <tr key={record.id || idx} className="hover:bg-[#111] transition-colors group">
+                      <td className="px-6 py-4 font-medium text-slate-300">
+                        <div className="flex items-center gap-2">
+                          {record.direction === 'INBOUND' ? (
+                            <PhoneIncoming className="w-4 h-4 text-emerald-500" />
+                          ) : (
+                            <PhoneOutgoing className="w-4 h-4 text-blue-500" />
+                          )}
+                          <span title={record.callSid || record.id}>{shortId}</span>
                         </div>
-                      ) : record.recordingStatus === 'PROCESSING' ? (
-                        <span className="text-xs text-amber-500 font-medium inline-flex items-center gap-1.5">
-                          <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping" />
-                          Processing Recording...
+                      </td>
+                      <td className="px-6 py-4 font-medium text-white">{customerDisplay}</td>
+                      <td className="px-6 py-4 text-slate-400">{agentDisplay}</td>
+                      <td className="px-6 py-4">
+                        <span className="flex items-center gap-1.5 text-slate-300">
+                          <Clock className="w-3 h-3 text-slate-500" />
+                          {formatDuration(durationVal)}
                         </span>
-                      ) : record.recordingStatus === 'FAILED' ? (
-                        <span className="text-xs text-rose-500 font-medium">Recording Failed</span>
-                      ) : (
-                        <span className="text-xs text-slate-500">No Recording</span>
-                      )}
-                    </td>
-                  </tr>
-                ))
+                      </td>
+                      <td className="px-6 py-4 text-slate-400">
+                        {dateDisplay}
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        {record.recordingStatus === 'READY' && record.recordingUrl ? (
+                          <div className="flex items-center justify-end gap-2">
+                            <audio 
+                              src={record.recordingUrl} 
+                              controls 
+                              className="w-48 h-8 rounded-lg outline-none" 
+                              preload="metadata"
+                              crossOrigin="anonymous"
+                              onLoadStart={(e) => console.log(`[RECORDING-PLAYER] event=loadStart callId=${record.id} srcPresent=${!!e.currentTarget.src}`)}
+                              onLoadedMetadata={(e) => console.log(`[RECORDING-PLAYER] event=loadedMetadata callId=${record.id} duration=${e.currentTarget.duration}`)}
+                              onCanPlay={(e) => console.log(`[RECORDING-PLAYER] event=canPlay callId=${record.id} readyState=${e.currentTarget.readyState}`)}
+                              onError={(e) => console.error(`[RECORDING-PLAYER] event=error callId=${record.id} networkState=${e.currentTarget.networkState} errorCode=${e.currentTarget.error?.code} errorMessage=${e.currentTarget.error?.message}`)}
+                            />
+                          </div>
+                        ) : record.recordingStatus === 'PROCESSING' ? (
+                          <span className="text-xs text-amber-500 font-medium inline-flex items-center gap-1.5">
+                            <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping" />
+                            Processing Recording...
+                          </span>
+                        ) : record.recordingStatus === 'FAILED' ? (
+                          <span className="text-xs text-rose-500 font-medium">Recording Failed</span>
+                        ) : (
+                          <span className="text-xs text-slate-500">No Recording</span>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })
               ) : (
                 <tr>
                   <td colSpan={6} className="text-center py-12 text-slate-500">

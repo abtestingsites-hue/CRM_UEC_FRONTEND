@@ -173,6 +173,22 @@ export function NumericKeypad({ onCallInitiated }: NumericKeypadProps) {
 
       setSuccessNotice(`Connecting outbound call to ${normalized}...`);
 
+      const finalRoomName = data.roomName || data.callSid || `room_${Date.now()}`;
+      setActiveCall({
+        callSid: finalRoomName,
+        roomName: finalRoomName,
+        customerName: 'Customer',
+        phone: normalized,
+        urgency: 'NORMAL',
+        category: 'Outbound',
+        direction: 'OUTBOUND',
+        status: 'DIALING',
+        isCaller: true,
+        accepted: true,
+        token: data.token,
+        serverUrl: data.serverUrl || data.wsUrl
+      });
+
       if (onCallInitiated) {
         onCallInitiated(data);
       }

@@ -94,7 +94,17 @@ export default function AiRecordsPage() {
               No call records found.
             </div>
           ) : (
-            records.map((record) => (
+            records.map((record) => {
+              const customerDisplay = record.customerName || record.customerDetails?.name || record.callerName || 'Customer';
+              const phoneDisplay = record.customerPhone || record.callerPhone || '';
+              const agentDisplay = record.agentName || record.handlingAgent?.name || record.originalAgent?.name || 'Agent';
+              const rawDate = record.date || record.timestamp || record.startedAt || record.createdAt;
+              const dateObj = rawDate ? new Date(rawDate) : null;
+              const isDateValid = dateObj && !isNaN(dateObj.getTime());
+              const dateStr = isDateValid ? `${dateObj.toLocaleDateString()} ${dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` : '—';
+              const isDirInbound = String(record.direction || '').toUpperCase().includes('IN');
+
+              return (
               <div key={record.id} className="border-b border-[#222] last:border-0 hover:bg-[#111]/30 transition-colors">
                 <div 
                   className="grid grid-cols-12 gap-4 px-6 py-4 items-center cursor-pointer"
@@ -103,18 +113,18 @@ export default function AiRecordsPage() {
                   {/* Direction */}
                   <div className="col-span-1 flex items-center">
                     <div className={`w-8 h-8 rounded-lg flex items-center justify-center border ${
-                      record.direction === 'Inbound' 
+                      isDirInbound
                         ? 'bg-blue-500/10 border-blue-500/20 text-blue-500' 
                         : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500'
                     }`}>
-                      {record.direction === 'Inbound' ? <PhoneIncoming className="w-4 h-4" /> : <PhoneOutgoing className="w-4 h-4" />}
+                      {isDirInbound ? <PhoneIncoming className="w-4 h-4" /> : <PhoneOutgoing className="w-4 h-4" />}
                     </div>
                   </div>
 
                   {/* Customer */}
                   <div className="col-span-3 min-w-0 flex flex-col">
-                    <span className="text-sm font-bold text-white truncate">{record.customerName}</span>
-                    <span className="text-xs text-slate-500 font-mono truncate">{record.customerPhone}</span>
+                    <span className="text-sm font-bold text-white truncate">{customerDisplay}</span>
+                    {phoneDisplay && <span className="text-xs text-slate-500 font-mono truncate">{phoneDisplay}</span>}
                   </div>
 
                   {/* Agent */}
@@ -122,19 +132,19 @@ export default function AiRecordsPage() {
                     <div className="w-6 h-6 rounded-full bg-[#222] flex items-center justify-center text-[10px] text-slate-400">
                       <User className="w-3 h-3" />
                     </div>
-                    <span className="text-sm font-medium text-slate-300 truncate">{record.agentName}</span>
+                    <span className="text-sm font-medium text-slate-300 truncate">{agentDisplay}</span>
                   </div>
 
                   {/* Duration */}
                   <div className="col-span-2 flex items-center gap-2 text-sm text-slate-400">
                     <Clock className="w-3.5 h-3.5" />
-                    {formatDuration(record.duration)}
+                    {formatDuration(record.duration || record.connectedDuration || 0)}
                   </div>
 
                   {/* Date */}
                   <div className="col-span-2 flex items-center gap-2 text-sm text-slate-400">
                     <CalendarIcon className="w-3.5 h-3.5" />
-                    {new Date(record.date).toLocaleDateString()} {new Date(record.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    {dateStr}
                   </div>
 
                   {/* Status */}
@@ -225,7 +235,8 @@ export default function AiRecordsPage() {
                   </div>
                 )}
               </div>
-            ))
+            );
+          })
           )}
         </div>
       </div>
