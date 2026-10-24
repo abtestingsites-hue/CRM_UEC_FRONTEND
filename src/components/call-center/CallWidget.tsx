@@ -37,9 +37,8 @@ function LiveKitManager({ setCallState, setWebrtcConnected, callSid, isMuted, is
     setCallState('CONNECTED');
     setWebrtcConnected(true);
     if (telephonySocket && room) {
-      console.log(`[CALL-RECORDING] Emitting startRecording and callAnswered callSid=${callSid} roomName=${room.name}`);
+      console.log(`[CALL-RECORDING] Emitting callAnswered callSid=${callSid} roomName=${room.name}`);
       telephonySocket.emit('callAnswered', { callSid, roomName: room.name });
-      telephonySocket.emit('startRecording', { callSid, roomName: room.name });
     }
   };
 
@@ -107,6 +106,10 @@ function LiveKitManager({ setCallState, setWebrtcConnected, callSid, isMuted, is
 
     const checkSipStatus = (participantIdentity: string, status: string) => {
       console.log(`[CALL-LIVEKIT-SIP-STATE] callSessionId=${callSid} participantIdentity=${participantIdentity} sip.callStatus=${status}`);
+      if (callEndedTriggeredRef.current) {
+        console.warn(`[CALL-LIVEKIT-SIP-STATE] Ignored sip.callStatus=${status} for callSid=${callSid} because call has already ended.`);
+        return;
+      }
       if (status === 'active') {
         markConnectedAndRecord();
       } else if (status === 'hangup' || status === 'disconnect') {
@@ -124,17 +127,17 @@ function LiveKitManager({ setCallState, setWebrtcConnected, callSid, isMuted, is
       },
       disconnected: (reason: any) => {
         logEvent('disconnected', reason);
-        if (hasEverConnectedRef.current && !callEndedTriggeredRef.current) {
-          console.log(`[CALL-LIFECYCLE-DIAG] LiveKit room disconnected after connection: reason=${reason}`);
-          triggerCallEnd('room_disconnected');
-        }
+        console.log(`[CALL-LIFECYCLE-DIAG] Room disconnected event: roomState=${room.state} connectionState=${state} callState=${useCallStore.getState().activeCall?.status} hasEverConnected=${hasEverConnectedRef.current} callId=${callSid} reason=${reason} terminationSource=room_disconnected (PSTN Call Preserved - Non-Destructive)`);
+        setWebrtcConnected(false);
       },
       reconnecting: () => {
         logEvent('reconnecting');
+        console.log(`[CALL-LIFECYCLE-DIAG] Room reconnecting: callId=${callSid}`);
         setWebrtcConnected(false);
       },
       reconnected: () => {
         logEvent('reconnected');
+        console.log(`[CALL-LIFECYCLE-DIAG] Room reconnected: callId=${callSid}`);
         setWebrtcConnected(true);
       },
       mediaDevicesError: (e: any) => {
@@ -143,6 +146,7 @@ function LiveKitManager({ setCallState, setWebrtcConnected, callSid, isMuted, is
       },
       participantConnected: (p: any) => {
         logEvent('participant_connected', p);
+        if (callEndedTriggeredRef.current) return;
         // Only mark connected if customer has already answered (active)
         if (p.attributes?.['sip.callStatus'] === 'active') {
           markConnectedAndRecord();
@@ -375,6 +379,9 @@ export function CallWidget() {
   const [duration, setDuration] = useState(0);
   const [audioBlocked, setAudioBlocked] = useState(false);
   const roomContextRef = useRef<any>(null);
+  const handleRoomReady = React.useCallback((r: any) => {
+    roomContextRef.current = r;
+  }, []);
   
   const callState = activeCall?.status || 'IDLE';
 
@@ -725,7 +732,7 @@ export function CallWidget() {
                   callCategory={activeCall.category}
                   telephonySocket={telephonySocket}
                   onAudioBlockedChange={setAudioBlocked}
-                  onRoomReady={(r: any) => { roomContextRef.current = r; }}
+                  onRoomReady={handleRoomReady}
                 />
               </LiveKitRoom>
               <CallControlsInner 
