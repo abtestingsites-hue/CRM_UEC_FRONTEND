@@ -254,26 +254,49 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     };
 
     const handleCallConnected = (data: any) => {
-      console.log(`[SOCKET] callConnected received | callSid=${data.callSid}`);
+      console.log(`[SOCKET] callConnected received | dataCallSid=${data?.callSid} dataRoomName=${data?.roomName}`);
       const { activeCall, updateActiveCallStatus } = useCallStore.getState();
-      if (activeCall && activeCall.callSid === data.callSid) {
+      const isMatching = Boolean(activeCall && (
+        activeCall.callSid === data?.callSid ||
+        activeCall.roomName === data?.callSid ||
+        activeCall.callSid === data?.roomName ||
+        activeCall.roomName === data?.roomName ||
+        (data?.sessionId && (activeCall.callSid === data.sessionId || (activeCall as any).sessionId === data.sessionId))
+      ));
+      if (isMatching) {
         updateActiveCallStatus('CONNECTED');
       }
     };
 
     const handleCallEnded = (data: any) => {
       console.log(
-        `[INBOUND-E2E] CALL_ENDED_RECEIVED | callSid=${data.callSid} activeCallId=${useCallStore.getState().activeCall?.callSid}`
+        `[INBOUND-E2E] CALL_ENDED_RECEIVED | dataCallSid=${data?.callSid} dataRoomName=${data?.roomName} activeCallSid=${useCallStore.getState().activeCall?.callSid}`
       );
-      const { setIncomingCall, setWebrtcConnected, fetchDashboardCalls, activeCall, updateActiveCallStatus } =
+      const { setIncomingCall, setWebrtcConnected, fetchDashboardCalls, activeCall, updateActiveCallStatus, setActiveCall, setStatus } =
         useCallStore.getState();
 
       setIncomingCall(null);
       setWebrtcConnected(false);
       fetchDashboardCalls();
 
-      if (activeCall && activeCall.callSid === data.callSid) {
+      const isMatching = Boolean(activeCall && (
+        activeCall.callSid === data?.callSid ||
+        activeCall.roomName === data?.callSid ||
+        activeCall.callSid === data?.roomName ||
+        activeCall.roomName === data?.roomName ||
+        (data?.sessionId && (activeCall.callSid === data.sessionId || (activeCall as any).sessionId === data.sessionId))
+      ));
+
+      if (isMatching) {
         updateActiveCallStatus('ENDED');
+        // Grace period before clearing activeCall from store to ensure stale calls never persist across routes
+        setTimeout(() => {
+          const current = useCallStore.getState().activeCall;
+          if (current && current.status === 'ENDED') {
+            setActiveCall(null);
+            setStatus('AVAILABLE');
+          }
+        }, 3000);
       }
     };
 
@@ -286,7 +309,13 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
 
     const handleCallAccepted = (data: any) => {
       const { activeCall, setActiveCall } = useCallStore.getState();
-      if (activeCall && activeCall.callSid === data.callSid) {
+      const isMatching = Boolean(activeCall && (
+        activeCall.callSid === data?.callSid ||
+        activeCall.roomName === data?.callSid ||
+        activeCall.callSid === data?.roomName ||
+        activeCall.roomName === data?.roomName
+      ));
+      if (isMatching && activeCall) {
         setActiveCall({ ...activeCall, accepted: true });
       }
     };
