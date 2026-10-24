@@ -43,7 +43,7 @@ function LiveKitManager({ setCallState, setWebrtcConnected, callSid, isMuted, is
   };
 
   const triggerCallEnd = (reason: string) => {
-    if (callEndedTriggeredRef.current) return;
+    if (callEndedTriggeredRef.current || useCallStore.getState().activeCall?.status === 'ENDED') return;
     callEndedTriggeredRef.current = true;
     console.log(`[CALL-LIFECYCLE-DIAG] callId=${callSid} stage=CALL_TERMINATED source=${reason} timestamp=${new Date().toISOString()}`);
     setCallState('ENDED');
@@ -52,7 +52,7 @@ function LiveKitManager({ setCallState, setWebrtcConnected, callSid, isMuted, is
       telephonySocket.emit('endCall', {
         callSid,
         roomName: room.name,
-        reason,
+        reason: reason || 'explicit_user_end',
       });
     }
   };
@@ -154,6 +154,7 @@ function LiveKitManager({ setCallState, setWebrtcConnected, callSid, isMuted, is
       },
       participantDisconnected: (p: any) => {
         logEvent('participant_disconnected', p);
+        if (callEndedTriggeredRef.current || useCallStore.getState().activeCall?.status === 'ENDED') return;
         // If remote participant (PSTN customer) disconnects, customer hung up!
         if (!p.isLocal) {
           triggerCallEnd('customer_hangup');
@@ -552,6 +553,9 @@ export function CallWidget() {
   };
 
   const endCall = () => {
+    if (!activeCall || activeCall.status === 'ENDED' || callState === 'ENDED') {
+      return;
+    }
     if (telephonySocket && activeCall) {
       if (endCallRequestedRef.current) {
         console.log('[END-CALL-FLOW]', JSON.stringify({
@@ -582,7 +586,8 @@ export function CallWidget() {
           roomName: activeCall.roomName,
           isCaller: activeCall.isCaller,
           category: activeCall.category,
-          agentId: agentId
+          agentId: agentId,
+          reason: 'explicit_user_end'
         });
       } else if (telephonySocket) {
         telephonySocket.emit('endCall', { 
@@ -591,7 +596,8 @@ export function CallWidget() {
           isCaller: activeCall.isCaller,
           category: activeCall.category,
           agentId: agentId,
-          duration: duration || 1
+          duration: duration || 1,
+          reason: 'explicit_user_end'
         });
       }
       
