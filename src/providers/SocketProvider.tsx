@@ -268,6 +268,45 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
       }
     };
 
+    const handleCallRoomUpdated = (data: any) => {
+      console.log('[INBOUND-CALL] callRoomUpdated received:', data);
+      const { incomingCall, activeCall, setIncomingCall, setActiveCall } = useCallStore.getState();
+      const targetCallSid = data.callSid || data.callId;
+      if (incomingCall && (incomingCall.callSid === targetCallSid || incomingCall.roomName === targetCallSid || (incomingCall as any).id === targetCallSid)) {
+        setIncomingCall({
+          ...incomingCall,
+          roomName: data.roomName,
+          token: data.token,
+          serverUrl: data.serverUrl || data.wsUrl || incomingCall.serverUrl,
+          wsUrl: data.wsUrl || data.serverUrl || incomingCall.wsUrl,
+        });
+      }
+      if (activeCall && (activeCall.callSid === targetCallSid || activeCall.roomName === targetCallSid || (activeCall as any).id === targetCallSid)) {
+        setActiveCall({
+          ...activeCall,
+          roomName: data.roomName,
+          token: data.token,
+          serverUrl: data.serverUrl || data.wsUrl || activeCall.serverUrl,
+          wsUrl: data.wsUrl || data.serverUrl || activeCall.wsUrl,
+        });
+      }
+    };
+
+    const handleCallAcceptedConfirmed = (data: any) => {
+      console.log('[INBOUND-CALL] callAcceptedConfirmed received:', data);
+      const { activeCall, setActiveCall } = useCallStore.getState();
+      const targetCallSid = data.callSid || data.callId;
+      if (activeCall && (activeCall.callSid === targetCallSid || activeCall.roomName === targetCallSid || (activeCall as any).id === targetCallSid)) {
+        setActiveCall({
+          ...activeCall,
+          roomName: data.roomName,
+          token: data.token,
+          serverUrl: data.serverUrl || data.wsUrl || activeCall.serverUrl,
+          wsUrl: data.wsUrl || data.serverUrl || activeCall.wsUrl,
+        });
+      }
+    };
+
     const handleCallEnded = (data: any) => {
       console.log(
         `[INBOUND-E2E] CALL_ENDED_RECEIVED | dataCallSid=${data?.callSid} dataRoomName=${data?.roomName} activeCallSid=${useCallStore.getState().activeCall?.callSid}`
@@ -371,6 +410,8 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     socketInstance.on('incomingEmergencyCall', handleIncomingEmergencyCall);
     socketInstance.on('agentAssigned', handleAgentAssigned);
     socketInstance.on('callConnected', handleCallConnected);
+    socketInstance.on('callRoomUpdated', handleCallRoomUpdated);
+    socketInstance.on('callAcceptedConfirmed', handleCallAcceptedConfirmed);
     socketInstance.on('callEnded', handleCallEnded);
     socketInstance.on('callRejected', handleCallRejected);
     const handleAgentStatusChange = (data: any) => {
@@ -459,6 +500,8 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
       socketInstance.off('incomingEmergencyCall', handleIncomingEmergencyCall);
       socketInstance.off('agentAssigned', handleAgentAssigned);
       socketInstance.off('callConnected', handleCallConnected);
+      socketInstance.off('callRoomUpdated', handleCallRoomUpdated);
+      socketInstance.off('callAcceptedConfirmed', handleCallAcceptedConfirmed);
       socketInstance.off('callEnded', handleCallEnded);
       socketInstance.off('callRejected', handleCallRejected);
       socketInstance.off('callAccepted', handleCallAccepted);

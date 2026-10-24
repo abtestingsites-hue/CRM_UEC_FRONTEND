@@ -156,6 +156,7 @@ export const LiveCallPanel = () => {
         {/* Real LiveKit WebRTC Audio Connection Engine */}
         {hasLivekitToken && activeCall.status !== 'ENDED' && (
           <LiveKitRoom
+            key={`${activeCall.callSid}_${activeCall.roomName}`}
             serverUrl={serverUrl}
             token={activeCall.token}
             connect={activeCall.status !== 'ENDED'}

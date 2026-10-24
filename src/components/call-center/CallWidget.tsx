@@ -716,6 +716,7 @@ export function CallWidget() {
                 </div>
               )}
               <LiveKitRoom
+                key={`${activeCall.callSid}_${activeCall.roomName}`}
                 serverUrl={activeCall?.serverUrl || activeCall?.wsUrl || process.env.NEXT_PUBLIC_LIVEKIT_URL || 'wss://23jy3gv6xcs.livekit.cloud'}
                 token={activeCall.token}
                 connect={callState !== 'ENDED'}
