@@ -63,20 +63,27 @@ export default function CallCenterPage() {
 
   useEffect(() => {
     const handleStatusChange = (data: any) => {
-      setAgents(prev => prev.map(a => {
-        if (a.id === data.agentId || a.userId === data.agentId) {
-          return { ...a, status: data.status };
-        }
-        return a;
-      }));
+      if (!data || !data.agentId) return;
+      setAgents(prev => {
+        const target = prev.find(a => a.id === data.agentId || a.userId === data.agentId);
+        if (!target || target.status === data.status) return prev;
+        return prev.map(a =>
+          a.id === data.agentId || a.userId === data.agentId
+            ? { ...a, status: data.status }
+            : a
+        );
+      });
     };
 
-    if (telephonySocket) telephonySocket.on('agent_status_change', handleStatusChange);
-    if (mediaSocket) mediaSocket.on('agent_status_change', handleStatusChange);
+    const activeSocket = telephonySocket || mediaSocket;
+    if (activeSocket) {
+      activeSocket.on('agent_status_change', handleStatusChange);
+    }
 
     return () => {
-      if (telephonySocket) telephonySocket.off('agent_status_change', handleStatusChange);
-      if (mediaSocket) mediaSocket.off('agent_status_change', handleStatusChange);
+      if (activeSocket) {
+        activeSocket.off('agent_status_change', handleStatusChange);
+      }
     };
   }, [telephonySocket, mediaSocket]);
 

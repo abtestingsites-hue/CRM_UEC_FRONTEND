@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { X, UserPlus, CheckCircle, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { apiFetch } from '@/lib/api';
@@ -34,20 +34,41 @@ export function AddAgentModal({ onClose, onSuccess }: AddAgentModalProps) {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent, forceReactivate = false) => {
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      const hostname = typeof window !== 'undefined' ? window.location.hostname : 'localhost';
+      const payload: Record<string, any> = { ...formData };
+      if (forceReactivate) payload.reactivate = true;
+      if (!payload.employeeId?.trim()) delete payload.employeeId;
+      if (!payload.phone?.trim()) delete payload.phone;
+      if (!payload.dob?.trim()) delete payload.dob;
+      if (!payload.joinedAt?.trim()) delete payload.joinedAt;
+      if (!payload.address?.trim()) delete payload.address;
+      if (!payload.city?.trim()) delete payload.city;
+      if (!payload.state?.trim()) delete payload.state;
+      if (!payload.country?.trim()) delete payload.country;
+      if (!payload.zipCode?.trim()) delete payload.zipCode;
+      if (!payload.gender?.trim()) delete payload.gender;
+      if (!payload.department?.trim()) delete payload.department;
+
       const res = await apiFetch(`/api/v1/agents/create`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(payload)
       });
       if (res.ok) {
         onSuccess();
       } else {
         const err = await res.json();
+        if (err.isArchived) {
+          const confirmReactivate = window.confirm(
+            `${err.error}\n\nWould you like to restore and reactivate this archived agent profile?`
+          );
+          if (confirmReactivate) {
+            return handleSubmit(e, true);
+          }
+        }
         alert(`Error: ${err.message || err.error || 'Failed to create agent'}`);
       }
     } catch (err) {

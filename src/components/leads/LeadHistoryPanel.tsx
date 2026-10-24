@@ -1,6 +1,6 @@
-﻿import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Phone, MessageCircle, Calendar, FileText, Activity, User, Briefcase, Mail, Filter, CreditCard, DollarSign, AlertTriangle, RefreshCw, FileCheck, FileEdit } from 'lucide-react';
-import { io, Socket } from 'socket.io-client';
+import { useSocket } from '@/providers/SocketProvider';
 import { apiFetch, API_BASE_URL } from '@/lib/api';
 
 interface TimelineEvent {
@@ -39,7 +39,7 @@ export const LeadHistoryPanel = ({ entityId, type = 'lead' }: { entityId: string
   const [events, setEvents] = useState<TimelineEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeFilter, setActiveFilter] = useState<string>('All');
-  const socketRef = useRef<Socket | null>(null);
+  const { socket } = useSocket();
 
   const filters = [
     'All', 'Enquiry', 'Calls', 'WhatsApp', 'Email', 'Meetings', 'Notes', 
@@ -75,22 +75,23 @@ export const LeadHistoryPanel = ({ entityId, type = 'lead' }: { entityId: string
 
     window.addEventListener('lead-action-completed', handleActionCompleted as EventListener);
     
-    // WebSockets initialization
-    socketRef.current = io(API_URL);
-    socketRef.current.on('connect', () => {
-      socketRef.current?.emit('joinLeadRoom', entityId);
-    });
-
-    socketRef.current.on('lead-action-completed', () => {
+    const handleRemoteAction = () => {
       fetchTimeline();
-    });
+    };
+
+    if (socket) {
+      socket.emit('joinLeadRoom', entityId);
+      socket.on('lead-action-completed', handleRemoteAction);
+    }
 
     return () => {
       window.removeEventListener('lead-action-completed', handleActionCompleted as EventListener);
-      socketRef.current?.emit('leaveLeadRoom', entityId);
-      socketRef.current?.disconnect();
+      if (socket) {
+        socket.emit('leaveLeadRoom', entityId);
+        socket.off('lead-action-completed', handleRemoteAction);
+      }
     };
-  }, [entityId, type, API_URL]);
+  }, [entityId, type, API_URL, socket]);
 
   if (loading) {
     return <div className="p-8 text-center text-slate-500 animate-pulse flex items-center justify-center h-full">Loading full history...</div>;
