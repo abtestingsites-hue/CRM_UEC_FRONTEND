@@ -1,0 +1,35 @@
+sequenceDiagram
+  autonumber
+  actor Customer as PSTN Customer (+91)
+  participant Carrier as Vobiz SIP Trunk
+  participant LK as LiveKit Cloud SFU
+  participant Gateway as TelephonyGateway (WS)
+  participant Backend as NestJS TelephonyService
+  participant Agent as Agent Browser (WebRTC)
+  participant Egress as LiveKit Egress Service
+  participant S3 as Supabase S3 Storage
+  participant AI as Gemini 3.5 Flash
+
+  Customer->>Carrier: Dial +918064267760
+  Carrier->>Backend: Inbound Webhook (DialCallUUID)
+  Backend->>Backend: Reserve Inbound Channel (CapacityService)
+  Backend->>Gateway: Allocate Longest Idle Agent
+  Gateway->>Agent: incoming_call (WebSocket emit)
+  Agent->>Gateway: acceptCall
+  Agent->>LK: Join WebRTC SIP Room (callRoomUpdated)
+  Carrier->>LK: Bridge Audio via SIP Trunk (ST_89fEsPaUMyqM)
+  LK->>Agent: Two-Way Audio Active
+  Agent->>Backend: customerAnswered / startRecording
+  Backend->>LK: startRoomCompositeEgress
+  LK-->>Backend: Return egressId (EG_WrwmToLzTmEn)
+  Backend->>Backend: Update DB recordingStatus = RECORDING
+  Customer->>Carrier: Hangup
+  Carrier->>Backend: Carrier Webhook (CALL_ENDED)
+  Backend->>LK: stopRoomRecording
+  LK->>Egress: Encode MP4 Audio
+  Egress->>S3: Upload recordings/room.mp4
+  Backend->>Backend: Poll Egress Status = 3 (COMPLETE)
+  Backend->>Backend: Update DB recordingStatus = READY
+  Backend->>AI: Trigger Post-Call Pipeline with Audio
+  AI-->>Backend: Return Structured Summary & Sentiment
+  Backend->>Backend: Persist CallAnalytics & AiUsageRecord

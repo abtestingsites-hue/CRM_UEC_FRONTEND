@@ -1,0 +1,13 @@
+graph TD
+      A[Call Session Ended] --> B{recordingStatus == READY & audio exists?}
+      B -- Yes --> C[Fetch Audio Bytes from Supabase Storage]
+      C --> D[Send Audio + Prompt to Google Gemini 3.5 Flash]
+      D --> E[Gemini Generates Summary, Transcript, Sentiment Score]
+      E --> F[Persist to CallAnalytics table]
+      B -- No --> G[Trigger Metadata Fallback Pipeline]
+      G --> H[Synthesize Interaction Metadata: Duration, Caller, Agent]
+      H --> I[Prefix Summary: [Metadata Summary - Audio Not Recorded]]
+      I --> J[Set transcript = null, aiHandling = false]
+      J --> K[Persist Fallback to CallAnalytics table]
+      F --> L[Track Tokens & Costs in AiUsageRecord table]
+      K --> L

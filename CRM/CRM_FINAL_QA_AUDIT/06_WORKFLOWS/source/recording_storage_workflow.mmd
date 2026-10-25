@@ -1,0 +1,16 @@
+graph TD
+      A[Verified Call Answer] --> B{Already Recording / In-Flight?}
+      B -- Yes --> C[Skip Duplicate Request]
+      B -- No --> D{Attempts < 3?}
+      D -- No --> E[Suppress Runaway Loop: Mark FAILED]
+      D -- Yes --> F[Acquire In-Flight Lock recordingStartingInProgress]
+      F --> G[EgressClient.startRoomCompositeEgress]
+      G --> H{LiveKit Quota / HTTP 429?}
+      H -- Yes --> I[Capture 429: Mark NOT_AVAILABLE, Preserve Call]
+      H -- No --> J[Persist valid egressId & Set Status RECORDING]
+      J --> K[Release In-Flight Lock in finally block]
+      K --> L[Call Ends: stopRoomRecording]
+      L --> M[Egress Encodes & Uploads to S3 Bucket call-recordings]
+      M --> N[Backend Polls Egress Status == 3 COMPLETE]
+      N --> O[Update DB recordingStatus = READY & recordingStoragePath]
+      O --> P[CRM Generates Signed URL Valid 3600s for Playback]

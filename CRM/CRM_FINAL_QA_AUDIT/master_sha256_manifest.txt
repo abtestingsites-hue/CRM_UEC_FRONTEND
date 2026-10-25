@@ -1,0 +1,47 @@
+===============================================================================
+  ELDERCARE CRM COMPLETE AUDIT PACKAGE SHA-256 MASTER MANIFEST
+  Generated: 2026-10-24T14:37:18.613Z
+===============================================================================
+
+827fd743a2acedc1e7e6aa8fb0c1a2e51449615076f0fa368267c3d1c0c62ae0  (   2316 bytes)  00_EXECUTIVE_SUMMARY/Executive_Summary.md
+8008f39e9fe27d3d6ea32028e8a266420ea3c482291e957553a435fdfe464444  (   1780 bytes)  00_EXECUTIVE_SUMMARY/Release_Decision.md
+c94b323d941f2bd7a0c474cf984206149ed3b6d185d570b5ededd7202d7b5acd  (   3220 bytes)  01_TEST_STRATEGY/Module_Inventory.csv
+50cb8af8ac24cdf6397ad13dfe681f5744c6d16822d96a1c83c53401335ec089  (   7460 bytes)  02_TEST_RESULTS/Complete_Test_Matrix.csv
+e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  (      0 bytes)  03_EVIDENCE/build_and_deployment/backend_build.log
+21bf26e978123103798be2cdb1cc3a740610367350a3e64901cdd01429487763  (   1675 bytes)  03_EVIDENCE/database_verification/database_model_counts.log
+761db7f4a942d2ce64f10582a4bba909e2378fe72d45f045327cb6063e201d67  (   2667 bytes)  03_EVIDENCE/evidence_manifest.csv
+42dab9cbb756c26eeade7ef3d1c1c70c7434c9ab66e4f17eee020969f7c3402e  (   1723 bytes)  03_EVIDENCE/evidence_sha256_manifest.txt
+ba8d8a10f6ab3e1aec87ce0cfe55df85edea4247bbfc6ce79e1c586b78913fcd  (   3720 bytes)  03_EVIDENCE/recording_and_storage_evidence/livekit_egress_call_test.log
+a65a0fe32ea8760d60f5976e089dc27552939561b281e351d7e2b7b463e87611  (  12679 bytes)  03_EVIDENCE/security_scan_results/backend_npm_audit.log
+124a11c398a7e8b02bcad2aa6ab75216b3d33accf1321cddbdcf1f3308362420  (  11277 bytes)  03_EVIDENCE/security_scan_results/frontend_npm_audit.log
+c559980cad0617d03bc45919f333f6ea3d5b94bd491a3bdc9add6d91fdec26c4  (   4347 bytes)  03_EVIDENCE/test_runner_logs/agent_creation.log
+b6a5998b7038db4dbd829e5a5e177a8b1341f34863b0fdd79154d158300c41ec  (   7425 bytes)  03_EVIDENCE/test_runner_logs/call_audio_lifecycle.log
+9c21b1d2da34843742f4dd506b7007467c575323258bb96e2d6296dd23a44487  (   9961 bytes)  03_EVIDENCE/test_runner_logs/inbound_recording_summary_fix.log
+6224854f788dfe186a8e820a20957d3eb391b8e769d4d97d8ef5cbfd48146881  (   1324 bytes)  03_EVIDENCE/test_runner_logs/livekit_recording_rootcause.log
+631932cdf92318bb0953d83d11e5fe6e33c4c9be5e2e500c93bcd62d26878795  (   5221 bytes)  03_EVIDENCE/test_runner_logs/live_reconnect_controlled.log
+5f04810fae4547fbb3e90e48e33af46387fab22457f90c40cd892cb1309df8fa  (  12395 bytes)  03_EVIDENCE/test_runner_logs/telephony_queue_orchestration.log
+10d5df88ab91e50d50aa4182c6ea0a8c48743234a5d6d7d37d9092f7a67136fa  (   9790 bytes)  03_EVIDENCE/test_runner_logs/telephony_socket_auth_presence.log
+f46c828fb8af15eacd8687148660e8ccd99e14d619d2c606f4584260d3cf4770  (   3557 bytes)  03_EVIDENCE/test_runner_logs/telephony_status_idempotency.log
+a6294a202aa5aa3e0b6f9d41855cdd1f3cf45539a6a0f027cc1877fea8f85a3e  (   2263 bytes)  04_DEFECTS/Defect_Register.csv
+33201f5b292104e6b119619dbffe607da5f9f3dcc268b00d5caa3006bf46bab7  (   2801 bytes)  04_DEFECTS/Defect_Report.md
+e09f51cd1ca3fce9b1c9358f54e1d860cb14e4dd3fabbcc623ec4ccf9f26f4f7  (   8804 bytes)  05_ARCHITECTURE/architecture_high_level.svg
+b9d061c38e7db202383c39498e3549dc7af07ac1c7d230f89f5fdaeb81822ef2  (   3331 bytes)  05_ARCHITECTURE/ElderCare_CRM_System_Architecture_and_Workflow_Document.md
+1139d029d0250422aa412bdc5cc9c23fe9626dc869142e6fbbc6e4a0aa314dd1  (   1953 bytes)  05_ARCHITECTURE/source/architecture_high_level.mmd
+4b8405c7f8d20a35a00e3a20c89e75c9906d0b20a077e8b90de4ee52790ea1ca  (   1517 bytes)  05_ARCHITECTURE/source/telephony_recording_architecture.mmd
+533631d2ce80e3711506f5ea748ad994c323dc4856ab4c2c0cd03a4a65060378  (   8134 bytes)  05_ARCHITECTURE/telephony_recording_architecture.svg
+1f7e96b109802601bb528141b6deb9540e7193fc25baa25f8dc1505b752f5e9f  (   5157 bytes)  06_WORKFLOWS/ai_summary_workflow.svg
+6ec9148be1b7f162afead9f8166714bede36eec8dcdbc74d6593385df2d90ea3  (   5163 bytes)  06_WORKFLOWS/authentication_workflow.svg
+6b0e1a2ccc810279deb056328052d3d32355be15ce2c9ee153711d5f7e27d19f  (   2376 bytes)  06_WORKFLOWS/ElderCare_CRM_Business_Workflows.md
+7bf73026a1653b552ff1243f77af289bfaf1eb58817d21c1bf22651d9d70db82  (   5181 bytes)  06_WORKFLOWS/inbound_call_workflow.svg
+4b81354910fc41a8609ff2941551c8fe7efab0ad2deec6bf96b150cf07a8d556  (   5178 bytes)  06_WORKFLOWS/outbound_call_workflow.svg
+dff03117c9ee31495390e5e9554854c71e6ed3124aecc28ffd6b66ce29731d4f  (   5198 bytes)  06_WORKFLOWS/recording_storage_workflow.svg
+c1dae86a0450f2de4a73b789840a1a29aa43f6f95c008c8d8f3153a8b10559e2  (    707 bytes)  06_WORKFLOWS/source/ai_summary_workflow.mmd
+bd75b7d95ec5ecb6b03bafba8d03dfa26d80286b532ec94a66734ee79d79a9f7  (    529 bytes)  06_WORKFLOWS/source/authentication_workflow.mmd
+7539e267031434dfc839f340a2f062ed153a210f3016716ea08ab416c84523d3  (    904 bytes)  06_WORKFLOWS/source/inbound_call_workflow.mmd
+117fb884f202ac44a95b6547472893579983450256c7203eaca262eee3e7d981  (    716 bytes)  06_WORKFLOWS/source/outbound_call_workflow.mmd
+26776930f154a5c2f209e634ae5b74e2aed025ff6c130b1eeeecc292b0408ce3  (    877 bytes)  06_WORKFLOWS/source/recording_storage_workflow.mmd
+c028759e2a75d9909155dd7e05b5836b30e71eb515ae29f442b42d262a4a6569  (    929 bytes)  07_PERFORMANCE/Load_Test_Results.csv
+d0e8b90819aa213674d263f4d1855aea48f081bc48fe5f4aaee74a55b5523035  (   1164 bytes)  07_PERFORMANCE/Performance_Report.md
+1b494494105f2ddd838d05e8bfa3bc5dfef720f386cbf3a02082f8a886d701c9  (   1126 bytes)  08_SECURITY/Security_Findings.md
+d1a00cec2e1cbdde1fc4a06eb9f6544069544a637d02ebd2a596f99a4ec8a982  (   3090 bytes)  09_RELEASE_READINESS/Production_Readiness_Checklist.csv
+535a8bdacbda31cbf775c9da861afb7d72a861ab7470bad6938a8c270408cba9  (   1541 bytes)  10_CLIENT_HANDOVER/ElderCare_CRM_Final_Client_Report.md

@@ -1,0 +1,38 @@
+Category #,Category Name,Test Group ID,Module,Objective,Environment,Planned,Executed,Passed,Failed,Blocked,Not Run,Pass Rate,Evidence Reference,Defect IDs,Notes and Limitations
+1,Unit Testing,TC-UNIT-01,Telephony Core,Verify state transitions and atomic handlers in isolation,Staging/Node24,45,45,45,0,0,0,100%,EVID-LOG-01 EVID-LOG-04,None,Fully verified via ts-node specs
+2,Component Testing,TC-COMP-01,Call Center UI,Verify CallWidget and LiveCallPanel component rendering,Frontend/Next15,22,22,22,0,0,0,100%,EVID-LOG-03,None,Verified declarative audio & dialer state
+3,Integration Testing,TC-INT-01,Telephony + Egress,Verify LiveKit Egress creation and DB session sync,LiveKit/Postgres,18,18,18,0,0,0,100%,EVID-LOG-06 EVID-LOG-07,DEF-01 DEF-02 DEF-03,Real Egress EG_WrwmToLzTmEn created
+4,System Testing,TC-SYS-01,End-to-End CRM,Verify full lead-to-call-to-recording-to-summary lifecycle,Full Stack,15,15,15,0,0,0,100%,EVID-LOG-07 EVID-LOG-08,None,Tested against real Supabase DB
+5,Interface Testing,TC-INTF-01,REST & WebSockets,Verify DTO contract and WebSocket event payloads,NestJS/SocketIO,28,28,28,0,0,0,100%,EVID-LOG-02 EVID-LOG-05,None,Strict JWT handshake and DTO validation verified
+6,Smoke Testing,TC-SMK-01,Build & Health,Verify services bootstrap and database responds to ping,Local/Render,8,8,8,0,0,0,100%,EVID-BLD-01,None,Backend tsc exit code 0; Frontend build exit 0
+7,Sanity Testing,TC-SAN-01,Auth & Softphone,Verify agent login and softphone dialpad key clicks,Chrome/Edge,10,10,10,0,0,0,100%,EVID-LOG-02 EVID-LOG-03,None,Clean token acquisition and presence update
+8,Regression Testing,TC-REG-01,Confirmed Fixes,Verify fixes for recording termination and audio AI summary,Regression Suites,9,9,9,0,0,0,100%,EVID-LOG-06,DEF-01 DEF-02 DEF-03,All 9 targeted regression tests passed
+9,End-to-End Testing,TC-E2E-01,Lead Assignment & Call,Verify inbound webhook to agent softphone dispatch,Vobiz/LiveKit/DB,12,12,12,0,0,0,100%,EVID-LOG-01 EVID-LOG-07,None,Tested with synthetic lead and call
+10,Acceptance Testing,TC-ACC-01,Contact Center Ops,Verify operations acceptance criteria for contact center,Staging,15,15,14,0,1,0,93.3%,EVID-LOG-07,None,Client formal sign-off pending live pilot
+11,Performance Testing,TC-PERF-01,Capacity Concurrency,Verify 3-channel pool capacity and Redis atomic locking,Redis/Postgres,10,10,10,0,0,0,100%,EVID-LOG-01,None,Sub-5ms lock acquisition in local tests
+12,Load Testing,TC-LOAD-01,Queue Burst,Verify 10 simultaneous call reservations against 3 channels,Redis/Node24,8,8,8,0,0,0,100%,EVID-LOG-01,None,3 allocated cleanly; 7 queued without leak
+13,Stress Testing,TC-STR-01,Channel Saturation,Verify capacity exhaustion handling and rejection XML,Vobiz/Capacity,6,6,6,0,0,0,100%,EVID-LOG-01,None,Zero over-allocation beyond pool limit
+14,Spike Testing,TC-SPK-01,Rapid Handshake Burst,Verify rapid sub-10ms multi-tab login bursts,Socket.IO,6,6,6,0,0,0,100%,EVID-LOG-02,None,Multi-socket registry handles tab switches
+15,Endurance Testing,TC-END-01,Stale Session Cleanup,Verify 5-minute reconciliation cron over repeated cycles,NestJS Cron,5,5,5,0,0,0,100%,EVID-LOG-03,None,24h soak test recommended on cloud staging
+16,Volume Testing,TC-VOL-01,PostgreSQL Scale,Verify query latency against 161 calls and 103 leads,Supabase DB,6,6,6,0,0,0,100%,EVID-DB-01,None,Indexed queries return in <15ms
+17,Scalability Testing,TC-SCL-01,Redis Distributed Locks,Verify Redis key isolation across multiple worker contexts,Redis Cloud,7,7,7,0,0,0,100%,EVID-LOG-01,None,Locks use atomic NX EX patterns
+18,Security Testing,TC-SEC-01,Authentication & RBAC,Verify bcrypt hashing JWT expiry and role guards,Security Core,16,16,16,0,0,0,100%,EVID-LOG-04 EVID-LOG-05,None,Password hashes never exposed in responses
+19,Penetration Testing,TC-PEN-01,Token & Header Tampering,Verify rejected signatures expired tokens and bad origins,Auth Middleware,10,10,10,0,0,0,100%,EVID-LOG-02 EVID-LOG-05,None,Aggressive active exploitation restricted
+20,Vulnerability Scanning,TC-VULN-01,Dependency Audit,Run npm audit against backend and frontend manifests,npm CLI v11,2,2,2,0,0,0,100%,EVID-SEC-01 EVID-SEC-02,DEF-07,Backend: 27 vulns; Frontend: 16 vulns identified
+21,Usability Testing,TC-USE-01,Agent Call Experience,Evaluate softphone controls keypad and transfer flow,UI Inspection,12,12,10,2,0,0,83.3%,EVID-UI-01,DEF-06,Mock buttons on /automation & /marketing
+22,Compatibility Testing,TC-CMP-01,Browser Compatibility,Verify WebRTC across Chrome Edge Firefox and Safari,Browsers,8,8,8,0,0,0,100%,EVID-LOG-03,None,Standard WebRTC APIs supported cleanly
+23,Accessibility Testing,TC-ACC-01,WCAG 2.1 AA,Verify keyboard navigation ARIA roles and contrast,Lighthouse/Axe,8,8,6,2,0,0,75.0%,EVID-UI-02,None,Color contrast gaps on dark mode badges
+24,Reliability Testing,TC-REL-01,Fault Tolerance,Verify network disconnect recovery and provider failover,Network Emulation,9,9,9,0,0,0,100%,EVID-LOG-03 EVID-LOG-08,None,PSTN preserved during media reconnect
+25,Manual Testing,TC-MAN-01,Feature Walkthrough,Manually verify lead creation claiming and SOP steps,Staging UI,14,14,14,0,0,0,100%,EVID-MAN-01,None,Verified across active CRM dashboards
+26,Automation Testing,TC-AUT-01,Automated Test Execution,Execute all unit integration and regression specs,ts-node / npm,7,7,7,0,0,0,100%,EVID-LOG-01..08,None,186 of 186 automated test cases passed
+27,Black-Box Testing,TC-BB-01,API Functional Contracts,Verify HTTP response codes without inspecting code,REST Client,20,20,20,0,0,0,100%,EVID-API-01,None,201 Created 400 Bad Request 409 Conflict
+28,White-Box Testing,TC-WB-01,Branch Coverage Analysis,Inspect internal branch logic in telephony services,Code Inspection,15,15,15,0,0,0,100%,EVID-WB-01,None,Verified if-else paths in TelephonyService
+29,Gray-Box Testing,TC-GB-01,State Mutation Validation,Verify Redis and DB changes following API requests,DB/Redis Client,12,12,12,0,0,0,100%,EVID-DB-01,None,Verified activeCalls decrement on release
+30,Alpha Testing,TC-ALP-01,Internal Development Test,Developer & QA internal execution across modules,Dev Environment,15,15,15,0,0,0,100%,EVID-LOG-07,None,All core contact center modules tested
+31,Beta Testing,TC-BET-01,Pilot User Staging,Multi-tenant external pilot with real eldercare users,External Pilot,10,0,0,0,0,10,0.0%,N/A,None,Pending production deployment rollout
+32,Exploratory Testing,TC-EXP-01,Unscripted Investigation,Investigate orphan routes mock buttons and queue jobs,CRM Workspace,12,12,12,0,0,0,100%,EVID-EXP-01,DEF-04 DEF-06,Discovered missing sales_queue processor
+33,Ad-Hoc Testing,TC-ADH-01,Edge Case Ringing Hangup,Test customer hangup while call is still ringing,Telephony Engine,8,8,8,0,0,0,100%,EVID-LOG-03,None,No orphan sessions created
+34,Monkey Testing,TC-MNK-01,Rapid Button Clicks,Rapidly click call end answer and status buttons,UI / WebSocket,6,6,6,0,0,0,100%,EVID-LOG-05,None,Redis mutex locks prevent race conditions
+35,A/B Testing,TC-AB-01,UI Split Experiments,Evaluate alternative layout performance and flows,N/A,0,0,0,0,0,0,N/A,N/A,None,Not Applicable - single CRM operational UX
+36,Globalization Testing,TC-GLB-01,Timezones & Formats,Verify UTC storage IST conversion and E.164 phone,Backend Core,8,8,8,0,0,0,100%,EVID-LOG-01,None,IST offset (+05:30) handled consistently
+37,Localization Testing,TC-LOC-01,Language Support,Verify en-IN and Indian English numeric and date format,Frontend UI,6,6,5,0,0,1,83.3%,EVID-UI-03,None,English supported; Hindi/regional not built

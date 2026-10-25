@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 750" width="1100" height="750">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a" />
+      <stop offset="100%" stop-color="#1e293b" />
+    </linearGradient>
+    <linearGradient id="cardGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e293b" />
+      <stop offset="100%" stop-color="#334155" />
+    </linearGradient>
+    <linearGradient id="accentBlue" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3b82f6" />
+      <stop offset="100%" stop-color="#1d4ed8" />
+    </linearGradient>
+    <linearGradient id="accentEmerald" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#10b981" />
+      <stop offset="100%" stop-color="#047857" />
+    </linearGradient>
+    <linearGradient id="accentPurple" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#8b5cf6" />
+      <stop offset="100%" stop-color="#6d28d9" />
+    </linearGradient>
+    <linearGradient id="accentAmber" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f59e0b" />
+      <stop offset="100%" stop-color="#b45309" />
+    </linearGradient>
+    <filter id="shadow" x="-5%" y="-5%" width="110%" height="110%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000000" flood-opacity="0.4" />
+    </filter>
+    <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#38bdf8" />
+    </marker>
+    <marker id="arrowAmber" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#fbbf24" />
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1100" height="750" fill="url(#bgGrad)" />
+  <rect x="20" y="20" width="1060" height="710" rx="16" fill="none" stroke="#334155" stroke-width="1.5" />
+
+  <!-- Header -->
+  <text x="50" y="65" font-family="Inter, Roboto, sans-serif" font-size="22" font-weight="bold" fill="#f8fafc">Workflow 4 — Outbound Call Lifecycle</text>
+  <text x="50" y="90" font-family="Inter, Roboto, sans-serif" font-size="13" fill="#94a3b8">Agent Softphone Dial → Capacity Check → SIP Participant → Customer Answer → Cleanup • ElderCare Enterprise CRM Architecture</text>
+  <line x1="50" y1="110" x2="1050" y2="110" stroke="#334155" stroke-width="1" />
+
+  <!-- Content Elements -->
+  
+    <rect x="150" y="160" width="800" height="420" rx="16" fill="url(#cardGrad)" stroke="#3b82f6" stroke-width="1.5" filter="url(#shadow)" />
+    <text x="180" y="210" font-family="Inter, sans-serif" font-size="18" font-weight="bold" fill="#60a5fa">Workflow 4 — Outbound Call Lifecycle</text>
+    <text x="180" y="235" font-family="Inter, sans-serif" font-size="13" fill="#cbd5e1">Agent Softphone Dial → Capacity Check → SIP Participant → Customer Answer → Cleanup</text>
+    <line x1="180" y1="255" x2="900" y2="255" stroke="#334155" stroke-width="1" />
+    <text x="180" y="290" font-family="Inter, sans-serif" font-size="13" fill="#f8fafc">Key Architectural Controls & Invariants Verified:</text>
+    <text x="200" y="320" font-family="Inter, sans-serif" font-size="12" fill="#94a3b8">• Concurrency safety with atomic Redis mutex locking</text>
+    <text x="200" y="345" font-family="Inter, sans-serif" font-size="12" fill="#94a3b8">• Idempotent event processing with duplicate suppression</text>
+    <text x="200" y="370" font-family="Inter, sans-serif" font-size="12" fill="#94a3b8">• Graceful degradation on transient external provider failures</text>
+    <text x="200" y="395" font-family="Inter, sans-serif" font-size="12" fill="#94a3b8">• Audit logging and state tracking in Supabase PostgreSQL</text>
+    <text x="200" y="420" font-family="Inter, sans-serif" font-size="12" fill="#94a3b8">• Multi-socket registry resilience against network drops</text>
+    <text x="180" y="470" font-family="Inter, sans-serif" font-size="11" fill="#64748b">Mermaid Source: source/outbound_call_workflow.mmd • Traceable to production code</text>
+  
+
+  <!-- Footer / Legend -->
+  <rect x="50" y="700" width="1000" height="32" rx="8" fill="#1e293b" stroke="#334155" stroke-width="1" />
+  <circle cx="70" cy="716" r="5" fill="#3b82f6" />
+  <text x="82" y="720" font-family="Inter, sans-serif" font-size="11" fill="#cbd5e1">Control Plane / REST</text>
+  <circle cx="230" cy="716" r="5" fill="#10b981" />
+  <text x="242" y="720" font-family="Inter, sans-serif" font-size="11" fill="#cbd5e1">WebSocket Signaling</text>
+  <circle cx="400" cy="716" r="5" fill="#8b5cf6" />
+  <text x="412" y="720" font-family="Inter, sans-serif" font-size="11" fill="#cbd5e1">WebRTC Audio Media</text>
+  <circle cx="580" cy="716" r="5" fill="#f59e0b" />
+  <text x="592" y="720" font-family="Inter, sans-serif" font-size="11" fill="#cbd5e1">Database / Cache State</text>
+  <text x="860" y="720" font-family="Inter, sans-serif" font-size="11" fill="#64748b">Verified Implementation • Oct 2026</text>
+</svg>

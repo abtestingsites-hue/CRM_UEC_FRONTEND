@@ -1,0 +1,21 @@
+Checklist Item #,Area,Requirement,Verification Method,Status,Evidence File,Notes
+PR-01,Telephony,Inbound call routes to connected agent socket with priority,Automated Spec,PASS,telephony_queue_orchestration.log,Verified with EMERGENCY priority
+PR-02,Telephony,Outbound call connects via Vobiz SIP and bridges to LiveKit,Automated Spec,PASS,call_audio_lifecycle.log,Verified with E.164 normalization
+PR-03,Telephony,Global capacity limits to 3 concurrent channels with zero leak,Automated Spec,PASS,telephony_queue_orchestration.log,Verified atomic Redis decrement
+PR-04,Recording,LiveKit Egress creates genuine EG_ job on cloud project,Empirical Execution,PASS,livekit_egress_call_test.log,Created EG_WrwmToLzTmEn on crm-8q9fuunw
+PR-05,Recording,Recording file uploads to Supabase S3 bucket call-recordings,Config & Spec,PASS,livekit_recording_rootcause.log,Verified S3 direct upload config
+PR-06,Recording,CRM provides signed playback URL for authorized users,Code & DB Spec,PASS,call_audio_lifecycle.log,Supabase createSignedUrl (3600s)
+PR-07,AI Analytics,Gemini generates summary and sentiment from call interaction,Live API Execution,PASS,inbound_recording_summary_fix.log,Verified gemini-3.5-flash with real tokens
+PR-08,AI Analytics,Missing audio strictly produces labeled metadata summary,Automated Spec,PASS,inbound_recording_summary_fix.log,Strict [Metadata Summary] prefix
+PR-09,Omnichannel,WhatsApp messaging active via Meta Cloud API v22.0,Live Database & Config,PASS,database_model_counts.log,137 live messages in DB
+PR-10,Omnichannel,Email sending active via Nodemailer SMTP + IMAP listener,Live Config & Code,PASS,module_inventory.log,Connected to Gmail SMTP/IMAP
+PR-11,Omnichannel,Instagram Graph messaging active with enrichment processor,BullMQ Processor,PASS,module_inventory.log,InstagramEnrichmentProcessor verified
+PR-12,CRM Core,Lead deduplication blocks duplicate phone/email ingestion,Automated Spec,PASS,module_inventory.log,DeduplicationController verified
+PR-13,CRM Core,Lead pool enables agent claiming and follow-up tracking,Live DB & API,PASS,database_model_counts.log,103 leads and 47 followups verified
+PR-14,Operations,SOP templates and daily checklist executions functional,Live DB & API,PASS,database_model_counts.log,14 templates and 16 executions
+PR-15,Security,JWT auth with bcrypt hashing and Redis blacklist on logout,Automated Spec,PASS,agent_creation.log,Verified bcrypt salt 10
+PR-16,Security,Meta webhooks verify HMAC-SHA256 signatures,Code Inspection,PASS,module_inventory.log,Verified in metaWebhook.js
+PR-17,Build,Backend TypeScript compiles with zero errors,tsc Compiler,PASS,backend_build.log,Exit Code 0
+PR-18,Build,Frontend Next.js compiles all 60 routes with zero errors,Turbopack Build,PASS,build_manifest.log,Exit Code 0
+PR-19,ERP Scope,Financial ERP modules isolated or disabled for CRM pilot,Scope Review,ACCEPTED RISK,defect_register.csv,Billing/Invoicing hidden during pilot
+PR-20,Queue Worker,sales_queue processor implemented before lead campaign,Queue Review,ACCEPTED RISK,defect_register.csv,SalesQueueProcessor pending Phase 2

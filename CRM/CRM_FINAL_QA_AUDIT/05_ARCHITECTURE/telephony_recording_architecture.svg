@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 750" width="1100" height="750">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a" />
+      <stop offset="100%" stop-color="#1e293b" />
+    </linearGradient>
+    <linearGradient id="cardGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e293b" />
+      <stop offset="100%" stop-color="#334155" />
+    </linearGradient>
+    <linearGradient id="accentBlue" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3b82f6" />
+      <stop offset="100%" stop-color="#1d4ed8" />
+    </linearGradient>
+    <linearGradient id="accentEmerald" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#10b981" />
+      <stop offset="100%" stop-color="#047857" />
+    </linearGradient>
+    <linearGradient id="accentPurple" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#8b5cf6" />
+      <stop offset="100%" stop-color="#6d28d9" />
+    </linearGradient>
+    <linearGradient id="accentAmber" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f59e0b" />
+      <stop offset="100%" stop-color="#b45309" />
+    </linearGradient>
+    <filter id="shadow" x="-5%" y="-5%" width="110%" height="110%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000000" flood-opacity="0.4" />
+    </filter>
+    <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#38bdf8" />
+    </marker>
+    <marker id="arrowAmber" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#fbbf24" />
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1100" height="750" fill="url(#bgGrad)" />
+  <rect x="20" y="20" width="1060" height="710" rx="16" fill="none" stroke="#334155" stroke-width="1.5" />
+
+  <!-- Header -->
+  <text x="50" y="65" font-family="Inter, Roboto, sans-serif" font-size="22" font-weight="bold" fill="#f8fafc">Telephony & Recording Media Architecture</text>
+  <text x="50" y="90" font-family="Inter, Roboto, sans-serif" font-size="13" fill="#94a3b8">Inbound & Outbound SIP, WebRTC, Egress & AI Summary • ElderCare Enterprise CRM Architecture</text>
+  <line x1="50" y1="110" x2="1050" y2="110" stroke="#334155" stroke-width="1" />
+
+  <!-- Content Elements -->
+  
+  <!-- Stages -->
+  <rect x="50" y="140" width="180" height="110" rx="10" fill="url(#cardGrad)" stroke="#3b82f6" stroke-width="1.5" />
+  <text x="65" y="165" font-family="Inter, sans-serif" font-size="13" font-weight="bold" fill="#60a5fa">1. Inbound Ingestion</text>
+  <text x="65" y="185" font-family="Inter, sans-serif" font-size="11" fill="#f8fafc">Vobiz Carrier (+918064267760)</text>
+  <text x="65" y="205" font-family="Inter, sans-serif" font-size="10" fill="#94a3b8">DID Dispatch & Webhook POST</text>
+  <text x="65" y="225" font-family="Inter, sans-serif" font-size="10" fill="#94a3b8">Deterministic DialCallUUID</text>
+
+  <rect x="260" y="140" width="180" height="110" rx="10" fill="url(#cardGrad)" stroke="#10b981" stroke-width="1.5" />
+  <text x="275" y="165" font-family="Inter, sans-serif" font-size="13" font-weight="bold" fill="#34d399">2. Queue & Dispatch</text>
+  <text x="275" y="185" font-family="Inter, sans-serif" font-size="11" fill="#f8fafc">Capacity & QueueService</text>
+  <text x="275" y="205" font-family="Inter, sans-serif" font-size="10" fill="#94a3b8">3-Channel Mutex Lock</text>
+  <text x="275" y="225" font-family="Inter, sans-serif" font-size="10" fill="#94a3b8">Multi-Socket Handshake</text>
+
+  <rect x="470" y="140" width="180" height="110" rx="10" fill="url(#cardGrad)" stroke="#8b5cf6" stroke-width="1.5" />
+  <text x="485" y="165" font-family="Inter, sans-serif" font-size="13" font-weight="bold" fill="#a78bfa">3. LiveKit Bridging</text>
+  <text x="485" y="185" font-family="Inter, sans-serif" font-size="11" fill="#f8fafc">SIP Dispatch Rule</text>
+  <text x="485" y="205" font-family="Inter, sans-serif" font-size="10" fill="#94a3b8">Trunk: ST_89fEsPaUMyqM</text>
+  <text x="485" y="225" font-family="Inter, sans-serif" font-size="10" fill="#94a3b8">Agent WebRTC Participant</text>
+
+  <rect x="680" y="140" width="180" height="110" rx="10" fill="url(#cardGrad)" stroke="#ec4899" stroke-width="1.5" />
+  <text x="695" y="165" font-family="Inter, sans-serif" font-size="13" font-weight="bold" fill="#f472b6">4. Egress Recording</text>
+  <text x="695" y="185" font-family="Inter, sans-serif" font-size="11" fill="#f8fafc">Room Composite Egress</text>
+  <text x="695" y="205" font-family="Inter, sans-serif" font-size="10" fill="#94a3b8">egressId: EG_WrwmToLzTmEn</text>
+  <text x="695" y="225" font-family="Inter, sans-serif" font-size="10" fill="#94a3b8">In-flight Lock Deduplication</text>
+
+  <rect x="890" y="140" width="160" height="110" rx="10" fill="url(#cardGrad)" stroke="#f59e0b" stroke-width="1.5" />
+  <text x="905" y="165" font-family="Inter, sans-serif" font-size="13" font-weight="bold" fill="#fbbf24">5. Storage Upload</text>
+  <text x="905" y="185" font-family="Inter, sans-serif" font-size="11" fill="#f8fafc">Supabase S3</text>
+  <text x="905" y="205" font-family="Inter, sans-serif" font-size="10" fill="#94a3b8">call-recordings Bucket</text>
+  <text x="905" y="225" font-family="Inter, sans-serif" font-size="10" fill="#94a3b8">Signed URL Generation</text>
+
+  <!-- Flow 2: Analytics & Summary -->
+  <rect x="260" y="300" width="600" height="140" rx="12" fill="url(#cardGrad)" stroke="#06b6d4" stroke-width="1.5" />
+  <text x="280" y="330" font-family="Inter, sans-serif" font-size="14" font-weight="bold" fill="#22d3ee">Post-Call AI Intelligence Pipeline (Gemini 3.5 Flash)</text>
+  <text x="280" y="355" font-family="Inter, sans-serif" font-size="12" fill="#f8fafc">Audio Available (recordingStatus == READY):</text>
+  <text x="300" y="375" font-family="Inter, sans-serif" font-size="11" fill="#94a3b8">• Fetches audio bytes from Supabase storage → Gemini multimodal prompt</text>
+  <text x="300" y="395" font-family="Inter, sans-serif" font-size="11" fill="#94a3b8">• Generates full transcript, sentiment score, urgency, and follow-up actions</text>
+  <text x="280" y="415" font-family="Inter, sans-serif" font-size="12" fill="#f8fafc">Audio Unavailable (recordingStatus == NOT_AVAILABLE / FAILED):</text>
+  <text x="300" y="430" font-family="Inter, sans-serif" font-size="11" fill="#94a3b8">• Strictly labels summary: "[Metadata Summary - Audio Not Recorded]", transcript = null</text>
+
+  <!-- Connectors -->
+  <path d="M 230 195 L 260 195" stroke="#38bdf8" stroke-width="2" marker-end="url(#arrow)" />
+  <path d="M 440 195 L 470 195" stroke="#38bdf8" stroke-width="2" marker-end="url(#arrow)" />
+  <path d="M 650 195 L 680 195" stroke="#38bdf8" stroke-width="2" marker-end="url(#arrow)" />
+  <path d="M 860 195 L 890 195" stroke="#38bdf8" stroke-width="2" marker-end="url(#arrow)" />
+  <path d="M 970 250 L 970 370 L 860 370" stroke="#38bdf8" stroke-width="2" marker-end="url(#arrow)" />
+
+
+  <!-- Footer / Legend -->
+  <rect x="50" y="700" width="1000" height="32" rx="8" fill="#1e293b" stroke="#334155" stroke-width="1" />
+  <circle cx="70" cy="716" r="5" fill="#3b82f6" />
+  <text x="82" y="720" font-family="Inter, sans-serif" font-size="11" fill="#cbd5e1">Control Plane / REST</text>
+  <circle cx="230" cy="716" r="5" fill="#10b981" />
+  <text x="242" y="720" font-family="Inter, sans-serif" font-size="11" fill="#cbd5e1">WebSocket Signaling</text>
+  <circle cx="400" cy="716" r="5" fill="#8b5cf6" />
+  <text x="412" y="720" font-family="Inter, sans-serif" font-size="11" fill="#cbd5e1">WebRTC Audio Media</text>
+  <circle cx="580" cy="716" r="5" fill="#f59e0b" />
+  <text x="592" y="720" font-family="Inter, sans-serif" font-size="11" fill="#cbd5e1">Database / Cache State</text>
+  <text x="860" y="720" font-family="Inter, sans-serif" font-size="11" fill="#64748b">Verified Implementation • Oct 2026</text>
+</svg>

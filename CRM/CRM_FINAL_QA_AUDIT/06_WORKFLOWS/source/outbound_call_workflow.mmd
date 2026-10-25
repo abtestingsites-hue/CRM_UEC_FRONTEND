@@ -1,0 +1,13 @@
+graph TD
+      A[Agent Enters Number in Softphone] --> B{Outbound Allowed? Queue Empty?}
+      B -- No --> C[Throttle Outbound: Prioritize Waiting Inbound]
+      B -- Yes --> D[Reserve Channel in Redis CapacityService]
+      D --> E[Create LiveKit Room call_outbound_timestamp]
+      E --> F[Normalize to E.164 +91 Indian Format]
+      F --> G[LivekitService.createSipParticipant via Trunk ST_SLQtKnLvkbg3]
+      G --> H[Customer Phone Rings]
+      H --> I{Customer Answers?}
+      I -- No --> J[Call CANCELLED / UNANSWERED: Release Channel]
+      I -- Yes --> K[Verified Answer Event: Start Egress Recording]
+      K --> L[Two-Way Call Conversation]
+      L --> M[Call Terminated: Stop Egress & Trigger AI Pipeline]

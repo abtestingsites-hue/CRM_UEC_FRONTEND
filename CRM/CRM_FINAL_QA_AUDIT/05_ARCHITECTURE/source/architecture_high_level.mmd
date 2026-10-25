@@ -1,0 +1,44 @@
+graph TB
+  subgraph Client_Tier [Client Presentation Tier]
+    BrowserAgent["Agent Workstation<br/>Next.js 15 + React 19<br/>WebRTC Audio Dialer"]
+    BrowserAdmin["Supervisor / Admin<br/>Next.js Dashboard<br/>SOP & Reports View"]
+  end
+
+  subgraph Gateway_Tier [Application & Signaling Gateway]
+    NestAPI["Backend REST API Gateway<br/>NestJS 12.1 + Express 4.19<br/>Port 3000 /api/v1"]
+    SocketGateway["Telephony WebSocket Gateway<br/>Socket.IO 4.8 + JWT Auth<br/>Multi-Tab Presence Registry"]
+  end
+
+  subgraph State_Tier [Persistence & Coordination]
+    PostgresDB[("Supabase PostgreSQL DB<br/>68 Prisma Models<br/>Transactions & Constraints")]
+    RedisCache[("Redis Cloud Cache<br/>Channel Pool Locks<br/>Token Blacklist & BullMQ")]
+  end
+
+  subgraph Telephony_Tier [Telephony & WebRTC Media Stack]
+    VobizCarrier["Vobiz PSTN Carrier<br/>SIP Trunking<br/>E.164 Routing"]
+    LiveKitServer["LiveKit Cloud SFU<br/>SIP Dispatcher & Rooms<br/>WebRTC Audio Bridging"]
+    LiveKitEgress["LiveKit Egress Service<br/>Room Composite MP4<br/>Direct S3 Upload"]
+  end
+
+  subgraph Storage_AI_Tier [Storage & Intelligence Tier]
+    SupabaseS3[("Supabase Storage S3<br/>Bucket: call-recordings<br/>Signed URL Playback")]
+    GeminiAI["Google Gemini 3.5 Flash<br/>Multimodal Audio Summary<br/>Sentiment & Transcript"]
+  end
+
+  BrowserAgent -->|HTTPS REST| NestAPI
+  BrowserAgent -->|WSS Socket.IO| SocketGateway
+  BrowserAgent -->|WebRTC Opus/RTP| LiveKitServer
+  BrowserAdmin -->|HTTPS REST| NestAPI
+
+  NestAPI -->|Prisma ORM| PostgresDB
+  NestAPI -->|IORedis Locks| RedisCache
+  SocketGateway -->|Redis Presence Sync| RedisCache
+
+  VobizCarrier <-->|SIP Trunking| LiveKitServer
+  VobizCarrier -->|Webhooks HTTPS| NestAPI
+  LiveKitServer -->|Egress Trigger| LiveKitEgress
+  LiveKitEgress -->|S3 Multipart Upload| SupabaseS3
+
+  NestAPI -->|Signed Audio Fetch| SupabaseS3
+  NestAPI -->|Multimodal Prompt| GeminiAI
+  GeminiAI -->|Summary & Metrics| PostgresDB

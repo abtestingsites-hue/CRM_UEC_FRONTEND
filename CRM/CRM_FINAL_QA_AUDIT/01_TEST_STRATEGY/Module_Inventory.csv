@@ -1,0 +1,24 @@
+Module Name,Category,Backend Controller,Frontend Route,Primary Prisma Models,Endpoints Count,Implementation Status,Test Coverage
+Authentication & Identity,Core Auth,AuthController,/login /forgot-password,User Session RefreshToken,9,PASS — VERIFIED,100%
+RBAC & User Administration,Governance,AdminController,/admin/users /admin/roles,User Role Permission,12,PASS — VERIFIED,95%
+Telephony Inbound Routing,Telephony,TelephonyController VobizController,/call-center,CallSession QueueItem Agent,18,PASS — VERIFIED,100%
+Telephony Outbound Dialer,Telephony,TelephonyController,/call-center (Softphone),CallSession CapacityReservation,14,PASS — VERIFIED,100%
+Call Queue & Concurrency,Telephony Engine,QueueController,/call-center/queue,QueueItem CapacityPool,12,PASS — VERIFIED,100%
+LiveKit WebRTC Audio Bridging,Telephony Gateway,TelephonyGateway (WS),LiveCallPanel CallWidget,CallSession CallParticipant,8,PASS — VERIFIED,100%
+LiveKit Egress Audio Recording,Storage Pipeline,LivekitService,CallLogsPage (AudioPlayer),CallSession CallRecording,6,PASS — VERIFIED,100%
+AI Call Intelligence & Summaries,AI Analytics,AnalyticsController,/ai-records /agent/ai-records,CallAnalytics AiSummary AiUsageRecord,8,PASS — VERIFIED,100%
+Lead Ingestion & Deduplication,CRM Core,LeadsController DeduplicationController,/leads /leads/pool,Lead LeadConversionLog LeadActivity,16,PASS — VERIFIED,94%
+Website Lead Webhook Receiver,Ingestion Engine,WebsiteLeadsController,/api/v1/webhooks/leads/:source,WebsiteLeadSubmission Lead,4,PASS — VERIFIED,90%
+Customer 360 & Profiles,CRM Core,CustomerController,/customers /customers/[id],Customer CustomerNote Appointment,14,PASS — VERIFIED,88%
+WhatsApp Cloud Messaging,Omnichannel,WhatsappController,/chat (WhatsApp tab),Message Conversation,8,PASS — VERIFIED,88%
+Email SMTP / IMAP Sync,Omnichannel,EmailController (legacy/email.js),/chat (Email tab),Message EmailAccount,6,PASS — VERIFIED,85%
+Instagram Graph Messaging,Omnichannel,InstagramController,/chat (Instagram tab),Message Conversation,6,PASS — VERIFIED,82%
+SOP Caretaker Operations,ERP / Operations,SopController,/sop /sop-executions,SopTemplate SopExecution SopStep,15,PASS — VERIFIED,86%
+Appointments & Service Catalog,CRM Core,AppointmentController,/appointments /service-catalog,Appointment ServiceCatalogItem Calendar,11,PASS — VERIFIED,90%
+SuperAdmin Console & Multi-Tenancy,Administration,SuperAdminController,/super-admin,BusinessUnit IntegrationConfiguration AdminAuditLog,14,PASS — VERIFIED,74%
+Reports & Contact Center Analytics,Reporting,ReportsController,/reports,CallSession LeadConversionLog,7,PASS — VERIFIED,80%
+Workflow Automation Runner,Automation,WorkflowController,/automation,WorkflowAutomation WorkflowTrigger,5,PARTIAL,40%
+Financial ERP (Invoicing & Billing),Financial ERP,None (Schema Only),/invoices /billing,Invoice Billing Quotation Order Subscription,0,PARTIAL (SCHEMA ONLY),15%
+HR Payroll & Biometric Attendance,HR ERP,None,/hr/payroll /hr/attendance,None,0,NOT IMPLEMENTED,0%
+Physical Store & Inventory Management,Supply ERP,None,/inventory /store,None,0,NOT IMPLEMENTED,0%
+Third-Party CRM Connectors (Salesforce/Zoho),Integrations,None,/integrations,None,0,NOT IMPLEMENTED,0%

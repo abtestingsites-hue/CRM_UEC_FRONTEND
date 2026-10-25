@@ -1,0 +1,18 @@
+graph TD
+      A[PSTN Customer Calls +918064267760] --> B[Vobiz Webhook Event Received]
+      B --> C{Active Channels < 3?}
+      C -- No --> D[Return Carrier Busy XML 486]
+      C -- Yes --> E[Acquire Redis Inbound Lock]
+      E --> F{Available Connected Agent?}
+      F -- Yes --> G[Allocate Agent via LONGEST_IDLE]
+      F -- No --> H[Enqueue into Priority Queue EMERGENCY > HIGH > NORMAL]
+      G --> I[Emit incoming_call to Agent Socket]
+      I --> J{Agent Accepts?}
+      J -- No --> K[Agent Reject: Release Channel & Reassign]
+      J -- Yes --> L[Join LiveKit SIP Room callRoomUpdated]
+      L --> M[Start Room Composite Egress with In-flight Lock]
+      M --> N[Two-Way WebRTC Audio Stream]
+      N --> O[Customer or Agent Hangs Up]
+      O --> P[Stop Egress & Upload MP4 to Supabase S3]
+      P --> Q[Generate Multimodal Gemini AI Summary]
+      Q --> R[Release Capacity Channel to Redis Pool]

@@ -1,0 +1,11 @@
+graph TD
+      A[User Enters Credentials] --> B{Valid Email & Password?}
+      B -- No --> C[Return 401 Unauthorized]
+      B -- Yes --> D[Bcrypt Compare Salt 10]
+      D --> E[Generate Access Token HS256 & Refresh Token]
+      E --> F[Socket Handshake Auth Middleware]
+      F --> G[Register in Multi-Socket Presence Registry]
+      G --> H[User Access Granted to Role-Protected Routes]
+      H --> I[User Logout Request]
+      I --> J[Blacklist Token in Redis Cache 24h]
+      J --> K[Disconnect WebSockets & Terminate Session]
