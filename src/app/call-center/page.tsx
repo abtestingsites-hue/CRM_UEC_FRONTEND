@@ -170,6 +170,10 @@ export default function CallCenterPage() {
 
       if (res.ok) {
         const data = await res.json();
+        if (!data.success) {
+          alert(data.message || 'Capacity limit reached: unable to initiate call.');
+          return;
+        }
         const finalRoomName = data.roomName || data.callSid || `room_${Date.now()}`;
         setActiveCall({
           callSid: finalRoomName,

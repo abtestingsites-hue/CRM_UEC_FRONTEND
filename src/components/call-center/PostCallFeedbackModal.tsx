@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState } from 'react';
-import { Star, CheckCircle, Loader2, Calendar, PhoneOff, PhoneForwarded, AlertCircle, Clock, FileText } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Star, CheckCircle, Loader2, Calendar, PhoneOff, PhoneForwarded, AlertCircle, Clock, FileText, Volume2, Play, Pause, Sparkles, Languages } from 'lucide-react';
 import { apiFetch } from '@/lib/api';
 import { CallIntakeFormModal } from './CallIntakeFormModal';
 
@@ -22,6 +22,57 @@ export function PostCallFeedbackModal({ callSid, onClose, onSubmit, leadId }: Po
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [showIntakeModal, setShowIntakeModal] = useState(false);
+
+  // Audio Playback & AI Summary in Disposition Modal
+  const [intelligence, setIntelligence] = useState<any>(null);
+  const [recordingUrl, setRecordingUrl] = useState<string | null>(null);
+  const [isPlayingAudio, setIsPlayingAudio] = useState(false);
+  const [audioTime, setAudioTime] = useState(0);
+  const [audioDuration, setAudioDuration] = useState(0);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    let isMounted = true;
+    const fetchSummary = async () => {
+      try {
+        const res = await apiFetch(`/api/v1/analytics/summaries/${callSid}`);
+        if (res.ok && isMounted) {
+          const data = await res.json();
+          if (data.recordingUrl) {
+            setRecordingUrl(data.recordingUrl);
+            if (data.recordingDuration) setAudioDuration(data.recordingDuration);
+          }
+          if (data.summary) {
+            setIntelligence(data);
+          }
+        }
+      } catch (_) {}
+    };
+
+    fetchSummary();
+    const timer = setTimeout(fetchSummary, 3000);
+    return () => {
+      isMounted = false;
+      clearTimeout(timer);
+    };
+  }, [callSid]);
+
+  const togglePlayAudio = () => {
+    if (!audioRef.current || !recordingUrl) return;
+    if (isPlayingAudio) {
+      audioRef.current.pause();
+      setIsPlayingAudio(false);
+    } else {
+      audioRef.current.play().then(() => setIsPlayingAudio(true)).catch(console.error);
+    }
+  };
+
+  const formatSecs = (sec: number) => {
+    if (!sec || isNaN(sec)) return '00:00';
+    const m = Math.floor(sec / 60).toString().padStart(2, '0');
+    const s = Math.floor(sec % 60).toString().padStart(2, '0');
+    return `${m}:${s}`;
+  };
 
   const tags = ["Resolved", "Follow-up needed", "Billing", "Technical", "Complaint", "Escalated", "Interested", "Callback requested"];
 
@@ -93,6 +144,82 @@ export function PostCallFeedbackModal({ callSid, onClose, onSubmit, leadId }: Po
             <div className="p-3 bg-rose-500/10 border border-rose-500/30 rounded-xl text-rose-400 text-xs flex items-center gap-2">
               <AlertCircle className="w-4 h-4 shrink-0" />
               <span>{errorMsg}</span>
+            </div>
+          )}
+
+          {/* Audio Recording & AI Intelligence Review Bar */}
+          {(recordingUrl || intelligence) && (
+            <div className="bg-[#141519] border border-[#262830] rounded-2xl p-4 space-y-3">
+              {recordingUrl && (
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="font-bold text-slate-300 flex items-center gap-1.5">
+                      <Volume2 className="w-3.5 h-3.5 text-blue-400" /> Call Recording
+                    </span>
+                    <span className="text-[10px] font-mono text-slate-400">
+                      {formatSecs(audioTime)} / {formatSecs(audioDuration)}
+                    </span>
+                  </div>
+                  <audio
+                    ref={audioRef}
+                    src={recordingUrl}
+                    onTimeUpdate={(e) => setAudioTime(e.currentTarget.currentTime)}
+                    onLoadedMetadata={(e) => {
+                      if (e.currentTarget.duration && !isNaN(e.currentTarget.duration)) {
+                        setAudioDuration(e.currentTarget.duration);
+                      }
+                    }}
+                    onEnded={() => {
+                      setIsPlayingAudio(false);
+                      setAudioTime(0);
+                    }}
+                  />
+                  <div className="flex items-center gap-3">
+                    <button
+                      type="button"
+                      onClick={togglePlayAudio}
+                      className="w-8 h-8 rounded-full bg-emerald-500 hover:bg-emerald-400 text-black flex items-center justify-center shrink-0 shadow transition-transform active:scale-95"
+                    >
+                      {isPlayingAudio ? <Pause className="w-3.5 h-3.5 fill-current" /> : <Play className="w-3.5 h-3.5 fill-current ml-0.5" />}
+                    </button>
+                    <input
+                      type="range"
+                      min="0"
+                      max={audioDuration || 1}
+                      step="0.1"
+                      value={audioTime}
+                      onChange={(e) => {
+                        const newTime = parseFloat(e.target.value);
+                        setAudioTime(newTime);
+                        if (audioRef.current) audioRef.current.currentTime = newTime;
+                      }}
+                      className="flex-1 h-1.5 bg-[#252830] rounded-lg appearance-none cursor-pointer accent-emerald-400"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {intelligence?.summary && (
+                <div className="pt-2 border-t border-[#22242a] space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1">
+                      <Sparkles className="w-3 h-3 text-primary" /> AI Summary
+                    </span>
+                    {intelligence.sentiment && (
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded uppercase ${
+                        intelligence.sentiment === 'Positive' ? 'bg-emerald-500/20 text-emerald-400' :
+                        intelligence.sentiment === 'Negative' ? 'bg-rose-500/20 text-rose-400' :
+                        'bg-slate-800 text-slate-400'
+                      }`}>
+                        {intelligence.sentiment} ({intelligence.sentimentScore || 5}/10)
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs text-slate-300 leading-relaxed max-h-24 overflow-y-auto custom-scrollbar p-2 bg-[#0a0b0e] rounded-lg border border-[#1f2128]">
+                    {intelligence.summary}
+                  </p>
+                </div>
+              )}
             </div>
           )}
 

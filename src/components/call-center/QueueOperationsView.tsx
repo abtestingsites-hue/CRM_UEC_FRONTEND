@@ -32,8 +32,13 @@ export function QueueOperationsView() {
 
   // Capacity edit modal state
   const [showConfigModal, setShowConfigModal] = useState(false);
+  const [editMode, setEditMode] = useState<'UNLIMITED_APPLICATION' | 'CONFIGURED' | 'PROVIDER_MANAGED'>('CONFIGURED');
   const [editTotalChannels, setEditTotalChannels] = useState(3);
-  const [editInboundReserved, setEditInboundReserved] = useState(1);
+  const [editInboundReserved, setEditInboundReserved] = useState(0);
+  const [editFavorInboundOnLastChannel, setEditFavorInboundOnLastChannel] = useState(false);
+  const [editInboundPriorityPolicy, setEditInboundPriorityPolicy] = useState<'FAVOR_INBOUND_LAST_CHANNEL' | 'EQUAL_SHARED_POOL'>('EQUAL_SHARED_POOL');
+  const [editProtectInboundEmergencies, setEditProtectInboundEmergencies] = useState(true);
+  const [editProviderCpsLimit, setEditProviderCpsLimit] = useState(5);
   const [isSavingConfig, setIsSavingConfig] = useState(false);
   const [reconciling, setReconciling] = useState(false);
 
@@ -55,8 +60,13 @@ export function QueueOperationsView() {
         const capJson = await capRes.json();
         setCapacity(capJson?.data);
         if (capJson?.data) {
+          setEditMode(capJson.data.mode || 'CONFIGURED');
           setEditTotalChannels(capJson.data.totalChannels || 3);
-          setEditInboundReserved(capJson.data.inboundReserved || 1);
+          setEditInboundReserved(capJson.data.inboundReserved ?? 0);
+          setEditFavorInboundOnLastChannel(capJson.data.favorInboundOnLastChannel ?? false);
+          setEditInboundPriorityPolicy(capJson.data.inboundPriorityPolicy || 'EQUAL_SHARED_POOL');
+          setEditProtectInboundEmergencies(capJson.data.protectInboundEmergencies ?? true);
+          setEditProviderCpsLimit(capJson.data.providerCpsLimit ?? 5);
         }
       }
 
@@ -88,9 +98,14 @@ export function QueueOperationsView() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           provider: 'vobiz',
-          totalChannels: Number(editTotalChannels),
-          inboundReserved: Number(editInboundReserved),
-          maxOutboundChannels: Math.max(Number(editTotalChannels) - Number(editInboundReserved), 1),
+          mode: editMode,
+          totalChannels: editMode === 'UNLIMITED_APPLICATION' ? 0 : Number(editTotalChannels),
+          inboundReserved: editFavorInboundOnLastChannel ? 1 : Number(editInboundReserved),
+          maxOutboundChannels: editMode === 'UNLIMITED_APPLICATION' ? 0 : Number(editTotalChannels),
+          favorInboundOnLastChannel: Boolean(editFavorInboundOnLastChannel),
+          inboundPriorityPolicy: editFavorInboundOnLastChannel ? 'FAVOR_INBOUND_LAST_CHANNEL' : 'EQUAL_SHARED_POOL',
+          protectInboundEmergencies: Boolean(editProtectInboundEmergencies),
+          providerCpsLimit: Number(editProviderCpsLimit),
         }),
       });
 
@@ -137,11 +152,12 @@ export function QueueOperationsView() {
   const roster = data?.agentRoster || [];
   const waitingDetails = data?.waitingQueueDetails || [];
 
-  const capTotal = capacity?.totalChannels || 3;
+  const isUnlimitedMode = capacity?.mode === 'UNLIMITED_APPLICATION';
+  const capTotalDisplay = isUnlimitedMode ? 'Unconstrained' : (capacity?.totalChannels || 30);
   const capActive = capacity?.totalActive || 0;
-  const capAvailable = capacity?.availableChannels ?? Math.max(capTotal - capActive, 0);
-  const capUtil = capacity?.utilizationPercent ?? Math.round((capActive / capTotal) * 100);
-  const isThrottled = capacity?.isThrottled || (waitingDetails.length > 0 && capAvailable <= 1);
+  const capAvailableDisplay = isUnlimitedMode ? 'Provider-Bound' : (capacity?.availableChannels ?? Math.max((capacity?.totalChannels || 30) - capActive, 0));
+  const capUtil = capacity?.utilizationPercent !== null && capacity?.utilizationPercent !== undefined ? capacity.utilizationPercent : null;
+  const isThrottled = capacity?.isThrottled || (waitingDetails.length > 0 && !isUnlimitedMode && typeof capAvailableDisplay === 'number' && capAvailableDisplay <= 1);
 
   return (
     <div className="flex flex-col h-full overflow-y-auto p-5 space-y-6 custom-scrollbar text-white">
@@ -159,7 +175,7 @@ export function QueueOperationsView() {
             </h2>
           </div>
           <p className="text-xs text-slate-400 mt-1">
-            Real-time capacity orchestration, atomic agent reservation, and priority queue management.
+            Dynamic capacity orchestration, atomic agent reservation, and priority queue management.
           </p>
         </div>
 
@@ -169,7 +185,7 @@ export function QueueOperationsView() {
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#18181b] hover:bg-[#27272a] text-xs font-semibold text-slate-200 border border-[#333] transition-colors"
           >
             <Sliders className="w-3.5 h-3.5 text-emerald-400" />
-            Capacity Policy ({capTotal} Channels)
+            Capacity Policy ({isUnlimitedMode ? 'Unconstrained Mode' : `${capTotalDisplay} Channels`})
           </button>
           <button
             onClick={handleReconcile}
@@ -199,7 +215,7 @@ export function QueueOperationsView() {
         </div>
       </div>
 
-      {/* GLOBAL TELEPHONY CONCURRENCY & CAPACITY PANEL */}
+      {/* GLOBAL TELEPHONY CONCURRENCY & CAPACITY PANEL (PHASE 23 SHARED POOL) */}
       <div className="bg-gradient-to-r from-[#0c0d10] via-[#0f1115] to-[#0c0d10] border border-[#272a30] rounded-xl p-5 shadow-lg">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-[#1f2228]">
           <div className="flex items-center gap-3">
@@ -207,17 +223,50 @@ export function QueueOperationsView() {
               <Zap className="w-5 h-5" />
             </div>
             <div>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <span className="text-sm font-bold text-white uppercase tracking-wider">
-                  Provider Concurrency Capacity Pool
+                  Shared Inbound / Outbound Capacity Pool
                 </span>
                 <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-blue-500/20 text-blue-400 border border-blue-500/30 uppercase">
-                  {capacity?.provider || 'Vobiz'} PSTN TRUNK
+                  {capacity?.provider || 'Vobiz'} Trunk ({capacity?.effectiveCapacity ?? 3} Channels)
+                </span>
+                <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border ${
+                  isUnlimitedMode ? 'bg-purple-500/20 text-purple-300 border-purple-500/40' :
+                  capacity?.mode === 'CONFIGURED' ? 'bg-amber-500/20 text-amber-300 border-amber-500/40' :
+                  'bg-cyan-500/20 text-cyan-300 border-cyan-500/40'
+                }`}>
+                  {isUnlimitedMode ? 'UNLIMITED' : capacity?.mode || 'CONFIGURED'}
+                </span>
+                <span className={`px-2 py-0.5 rounded text-[10px] font-mono border ${
+                  capacity?.inboundPriorityPolicy === 'FAVOR_INBOUND_LAST_CHANNEL'
+                    ? 'bg-amber-500/10 text-amber-300 border-amber-500/30'
+                    : 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30'
+                }`}>
+                  {capacity?.inboundPriorityPolicy === 'FAVOR_INBOUND_LAST_CHANNEL' ? 'POLICY: FAVOR INBOUND (SLOT 3)' : 'POLICY: EQUAL SHARED POOL'}
                 </span>
               </div>
-              <span className="text-xs text-slate-400">
-                Configurable runtime capacity limit: {capTotal} channels total • {capacity?.inboundReserved || 1} reserved for inbound
-              </span>
+              <p className="text-xs text-slate-400 mt-1">
+                {isUnlimitedMode ? (
+                  <span className="text-emerald-400 font-medium">
+                    Application-level channel ceiling disabled. Actual provider, agent, media, and rate limits still apply.
+                  </span>
+                ) : (
+                  <span>
+                    Shared Pool: {capacity?.totalChannels || 3} configured channels • Effective provider capacity: {capacity?.effectiveCapacity || 3} • Source: {capacity?.providerSource || 'Vobiz Trunk Limit'}
+                  </span>
+                )}
+              </p>
+              <div className="flex items-center gap-3 text-[11px] text-slate-500 mt-1 font-mono">
+                <span>CPS Rate: {capacity?.providerCpsLimit || 5} CPS</span>
+                <span>•</span>
+                <span className={capacity?.protectInboundEmergencies ? 'text-emerald-400' : 'text-slate-500'}>
+                  Emergency Safeguard: {capacity?.protectInboundEmergencies ? 'ACTIVE' : 'OFF'}
+                </span>
+                <span>•</span>
+                <span>Reconcile: {capacity?.reconciliationStatus || 'SYNCHRONIZED'}</span>
+                <span>•</span>
+                <span>Stale Cleaned: {capacity?.staleReservationCount || 0}</span>
+              </div>
             </div>
           </div>
 
@@ -225,50 +274,77 @@ export function QueueOperationsView() {
             {isThrottled ? (
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
                 <AlertTriangle className="w-3.5 h-3.5" />
-                OUTBOUND THROTTLED (INBOUND PRIORITY)
+                OUTBOUND THROTTLED (SLOT 3 RESERVED FOR INBOUND)
+              </span>
+            ) : (capacity?.occupiedChannels ?? capacity?.totalActive ?? 0) >= (capacity?.effectiveCapacity ?? 3) && !isUnlimitedMode ? (
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-rose-500/20 text-rose-300 border border-rose-500/30">
+                <AlertTriangle className="w-3.5 h-3.5" />
+                CAPACITY EXHAUSTED (3/3 OCCUPIED)
               </span>
             ) : (
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
                 <CheckCircle2 className="w-3.5 h-3.5" />
-                CAPACITY OPTIMAL
+                CAPACITY OPTIMAL ({capacity?.availableChannels ?? 3} SLOTS FREE)
               </span>
             )}
           </div>
         </div>
 
-        {/* Capacity Breakdown Gauges */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+        {/* Capacity Breakdown Gauges (Authoritative Phase 23 Metrics) */}
+        <div className="grid grid-cols-2 md:grid-cols-6 gap-3 mt-4">
           <div className="bg-[#121418] p-3 rounded-lg border border-[#22252b]">
-            <span className="text-[11px] text-slate-400 block">Total Account Channels</span>
-            <div className="flex items-baseline gap-2 mt-1">
-              <span className="text-2xl font-black text-white">{capTotal}</span>
-              <span className="text-[11px] text-slate-500">simultaneous</span>
-            </div>
-          </div>
-
-          <div className="bg-[#121418] p-3 rounded-lg border border-[#22252b]">
-            <span className="text-[11px] text-slate-400 block">Active Inbound Channels</span>
-            <div className="flex items-baseline gap-2 mt-1">
-              <span className="text-2xl font-black text-emerald-400">{capacity?.activeInbound || 0}</span>
-              <span className="text-[11px] text-slate-500">in-use</span>
-            </div>
-          </div>
-
-          <div className="bg-[#121418] p-3 rounded-lg border border-[#22252b]">
-            <span className="text-[11px] text-slate-400 block">Active Outbound Calls</span>
-            <div className="flex items-baseline gap-2 mt-1">
-              <span className="text-2xl font-black text-blue-400">{capacity?.activeOutbound || 0}</span>
-              <span className="text-[11px] text-slate-500">max: {capacity?.maxOutboundChannels || 2}</span>
-            </div>
-          </div>
-
-          <div className="bg-[#121418] p-3 rounded-lg border border-[#22252b]">
-            <span className="text-[11px] text-slate-400 block">Available Trunk Channels</span>
-            <div className="flex items-baseline gap-2 mt-1">
-              <span className={`text-2xl font-black ${capAvailable > 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
-                {capAvailable}
+            <span className="text-[11px] text-slate-400 block">Shared Pool</span>
+            <div className="flex items-baseline gap-1.5 mt-1">
+              <span className={`text-xl font-black ${isUnlimitedMode ? 'text-purple-400 text-lg' : 'text-white'}`}>
+                {isUnlimitedMode ? '∞' : capacity?.effectiveCapacity || 3}
               </span>
-              <span className="text-[11px] text-slate-500">free</span>
+              <span className="text-[10px] text-slate-500">channels</span>
+            </div>
+          </div>
+
+          <div className="bg-[#121418] p-3 rounded-lg border border-[#22252b]">
+            <span className="text-[11px] text-slate-400 block">Active Inbound</span>
+            <div className="flex items-baseline gap-1.5 mt-1">
+              <span className="text-xl font-black text-emerald-400">{capacity?.activeInbound || 0}</span>
+              <span className="text-[10px] text-slate-500">in-use</span>
+            </div>
+          </div>
+
+          <div className="bg-[#121418] p-3 rounded-lg border border-[#22252b]">
+            <span className="text-[11px] text-slate-400 block">Active Outbound</span>
+            <div className="flex items-baseline gap-1.5 mt-1">
+              <span className="text-xl font-black text-blue-400">{capacity?.activeOutbound || 0}</span>
+              <span className="text-[10px] text-slate-500">
+                max: {isUnlimitedMode ? '∞' : capacity?.maxOutboundChannels || 3}
+              </span>
+            </div>
+          </div>
+
+          <div className="bg-[#121418] p-3 rounded-lg border border-[#22252b]">
+            <span className="text-[11px] text-slate-400 block">Pending Res.</span>
+            <div className="flex items-baseline gap-1.5 mt-1">
+              <span className="text-xl font-black text-amber-400">{capacity?.pendingReservations || 0}</span>
+              <span className="text-[10px] text-slate-500">reserving</span>
+            </div>
+          </div>
+
+          <div className="bg-[#121418] p-3 rounded-lg border border-[#22252b]">
+            <span className="text-[11px] text-slate-400 block">Total Occupied</span>
+            <div className="flex items-baseline gap-1.5 mt-1">
+              <span className="text-xl font-black text-purple-400">
+                {capacity?.occupiedChannels ?? capacity?.totalActive ?? 0}
+              </span>
+              <span className="text-[10px] text-slate-500">/ {isUnlimitedMode ? '∞' : capacity?.effectiveCapacity || 3}</span>
+            </div>
+          </div>
+
+          <div className="bg-[#121418] p-3 rounded-lg border border-[#22252b]">
+            <span className="text-[11px] text-slate-400 block">Available Shared</span>
+            <div className="flex items-baseline gap-1.5 mt-1">
+              <span className="text-xl font-black text-emerald-400">
+                {isUnlimitedMode ? '∞' : capacity?.availableChannels ?? Math.max((capacity?.effectiveCapacity || 3) - capActive, 0)}
+              </span>
+              <span className="text-[10px] text-slate-500">free slots</span>
             </div>
           </div>
         </div>
@@ -276,16 +352,29 @@ export function QueueOperationsView() {
         {/* Utilization Bar */}
         <div className="mt-4 space-y-1.5">
           <div className="flex justify-between text-xs text-slate-400 font-mono">
-            <span>Utilization: {capUtil}% ({capActive} / {capTotal} channels held)</span>
-            <span>Free Capacity: {capAvailable}</span>
+            {isUnlimitedMode ? (
+              <span>Active Calls: {capActive} active calls across shared pool (Ceiling disabled)</span>
+            ) : (
+              <span>
+                Pool Utilization: {capUtil !== null ? `${capUtil}%` : '0%'} ({capActive} / {capacity?.effectiveCapacity || 3} shared channels occupied)
+              </span>
+            )}
+            <span>Available Channels: {isUnlimitedMode ? 'Provider Bound' : `Free: ${capacity?.availableChannels ?? 3}`}</span>
           </div>
           <div className="w-full bg-[#181a1f] h-2.5 rounded-full overflow-hidden flex">
-            <div
-              style={{ width: `${Math.min(capUtil, 100)}%` }}
-              className={`h-full transition-all duration-500 ${
-                capUtil >= 90 ? 'bg-rose-500' : capUtil >= 66 ? 'bg-amber-500' : 'bg-emerald-500'
-              }`}
-            />
+            {isUnlimitedMode ? (
+              <div
+                style={{ width: `${Math.min(capActive * 33, 100)}%` }}
+                className="h-full bg-gradient-to-r from-emerald-500 to-purple-500 transition-all duration-500"
+              />
+            ) : (
+              <div
+                style={{ width: `${Math.min(capUtil || 0, 100)}%` }}
+                className={`h-full transition-all duration-500 ${
+                  (capUtil || 0) >= 100 ? 'bg-rose-500' : (capUtil || 0) >= 66 ? 'bg-amber-500' : 'bg-emerald-500'
+                }`}
+              />
+            )}
           </div>
         </div>
       </div>
@@ -610,11 +699,11 @@ export function QueueOperationsView() {
       {/* CAPACITY CONFIGURATION MODAL */}
       {showConfigModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
-          <div className="bg-[#121316] border border-[#2a2c32] rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-5 text-white">
+          <div className="bg-[#121316] border border-[#2a2c32] rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-5 text-white">
             <div className="flex items-center justify-between pb-3 border-b border-[#222]">
               <div className="flex items-center gap-2">
                 <Sliders className="w-5 h-5 text-emerald-400" />
-                <h3 className="text-base font-bold">Runtime Capacity Orchestration Policy</h3>
+                <h3 className="text-base font-bold">Telephony Dynamic Capacity Orchestration Policy</h3>
               </div>
               <button
                 onClick={() => setShowConfigModal(false)}
@@ -626,53 +715,195 @@ export function QueueOperationsView() {
 
             <p className="text-xs text-slate-400">
               Configure global telephony limits across inbound & outbound traffic.
-              Changes apply immediately to all horizontally scaled workers without redeploying code.
+              Changes persist in PostgreSQL and immediately synchronize with all workers and Redis clusters without redeploying code.
             </p>
 
             <div className="space-y-4 text-xs">
+              {/* POLICY MODE SELECTION */}
               <div>
-                <label className="font-semibold text-slate-300 block mb-1">
-                  Total Telephony Account Channels ($C_{'total'}$)
+                <label className="font-semibold text-slate-300 block mb-1.5">
+                  Capacity Orchestration Mode
                 </label>
-                <input
-                  type="number"
-                  min="1"
-                  max="1000"
-                  value={editTotalChannels}
-                  onChange={(e) => setEditTotalChannels(parseInt(e.target.value || '1', 10))}
-                  className="w-full bg-[#181a1f] border border-[#333] rounded-lg px-3 py-2 text-white font-mono focus:border-emerald-500 focus:outline-none"
-                />
-                <span className="text-[11px] text-slate-500 mt-1 block">
-                  Current provider allocation: 3 (Upgrade to 10, 30, or 100+ anytime).
-                </span>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setEditMode('UNLIMITED_APPLICATION')}
+                    className={`p-2.5 rounded-xl border text-left transition-all ${
+                      editMode === 'UNLIMITED_APPLICATION'
+                        ? 'bg-purple-950/40 border-purple-500 text-purple-200 shadow-md shadow-purple-500/10'
+                        : 'bg-[#181a1f] border-[#2c2f36] text-slate-400 hover:border-[#444]'
+                    }`}
+                  >
+                    <span className="font-bold block text-xs">UNLIMITED</span>
+                    <span className="text-[10px] text-slate-400 block mt-0.5">App Ceiling Disabled</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setEditMode('CONFIGURED')}
+                    className={`p-2.5 rounded-xl border text-left transition-all ${
+                      editMode === 'CONFIGURED'
+                        ? 'bg-amber-950/40 border-amber-500 text-amber-200 shadow-md shadow-amber-500/10'
+                        : 'bg-[#181a1f] border-[#2c2f36] text-slate-400 hover:border-[#444]'
+                    }`}
+                  >
+                    <span className="font-bold block text-xs">CONFIGURED</span>
+                    <span className="text-[10px] text-slate-400 block mt-0.5">Fixed Ceiling</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setEditMode('PROVIDER_MANAGED')}
+                    className={`p-2.5 rounded-xl border text-left transition-all ${
+                      editMode === 'PROVIDER_MANAGED'
+                        ? 'bg-blue-950/40 border-blue-500 text-blue-200 shadow-md shadow-blue-500/10'
+                        : 'bg-[#181a1f] border-[#2c2f36] text-slate-400 hover:border-[#444]'
+                    }`}
+                  >
+                    <span className="font-bold block text-xs">PROVIDER</span>
+                    <span className="text-[10px] text-slate-400 block mt-0.5">Carrier Reported</span>
+                  </button>
+                </div>
               </div>
 
-              <div>
-                <label className="font-semibold text-slate-300 block mb-1">
-                  Inbound Reserved Channel Floor ($C_{'inbound_reserve'}$)
-                </label>
-                <input
-                  type="number"
-                  min="0"
-                  max={editTotalChannels - 1}
-                  value={editInboundReserved}
-                  onChange={(e) => setEditInboundReserved(parseInt(e.target.value || '0', 10))}
-                  className="w-full bg-[#181a1f] border border-[#333] rounded-lg px-3 py-2 text-white font-mono focus:border-emerald-500 focus:outline-none"
-                />
-                <span className="text-[11px] text-slate-500 mt-1 block">
-                  Guaranteed channels reserved exclusively for incoming customer calls.
-                </span>
+              {/* UNLIMITED APPLICATION MODE NOTICE */}
+              {editMode === 'UNLIMITED_APPLICATION' && (
+                <div className="p-3 rounded-xl bg-purple-500/10 border border-purple-500/30 text-purple-300 text-xs space-y-1">
+                  <div className="flex items-center gap-1.5 font-bold text-white">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                    <span>Dynamic Concurrency Active</span>
+                  </div>
+                  <p className="text-slate-300">
+                    Application-level channel ceiling disabled. Actual provider, agent, media, and rate limits still apply.
+                  </p>
+                </div>
+              )}
+
+              {/* CONFIGURED / MANUAL MODE INPUTS */}
+              {editMode === 'CONFIGURED' && (
+                <div className="space-y-3 p-3 rounded-xl bg-[#16181d] border border-[#272a31]">
+                  <div>
+                    <label className="font-semibold text-slate-300 block mb-1">
+                      Total Shared Channels ($C_{'total'}$)
+                    </label>
+                    <input
+                      type="number"
+                      min="1"
+                      max="1000"
+                      value={editTotalChannels}
+                      onChange={(e) => setEditTotalChannels(parseInt(e.target.value || '1', 10))}
+                      className="w-full bg-[#181a1f] border border-[#333] rounded-lg px-3 py-2 text-white font-mono focus:border-emerald-500 focus:outline-none"
+                    />
+                    <span className="text-[11px] text-slate-500 mt-1 block">
+                      Application configured shared capacity (Default: 3 concurrent channels).
+                    </span>
+                  </div>
+
+                  <div>
+                    <label className="font-semibold text-slate-300 block mb-1">
+                      Inbound Priority Policy (Contention on Final Slot)
+                    </label>
+                    <div className="grid grid-cols-2 gap-2 mt-1">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEditFavorInboundOnLastChannel(false);
+                          setEditInboundPriorityPolicy('EQUAL_SHARED_POOL');
+                          setEditInboundReserved(0);
+                        }}
+                        className={`p-2.5 rounded-lg border text-left transition-all ${
+                          !editFavorInboundOnLastChannel
+                            ? 'bg-emerald-950/40 border-emerald-500 text-emerald-200 shadow-sm'
+                            : 'bg-[#181a1f] border-[#2c2f36] text-slate-400 hover:border-[#444]'
+                        }`}
+                      >
+                        <span className="font-bold block text-xs">Equal Shared Pool</span>
+                        <span className="text-[10px] text-slate-400 block mt-0.5">Outbound can use all 3 slots</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEditFavorInboundOnLastChannel(true);
+                          setEditInboundPriorityPolicy('FAVOR_INBOUND_LAST_CHANNEL');
+                          setEditInboundReserved(1);
+                        }}
+                        className={`p-2.5 rounded-lg border text-left transition-all ${
+                          editFavorInboundOnLastChannel
+                            ? 'bg-amber-950/40 border-amber-500 text-amber-200 shadow-sm'
+                            : 'bg-[#181a1f] border-[#2c2f36] text-slate-400 hover:border-[#444]'
+                        }`}
+                      >
+                        <span className="font-bold block text-xs">Favor Inbound Last</span>
+                        <span className="text-[10px] text-slate-400 block mt-0.5">Holds 3rd slot for incoming calls</span>
+                      </button>
+                    </div>
+                    <span className="text-[11px] text-slate-500 mt-1.5 block">
+                      {editFavorInboundOnLastChannel
+                        ? 'When 2 calls are occupied, the 3rd slot favors inbound traffic. Outbound calls pause with INSUFFICIENT_INBOUND_RESERVE.'
+                        : 'Both directions compete equally for all 3 shared channels. Outbound calls can use all 3 slots if available.'}
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              {/* SAFEGUARDS SECTION */}
+              <div className="space-y-3 pt-1">
+                <div className="flex items-center justify-between p-3 rounded-xl bg-[#16181d] border border-[#272a31]">
+                  <div>
+                    <span className="font-bold text-slate-200 block">Protect Inbound Emergencies</span>
+                    <span className="text-[11px] text-slate-400 block">
+                      Pause outbound calls when high-priority emergency queue depth &gt; 0
+                    </span>
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={editProtectInboundEmergencies}
+                      onChange={(e) => setEditProtectInboundEmergencies(e.target.checked)}
+                      className="sr-only peer"
+                    />
+                    <div className="w-11 h-6 bg-[#272a30] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
+                  </label>
+                </div>
+
+                <div>
+                  <label className="font-semibold text-slate-300 block mb-1">
+                    Provider Call Setup Rate Limit (CPS)
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="50"
+                    value={editProviderCpsLimit}
+                    onChange={(e) => setEditProviderCpsLimit(parseInt(e.target.value || '1', 10))}
+                    className="w-full bg-[#181a1f] border border-[#333] rounded-lg px-3 py-2 text-white font-mono focus:border-emerald-500 focus:outline-none"
+                  />
+                  <span className="text-[11px] text-slate-500 mt-1 block">
+                    Maximum outbound dials per second before rate throttling engages to protect provider trunks.
+                  </span>
+                </div>
               </div>
 
               <div className="p-3 rounded-lg bg-[#181a1f] border border-[#26282e] space-y-1">
-                <span className="text-[11px] text-slate-400 block font-semibold">Resulting Policy Limits:</span>
+                <span className="text-[11px] text-slate-400 block font-semibold">Active Policy Summary:</span>
                 <div className="flex justify-between font-mono text-slate-300 text-[11px]">
-                  <span>Max Concurrent Outbound:</span>
-                  <span className="text-blue-400 font-bold">{Math.max(editTotalChannels - editInboundReserved, 1)}</span>
+                  <span>Shared Pool Size:</span>
+                  <span className="text-emerald-400 font-bold">
+                    {editMode === 'UNLIMITED_APPLICATION' ? 'Unconstrained' : `${editTotalChannels} Channels`}
+                  </span>
                 </div>
                 <div className="flex justify-between font-mono text-slate-300 text-[11px]">
-                  <span>Outbound Throttler Trigger:</span>
-                  <span className="text-amber-400 font-bold">Queue Depth &gt; 0</span>
+                  <span>Contention Policy:</span>
+                  <span className={editFavorInboundOnLastChannel ? 'text-amber-400 font-bold' : 'text-blue-400 font-bold'}>
+                    {editFavorInboundOnLastChannel ? 'Favor Inbound on 3rd Slot' : 'Equal Shared Pool (Max 3 Outbound)'}
+                  </span>
+                </div>
+                <div className="flex justify-between font-mono text-slate-300 text-[11px]">
+                  <span>Emergency Priority Throttle:</span>
+                  <span className={editProtectInboundEmergencies ? 'text-emerald-400 font-bold' : 'text-slate-500'}>
+                    {editProtectInboundEmergencies ? 'Active (Depth > 0)' : 'Disabled'}
+                  </span>
                 </div>
               </div>
             </div>
@@ -689,7 +920,7 @@ export function QueueOperationsView() {
                 disabled={isSavingConfig}
                 className="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-xs font-bold text-white transition-colors disabled:opacity-50"
               >
-                {isSavingConfig ? 'Saving...' : 'Apply Runtime Policy'}
+                {isSavingConfig ? 'Persisting Policy...' : 'Save & Enforce Policy'}
               </button>
             </div>
           </div>
