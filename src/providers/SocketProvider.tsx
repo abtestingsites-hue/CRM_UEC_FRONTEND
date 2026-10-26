@@ -6,7 +6,7 @@ import { useAuthStore } from '@/store/authStore';
 import { useConversationStore } from '@/store/conversationStore';
 import { useCallStore } from '@/store/useCallStore';
 import { useAnalyticsStore } from '@/store/useAnalyticsStore';
-import { apiFetch, API_BASE_URL } from '@/lib/api';
+import { api, apiFetch, API_BASE_URL } from '@/lib/api';
 
 interface SocketContextProps {
   socket: Socket | null;
@@ -117,8 +117,25 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
         }
       });
 
-      globalSocket.on('connect_error', (err: any) => {
+      globalSocket.on('connect_error', async (err: any) => {
         console.warn('[AGENT-SOCKET] Connection/Handshake error:', err?.message);
+        if (err?.message?.includes('TOKEN_EXPIRED') || err?.message?.includes('AUTH_REJECTED')) {
+          console.log('[AGENT-SOCKET] Handshake rejected due to expired token. Triggering dynamic refresh...');
+          try {
+            const newToken = await api.refreshAccessToken();
+            if (newToken && globalSocket) {
+              globalSocket.auth = {
+                token: newToken,
+                agentId: user.agentId || user.id,
+              };
+              console.log('[AGENT-SOCKET] Reconnecting socket with refreshed auth credentials...');
+              globalSocket.connect();
+              return;
+            }
+          } catch (refreshErr) {
+            console.error('[AGENT-SOCKET] Dynamic refresh on handshake error failed:', refreshErr);
+          }
+        }
         const freshToken = getStoredToken();
         if (globalSocket) {
           globalSocket.auth = {
@@ -137,6 +154,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     }
 
     const socketInstance = globalSocket;
+    setSocket(socketInstance);
 
     const emitAgentLoginOnce = (targetSocket: Socket) => {
       if (!targetSocket.connected) return;
@@ -159,6 +177,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
 
     const handleConnect = () => {
       setIsConnected(true);
+      setSocket(socketInstance);
       console.log(`[AGENT-SOCKET] Managed socket connected (socketId: ${socketInstance.id})`);
       emitAgentLoginOnce(socketInstance);
     };
@@ -177,6 +196,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     // Initial Login Emission if already connected
     if (socketInstance.connected) {
       setIsConnected(true);
+      setSocket(socketInstance);
       emitAgentLoginOnce(socketInstance);
     }
 
@@ -476,6 +496,10 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
           agentId: user.agentId || user.id,
         };
         console.log('[AGENT-SOCKET] Socket auth token refreshed dynamically in real-time');
+        if (!socketInstance.connected) {
+          console.log('[AGENT-SOCKET] Socket disconnected after expiration; reconnecting with rotated token...');
+          socketInstance.connect();
+        }
       }
     };
     if (typeof window !== 'undefined') {

@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Phone, PhoneCall, Delete, X, AlertCircle, Volume2, ShieldCheck, Check } from 'lucide-react';
 import { useCallStore } from '@/store/useCallStore';
+import { useAuthStore } from '@/store/authStore';
 import { apiFetch } from '@/lib/api';
 
 interface NumericKeypadProps {
@@ -148,8 +149,12 @@ export function NumericKeypad({ onCallInitiated }: NumericKeypadProps) {
     try {
       let currentAgentId = null;
       try {
+        const authUser = useAuthStore.getState().user;
+        if (authUser?.agentId || authUser?.id) {
+          currentAgentId = authUser.agentId || authUser.id;
+        }
         const stored = localStorage.getItem('crm_user');
-        if (stored) {
+        if (!currentAgentId && stored) {
           currentAgentId = JSON.parse(stored).agentId;
         }
       } catch (_) {}
