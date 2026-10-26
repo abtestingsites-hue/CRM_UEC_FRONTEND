@@ -733,7 +733,7 @@ export function CallWidget() {
     });
     console.log(`[INBOUND-E2E] CALLWIDGET_ACTIVE_CALL | hasActiveCall=${!!activeCall} callId=${activeCall?.callSid} roomName=${activeCall?.roomName} hasToken=${!!activeCall?.token}`);
     console.log('[INBOUND-CALL] call_widget_rendered | callId=' + activeCall?.callSid + ' caller=' + activeCall?.phone);
-  });
+  }, [activeCall?.callSid, activeCall?.roomName, activeCall?.token, activeCall?.phone]);
 
   useEffect(() => {
     return () => {
