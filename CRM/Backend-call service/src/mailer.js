@@ -13,7 +13,7 @@ const transporter = nodemailer.createTransport({
 const sendEmailReply = async (toEmail, subject, htmlBody, inReplyTo, references) => {
   try {
     const mailOptions = {
-      from: `"ElderCare CRM" <${process.env.EMAIL_USER || 'testingforcompany.0@gmail.com'}>`,
+      from: `"CRM Tool" <${process.env.EMAIL_USER || 'testingforcompany.0@gmail.com'}>`,
       to: toEmail,
       subject: subject,
       html: htmlBody,
